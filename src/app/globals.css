@@ -35,6 +35,9 @@
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
   --font-malayalam: "Noto Sans Malayalam Variable", "Plus Jakarta Sans Variable",
     system-ui, sans-serif;
+  /* Wordmark face — Baloo Chettan 2, the same rounded display lettering as the logo */
+  --font-logo: "Baloo Chettan 2 Variable", "Noto Sans Malayalam Variable",
+    system-ui, sans-serif;
 }
 
 * {
