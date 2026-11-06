@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import '@fontsource-variable/fraunces';
+import '@fontsource-variable/baloo-chettan-2';
 import { getAuthenticatedProfile } from '@/lib/auth/session';
 import { LoginForm } from './LoginForm';
 
@@ -17,60 +18,49 @@ export default async function LoginPage() {
 
   return (
     <div className="relative min-h-dvh overflow-hidden bg-[#FFFBF7]">
-      {/* ── Burgundy wave header ─────────────────────────────── */}
-      <header className="relative bg-gradient-to-b from-[#330202] via-[#4A0404] to-[#5E0505]">
-        {/* soft sheen, top-right like light on silk */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_90%_at_85%_0%,rgba(255,255,255,0.13),transparent_65%)]"
-        />
-        <div className="relative mx-auto flex max-w-2xl flex-col items-center px-6 pb-36 pt-14 text-center sm:pb-40 sm:pt-20">
-          <h1 className="font-malayalam text-[44px] font-extrabold leading-[1.18] tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] sm:text-6xl sm:leading-[1.15]">
-            അഴിമതി
-            <br />
-            മയം
+      {/* ── Burgundy header — flat colour, one gentle wave ───── */}
+      <header className="relative bg-burgundy-logo">
+        <div className="relative mx-auto flex max-w-2xl flex-col items-center px-6 pb-24 pt-11 text-center sm:pt-14">
+          <h1 className="font-logo text-white">
+            <span className="block text-[21px] font-bold leading-[1.15] sm:text-[25px]">
+              അഴിമതി
+            </span>
+            <span className="block text-[42px] font-extrabold leading-[1.08] sm:text-[54px]">
+              മയം
+            </span>
           </h1>
-          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/60">
-            Learn · Prepare · Excel
-          </p>
         </div>
 
-        {/* layered waves — dark ribbon behind, page cream in front */}
         <svg
           aria-hidden="true"
-          viewBox="0 0 1440 130"
+          viewBox="0 0 1440 90"
           preserveAspectRatio="none"
-          className="absolute -bottom-px left-0 h-[74px] w-full sm:h-[96px]"
+          className="absolute -bottom-px left-0 h-[42px] w-full sm:h-[56px]"
         >
           <path
-            d="M0,64 C240,120 420,128 720,84 C1020,40 1200,16 1440,52 L1440,130 L0,130 Z"
-            fill="#2A0202"
-            opacity="0.55"
-          />
-          <path
-            d="M0,88 C260,130 520,122 820,82 C1100,46 1260,38 1440,72 L1440,130 L0,130 Z"
+            d="M0,50 C360,88 1080,12 1440,46 L1440,90 L0,90 Z"
             fill="#FFFBF7"
           />
         </svg>
       </header>
 
-      {/* ── Sign-in card, tucked into the wave ───────────────── */}
-      <main className="relative z-10 mx-auto w-full max-w-[430px] px-5 sm:px-0">
-        <section className="-mt-24 rounded-[28px] border border-[#F3E2DC] bg-white px-6 pb-7 pt-8 shadow-[0_24px_50px_-20px_rgba(74,4,4,0.35)] sm:-mt-28 sm:px-8">
-          <h2 className="font-login-display text-center text-[30px] font-semibold leading-tight text-[#43060A]">
+      {/* ── Sign-in card, resting lightly on the wave ────────── */}
+      <main className="relative z-10 mx-auto w-full max-w-[420px] px-5 sm:px-0">
+        <section className="-mt-16 rounded-3xl border border-[#F1E3DD] bg-white px-6 py-7 shadow-[0_12px_32px_-16px_rgba(74,4,4,0.22)] sm:px-8">
+          <h2 className="font-login-display text-center text-[26px] font-semibold leading-tight text-[#43060A]">
             Welcome Back
           </h2>
-          <p className="mt-2 text-center text-sm text-[#8A7A74]">
+          <p className="mt-1.5 text-center text-sm text-[#8A7A74]">
             Sign in to access your academic resources
           </p>
 
-          <div className="mt-7">
+          <div className="mt-6">
             <Suspense
               fallback={
-                <div className="space-y-4" aria-hidden="true">
-                  <div className="h-14 animate-pulse rounded-2xl bg-[#F7ECE8]" />
-                  <div className="h-14 animate-pulse rounded-2xl bg-[#F7ECE8]" />
-                  <div className="h-14 animate-pulse rounded-2xl bg-[#F3D9D2]" />
+                <div className="space-y-3.5" aria-hidden="true">
+                  <div className="h-12 animate-pulse rounded-xl bg-[#F7ECE8]" />
+                  <div className="h-12 animate-pulse rounded-xl bg-[#F7ECE8]" />
+                  <div className="h-12 animate-pulse rounded-xl bg-[#F3D9D2]" />
                 </div>
               }
             >
@@ -79,34 +69,12 @@ export default async function LoginPage() {
           </div>
         </section>
 
-        <p className="pb-40 pt-6 text-center text-xs text-[#A68F86]">
+        <p className="pb-10 pt-5 text-center text-xs text-[#A68F86]">
           © {new Date().getFullYear()}{' '}
-          <span className="font-malayalam font-semibold text-[#7A655E]">അഴിമതി മയം</span>
+          <span className="font-logo font-semibold text-[#7A655E]">അഴിമതി മയം</span>
           {' · '}Made for students
         </p>
       </main>
-
-      {/* ── Bottom waves ─────────────────────────────────────── */}
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 1440 220"
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute bottom-0 left-0 h-[150px] w-full sm:h-[190px]"
-      >
-        <path
-          d="M0,110 C240,60 480,40 760,78 C1040,116 1220,140 1440,96 L1440,220 L0,220 Z"
-          fill="#F8E9E2"
-        />
-        <path
-          d="M0,150 C260,104 540,92 840,124 C1100,152 1260,168 1440,138 L1440,220 L0,220 Z"
-          fill="#F0D8CE"
-          opacity="0.8"
-        />
-        <path
-          d="M0,190 C280,150 560,142 860,168 C1120,190 1280,198 1440,178 L1440,220 L0,220 Z"
-          fill="#4A0404"
-        />
-      </svg>
     </div>
   );
 }
