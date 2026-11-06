@@ -93,6 +93,20 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // "Short Notes & Exam Special" collection (short-notes + cheat-sheets)
+  if (sp.get('collection') === 'short-notes') {
+    const { data: snCats } = await supabase
+      .from('resource_categories')
+      .select('id')
+      .in('slug', ['short-notes', 'cheat-sheets']);
+    const ids = (snCats || []).map((c) => c.id);
+    if (ids.length > 0) {
+      query = query.in('category_id', ids);
+    } else {
+      return NextResponse.json({ items: [], total: 0, page, pageSize, totalPages: 0 });
+    }
+  }
+
   if (q) {
     // Resolve matching subjects, programmes, semesters, categories for comprehensive search
     const [subjRes, progRes, semRes, catRes] = await Promise.all([

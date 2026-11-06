@@ -37,6 +37,13 @@ async function main() {
     );
     await pg.query(schemaSql);
 
+    console.log('2b. Applying 0002_requests_and_short_notes.sql...');
+    const requestsSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0002_requests_and_short_notes.sql'),
+      'utf8'
+    );
+    await pg.query(requestsSql);
+
     console.log('3. Applying seed.sql (authentic Kerala taxonomy, zero fake data)...');
     const seedSql = fs.readFileSync(path.resolve(process.cwd(), 'supabase/seed.sql'), 'utf8');
     await pg.query(seedSql);

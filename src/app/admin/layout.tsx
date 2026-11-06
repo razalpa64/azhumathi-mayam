@@ -1,4 +1,5 @@
 import { requireAdminUser } from '@/lib/auth/session';
+import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { AdminShell } from '@/components/admin/AdminShell';
 
 export const metadata = {
@@ -15,5 +16,15 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const profile = await requireAdminUser();
-  return <AdminShell profile={profile}>{children}</AdminShell>;
+  const adminClient = createSupabaseAdminClient();
+  const { count: pendingRequests } = await adminClient
+    .from('resource_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending');
+
+  return (
+    <AdminShell profile={profile} pendingRequests={pendingRequests || 0}>
+      {children}
+    </AdminShell>
+  );
 }

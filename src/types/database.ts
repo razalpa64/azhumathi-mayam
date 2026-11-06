@@ -239,6 +239,31 @@ export interface Advertisement {
   updated_at: string;
 }
 
+export type ResourceRequestType =
+  | 'notes'
+  | 'question_paper'
+  | 'short_notes'
+  | 'cheat_sheet'
+  | 'syllabus'
+  | 'other';
+
+export type ResourceRequestStatus = 'pending' | 'in_progress' | 'fulfilled' | 'rejected';
+
+export interface ResourceRequest {
+  id: string;
+  student_id: string;
+  request_type: ResourceRequestType;
+  title: string;
+  subject_text: string | null;
+  details: string | null;
+  status: ResourceRequestStatus;
+  admin_note: string | null;
+  fulfilled_resource_id: string | null;
+  created_at: string;
+  updated_at: string;
+  student?: Pick<Profile, 'id' | 'full_name' | 'username'> | null;
+}
+
 export interface AdminActivityLog {
   id: string;
   admin_id: string | null;

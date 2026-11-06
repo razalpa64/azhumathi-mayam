@@ -44,7 +44,7 @@ export function BrandLogo({
       <div className="flex flex-col leading-tight">
         <span
           className={cn(
-            'font-malayalam font-bold tracking-tight',
+            'font-logo font-bold tracking-tight',
             dimensions.title,
             theme === 'dark' ? 'text-canvas' : 'text-charcoal'
           )}

@@ -17,6 +17,9 @@ Production-ready academic resource and student learning platform built with **Ne
    - Full study material library & dedicated Previous Question Papers hub with multi-level academic filters.
    - Dedicated embedded Google Drive PDF Preview (`/resources/[id]`) using canonical `https://drive.google.com/file/d/FILE_ID/preview` URLs, full-screen mode, fallback helper bar, and deduplicated download tracking (`/api/resources/[id]/download`).
    - Saved Bookmarks, Recently Viewed history, Notifications feed, Profile photo & curriculum editor, and secure Password Change.
+   - **Short Notes & Exam Special (`/dashboard/short-notes`)**: quick-revision short notes and cheat sheets (resource categories `short-notes` / `cheat-sheets`, added by migration `0002`), published through the normal admin Upload flow.
+   - **Student Requests (`/dashboard/requests`)**: students request missing notes, papers, short notes or cheat sheets and track the status (Waiting → Being worked on → Done); admins answer from **Student Requests (`/admin/requests`)** — status changes notify the student automatically.
+   - **Help & Contact (`/dashboard/help`)**: quick fixes plus direct contact (call / WhatsApp / email; defaults in `src/lib/support.ts`, email overridable via Admin Settings → support_email).
 
 3. **Super Administrator Console (`/admin/*`)**
    - Real-time PostgreSQL overview metrics (zero synthetic statistics).

@@ -14,6 +14,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   LogOut,
+  Inbox,
   Megaphone,
   Menu,
   Scale,
@@ -28,6 +29,7 @@ import { cn } from '@/lib/utils';
 
 interface AdminShellProps {
   profile: Profile;
+  pendingRequests?: number;
   children: React.ReactNode;
 }
 
@@ -42,12 +44,13 @@ const ADMIN_NAV = [
   { href: '/admin/resources', label: 'Study Materials', icon: FolderKanban },
   { href: '/admin/upload', label: 'Upload Resources', icon: FilePlus2 },
   { href: '/admin/notices', label: 'Notices', icon: Megaphone },
+  { href: '/admin/requests', label: 'Student Requests', icon: Inbox, badge: 'requests' },
   { href: '/admin/advertisements', label: 'Advertisements', icon: Sparkles },
   { href: '/admin/analytics', label: 'Analytics & Audit', icon: BarChart3 },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
-export function AdminShell({ profile, children }: AdminShellProps) {
+export function AdminShell({ profile, pendingRequests = 0, children }: AdminShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -101,7 +104,12 @@ export function AdminShell({ profile, children }: AdminShellProps) {
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span>{item.label}</span>
+                <span className="flex-1">{item.label}</span>
+                {'badge' in item && item.badge === 'requests' && pendingRequests > 0 ? (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-canvas px-1.5 text-[10px] font-bold text-burgundy-deep">
+                    {pendingRequests > 99 ? '99+' : pendingRequests}
+                  </span>
+                ) : null}
               </Link>
             );
           })}
