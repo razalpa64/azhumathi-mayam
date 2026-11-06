@@ -11,9 +11,12 @@ import {
   FileQuestion,
   GraduationCap,
   Home,
+  Inbox,
   Layers,
+  LifeBuoy,
   LogOut,
   Menu,
+  NotebookPen,
   Settings,
   User,
   X,
@@ -33,6 +36,7 @@ const TOP_NAV = [
   { href: '/dashboard/materials', label: 'Browse Materials', icon: BookOpen },
   { href: '/dashboard/courses', label: 'Courses', icon: GraduationCap },
   { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
+  { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
 ];
 
 const WORKSPACE_TABS = [
@@ -41,11 +45,22 @@ const WORKSPACE_TABS = [
   { href: '/dashboard/courses', label: 'My Courses', icon: GraduationCap },
   { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },
   { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
+  { href: '/dashboard/short-notes', label: 'Short Notes & Exam Special', icon: NotebookPen },
+  { href: '/dashboard/requests', label: 'Requests', icon: Inbox },
   { href: '/dashboard/bookmarks', label: 'Saved Materials', icon: Bookmark },
   { href: '/dashboard/history', label: 'Recently Viewed', icon: Clock },
   { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
   { href: '/dashboard/profile', label: 'My Profile', icon: User },
+  { href: '/dashboard/help', label: 'Help & Contact', icon: LifeBuoy },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+];
+
+const BOTTOM_NAV = [
+  { href: '/dashboard', label: 'Home', icon: Home, exact: true },
+  { href: '/dashboard/materials', label: 'Materials', icon: BookOpen },
+  { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
+  { href: '/dashboard/requests', label: 'Requests', icon: Inbox },
+  { href: '/dashboard/profile', label: 'Profile', icon: User },
 ];
 
 export function StudentShell({
@@ -258,15 +273,48 @@ export function StudentShell({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 pt-7 pb-24 sm:px-6 lg:px-8 lg:pb-7">
         {children}
       </main>
+
+      {/* Mobile bottom navigation */}
+      <nav
+        aria-label="Bottom"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+      >
+        <div className="mx-auto grid max-w-md grid-cols-5">
+          {BOTTOM_NAV.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href, item.exact);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors',
+                  active ? 'text-burgundy' : 'text-muted hover:text-charcoal'
+                )}
+              >
+                <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
+                <span className={cn(active && 'font-bold')}>{item.label}</span>
+                <span
+                  className={cn(
+                    'h-0.5 w-6 rounded-full bg-burgundy transition-opacity',
+                    active ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* Clean Institutional Footer */}
       <footer className="border-t border-line bg-neutral-soft/60 mt-12">
         <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-8 text-xs text-muted">
           <div className="flex items-center gap-2.5">
-            <span className="font-malayalam font-bold text-sm text-burgundy">അഴിമതി മയം</span>
+            <span className="font-logo font-bold text-sm text-burgundy">അഴിമതി മയം</span>
             <span>•</span>
             <span>notes, syllabus & question papers</span>
           </div>
@@ -276,6 +324,15 @@ export function StudentShell({
             </Link>
             <Link href="/dashboard/question-papers" className="hover:text-charcoal">
               Question Papers
+            </Link>
+            <Link href="/dashboard/short-notes" className="hover:text-charcoal">
+              Short Notes
+            </Link>
+            <Link href="/dashboard/requests" className="hover:text-charcoal">
+              Requests
+            </Link>
+            <Link href="/dashboard/help" className="hover:text-charcoal">
+              Help
             </Link>
             <Link href="/dashboard/profile" className="hover:text-charcoal">
               Academic Profile

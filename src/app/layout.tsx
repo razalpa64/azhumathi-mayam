@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import '@fontsource-variable/plus-jakarta-sans';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/noto-sans-malayalam';
+import '@fontsource-variable/baloo-chettan-2';
 import './globals.css';
 
 export const metadata: Metadata = {

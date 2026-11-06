@@ -41,6 +41,8 @@ interface MaterialsBrowserClientProps {
   profile: Profile;
   taxonomy: TaxonomyBundle;
   onlyQuestionPapers?: boolean;
+  /** 'short-notes' = Short Notes & Exam Special collection */
+  collection?: 'short-notes';
   allowCrossProgrammeBrowsing: boolean;
   adsEnabled: boolean;
   requireAdConsent: boolean;
@@ -52,6 +54,7 @@ export function MaterialsBrowserClient({
   profile,
   taxonomy,
   onlyQuestionPapers = false,
+  collection,
   allowCrossProgrammeBrowsing,
   adsEnabled,
   requireAdConsent,
@@ -127,12 +130,23 @@ export function MaterialsBrowserClient({
     });
   }, [programmeId, semesterId, specializationId, taxonomy.subjects]);
 
+  const shortNotesOnly = collection === 'short-notes';
+  const SHORT_NOTE_SLUGS = ['short-notes', 'cheat-sheets'];
+  const basePath = shortNotesOnly
+    ? '/dashboard/short-notes'
+    : onlyQuestionPapers
+      ? '/dashboard/question-papers'
+      : '/dashboard/materials';
+
   const visibleCategories = useMemo(
     () =>
-      onlyQuestionPapers
-        ? taxonomy.categories.filter((c) => c.is_question_paper)
-        : taxonomy.categories,
-    [onlyQuestionPapers, taxonomy.categories]
+      shortNotesOnly
+        ? taxonomy.categories.filter((c) => SHORT_NOTE_SLUGS.includes(c.slug))
+        : onlyQuestionPapers
+          ? taxonomy.categories.filter((c) => c.is_question_paper)
+          : taxonomy.categories,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onlyQuestionPapers, shortNotesOnly, taxonomy.categories]
   );
 
   const fetchResources = useCallback(async () => {
@@ -148,6 +162,7 @@ export function MaterialsBrowserClient({
       if (subjectId) sp.set('subjectId', subjectId);
       if (categoryId) sp.set('categoryId', categoryId);
       if (onlyQuestionPapers) sp.set('onlyQuestionPapers', 'true');
+      if (shortNotesOnly) sp.set('collection', 'short-notes');
       sp.set('sort', sort);
       sp.set('page', String(page));
       sp.set('pageSize', '12');
@@ -175,6 +190,7 @@ export function MaterialsBrowserClient({
     subjectId,
     categoryId,
     onlyQuestionPapers,
+    shortNotesOnly,
     sort,
     page,
   ]);
@@ -193,7 +209,7 @@ export function MaterialsBrowserClient({
     setCategoryId('');
     setSort('latest');
     setPage(1);
-    router.replace(onlyQuestionPapers ? '/dashboard/question-papers' : '/dashboard/materials');
+    router.replace(basePath);
   }
 
   function handleBrowseAll() {
@@ -206,7 +222,7 @@ export function MaterialsBrowserClient({
     setCategoryId('');
     setPage(1);
     router.replace(
-      `${onlyQuestionPapers ? '/dashboard/question-papers' : '/dashboard/materials'}?scope=all`
+      `${basePath}?scope=all`
     );
   }
 
@@ -217,14 +233,18 @@ export function MaterialsBrowserClient({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
-              {onlyQuestionPapers
-                ? 'Question papers'
-                : 'Study materials'}
+              {shortNotesOnly
+                ? 'Short Notes & Exam Special'
+                : onlyQuestionPapers
+                  ? 'Question papers'
+                  : 'Study materials'}
             </h1>
             <p className="mt-1 text-sm text-muted">
-              {onlyQuestionPapers
-                ? 'Previous years’ papers, model papers and question banks, by subject.'
-                : 'Notes, lab manuals, presentations and references for your subjects.'}
+              {shortNotesOnly
+                ? 'Short notes and cheat sheets for last-minute revision. Small files, big marks.'
+                : onlyQuestionPapers
+                  ? 'Previous years’ papers, model papers and question banks, by subject.'
+                  : 'Notes, lab manuals, presentations and references for your subjects.'}
             </p>
           </div>
 

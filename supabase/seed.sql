@@ -149,7 +149,9 @@ VALUES
   ('PPTs', 'ppts', 'Slide decks and visual lecture presentations.', 'Presentation', false, 9),
   ('Syllabus', 'syllabus', 'Official university curriculum, course outcomes, and marking schemes.', 'ScrollText', false, 10),
   ('Reference Materials', 'reference-materials', 'Handbooks, supplementary readings, and curated study guides.', 'Library', false, 11),
-  ('Important Questions', 'important-questions', 'High-priority examination questions and sure-shot revision topics.', 'Sparkles', true, 12)
+  ('Important Questions', 'important-questions', 'High-priority examination questions and sure-shot revision topics.', 'Sparkles', true, 12),
+  ('Short Notes', 'short-notes', 'Quick revision short notes — the night-before-the-exam read.', 'NotebookPen', false, 13),
+  ('Cheat Sheets', 'cheat-sheets', 'One-page formula sheets, charts and last-minute cheat sheets.', 'Zap', false, 14)
 ON CONFLICT (slug) DO NOTHING;
 
 -- 7. Authentic KTU B.Tech CSE Starter Curriculum Subjects (Editable from Admin)
