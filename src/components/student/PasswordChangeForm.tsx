@@ -59,13 +59,13 @@ export function PasswordChangeForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-line bg-canvas p-6 sm:p-8 space-y-5 max-w-xl"
+      className="rounded-xl border border-line bg-paper p-6 sm:p-8 space-y-5 max-w-xl"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-charcoal">Change Account Password</h2>
-          <p className="mt-1 text-xs text-muted">
-            Re-enter your current password to set a new strong password (minimum 8 characters).
+          <h2 className="font-display text-xl font-medium text-charcoal">Change password</h2>
+          <p className="mt-1 text-[13px] text-muted">
+            Enter your current password, then pick a new one (8+ characters).
           </p>
         </div>
         <button

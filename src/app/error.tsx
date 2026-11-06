@@ -16,17 +16,13 @@ export default function GlobalError({
 
   return (
     <div className="min-h-[65vh] flex flex-col items-center justify-center px-4 text-center">
-      <p className="font-mono text-xs font-semibold uppercase tracking-widest text-burgundy">
-        System Error
-      </p>
-      <h2 className="mt-2 text-xl font-semibold text-charcoal">
-        Something went wrong while loading this view
-      </h2>
+      <p className="font-display text-[15px] text-burgundy">Hmm.</p>
+      <h2 className="font-display mt-2 text-[24px] font-medium text-charcoal">Something went wrong</h2>
       <p className="mt-1.5 max-w-md text-sm text-muted">
-        Please try reloading the section. If the problem persists, contact your administrator.
+        Try again — if it keeps happening, let your administrator know.
       </p>
       <div className="mt-5">
-        <Button onClick={reset}>Try Again</Button>
+        <Button onClick={reset}>Try again</Button>
       </div>
     </div>
   );

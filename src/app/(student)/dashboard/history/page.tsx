@@ -19,7 +19,7 @@ const RESOURCE_JOIN = `
 `;
 
 export const metadata = {
-  title: 'Recently Viewed Materials',
+  title: 'Recently opened',
 };
 
 export default async function HistoryPage() {
@@ -49,36 +49,32 @@ export default async function HistoryPage() {
     );
 
   return (
-    <div className="space-y-6">
+    <div>
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
-          Recently Viewed Materials
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          Documents and question papers you opened most recently.
-        </p>
+        <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">Recently opened</h1>
+        <p className="mt-1.5 text-sm text-muted">Pick up right where you left off.</p>
       </div>
 
       {entries.length === 0 ? (
         <EmptyState
           icon={Clock}
-          title="No reading history yet"
-          description="Whenever you open a PDF preview or resource detail page, it will be tracked here so you can pick up right where you left off."
+          title="Nothing opened yet"
+          description="Files you open will show up here, newest first."
           action={
             <Link
               href="/dashboard/materials"
-              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-4 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
+              className="inline-flex h-10 items-center rounded-lg bg-burgundy px-5 text-sm font-semibold text-paper hover:bg-burgundy-dark"
             >
-              Explore Library
+              Browse materials
             </Link>
           }
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-7 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
           {entries.map((entry) => (
             <div key={entry.resource.id} className="space-y-1.5">
-              <p className="text-[11px] font-mono text-muted">
-                Last opened {formatDateTime(entry.viewedAt)}
+              <p className="text-xs text-muted">
+                Opened {formatDateTime(entry.viewedAt)}
               </p>
               <ResourceCard
                 resource={entry.resource}

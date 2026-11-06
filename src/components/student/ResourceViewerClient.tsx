@@ -113,8 +113,7 @@ export function ResourceViewerClient({
         setDownloadStatus({
           type: 'error',
           message:
-            data.error ||
-            'Unable to prepare Google Drive download link. Please try "Open in Google Drive" instead.',
+            data.error || 'Couldn’t prepare the download. Try “Open in Google Drive” instead.',
         });
         return;
       }
@@ -127,12 +126,12 @@ export function ResourceViewerClient({
       setDownloadStatus({
         type: 'info',
         message:
-          'Google Drive download tab opened. For larger files, Google Drive may display a virus-scan confirmation or quota notice — confirm on that tab to save the file, or use "Open in Google Drive".',
+          'Opened Google Drive in a new tab. If it asks you to confirm the download, go ahead — or use “Open in Google Drive”.',
       });
     } catch {
       setDownloadStatus({
         type: 'error',
-        message: 'Network error while requesting download navigation.',
+        message: 'Couldn’t reach Google Drive. Check your connection and try again.',
       });
     } finally {
       setDownloading(false);
@@ -145,19 +144,19 @@ export function ResourceViewerClient({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={isAdminViewer ? '/admin/resources' : '/dashboard/materials'}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-charcoal"
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted hover:text-charcoal"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          <span>{isAdminViewer ? 'Back to Resource Management' : 'Back to Study Materials'}</span>
+          <span>{isAdminViewer ? 'Back to materials' : 'Back to materials'}</span>
         </Link>
 
         {resource.publication_status === 'draft' ? (
-          <Badge variant="warning">Draft — Visible Only to Administrator</Badge>
+          <Badge variant="warning">Draft — only you can see this</Badge>
         ) : null}
       </div>
 
-      {/* Document Header Card */}
-      <section className="rounded-xl border border-line bg-canvas p-6 sm:p-7 space-y-5">
+      {/* Document header — plain, like a title page */}
+      <section className="space-y-4 border-b border-line pb-7">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
           <div className="space-y-2.5 max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
@@ -166,7 +165,7 @@ export function ResourceViewerClient({
                   {resource.category.name}
                 </Badge>
               ) : null}
-              <span className="rounded border border-line bg-neutral-soft px-2 py-0.5 font-mono text-xs font-semibold text-charcoal">
+              <span className="font-mono text-xs font-semibold text-charcoal">
                 {resource.file_type}
               </span>
               {resource.file_size ? (
@@ -177,7 +176,7 @@ export function ResourceViewerClient({
               ) : null}
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-charcoal leading-snug">
+            <h1 className="font-display text-[26px] font-medium leading-snug text-charcoal sm:text-[30px]">
               {resource.title}
             </h1>
 
@@ -471,7 +470,7 @@ export function ResourceViewerClient({
       {relatedResources.length > 0 && !isAdminViewer ? (
         <section className="space-y-4 pt-2">
           <div>
-            <h2 className="text-base font-semibold text-charcoal">Related Study Materials</h2>
+            <h2 className="font-display text-xl font-medium text-charcoal">More like this</h2>
             <p className="text-xs text-muted">
               More notes and question papers from the same subject and semester.
             </p>

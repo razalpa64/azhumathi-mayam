@@ -136,38 +136,33 @@ export default async function AdminOverviewPage() {
       {/* Header & Quick Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-5">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-burgundy">
-            Super Administrator Workspace
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-charcoal">
-            Platform Operations Overview
+          <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">
+            Overview
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            Live database metrics across student accounts, academic taxonomy, and Google Drive resources.
-          </p>
+          <p className="mt-1.5 text-sm text-muted">How the library is doing today.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/admin/upload"
-            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-3.5 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors"
+            className="inline-flex h-9.5 items-center gap-1.5 rounded-lg bg-burgundy px-4 text-[13px] font-semibold text-paper hover:bg-burgundy-dark transition-colors"
           >
             <FilePlus2 className="h-3.5 w-3.5" />
-            <span>Upload Resource</span>
+            <span>Add a resource</span>
           </Link>
           <Link
             href="/admin/students"
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
+            className="inline-flex h-9.5 items-center gap-1.5 rounded-lg border border-line-strong bg-paper px-4 text-[13px] font-semibold text-charcoal hover:bg-neutral-soft"
           >
             <UserPlus className="h-3.5 w-3.5 text-burgundy" />
-            <span>Add Student</span>
+            <span>Add student</span>
           </Link>
           <Link
             href="/admin/notices"
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
+            className="inline-flex h-9.5 items-center gap-1.5 rounded-lg border border-line-strong bg-paper px-4 text-[13px] font-semibold text-charcoal hover:bg-neutral-soft"
           >
             <Megaphone className="h-3.5 w-3.5 text-burgundy" />
-            <span>Post Notice</span>
+            <span>Post a notice</span>
           </Link>
         </div>
       </div>
@@ -180,7 +175,7 @@ export default async function AdminOverviewPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="group rounded-xl border border-line bg-canvas p-5 hover:border-burgundy-border transition-colors"
+              className="group rounded-xl border border-line bg-paper p-5 transition-all hover:-translate-y-0.5 hover:border-line-strong"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-muted">{stat.label}</span>
@@ -188,7 +183,7 @@ export default async function AdminOverviewPage() {
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <p className="mt-3 font-mono text-2xl font-semibold text-charcoal">{stat.value}</p>
+              <p className="font-display mt-3 text-[30px] font-medium text-charcoal">{stat.value}</p>
               <div className="mt-2 flex items-center justify-between text-xs text-muted">
                 <span>{stat.sub}</span>
                 <ArrowRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100 text-burgundy" />
@@ -230,7 +225,7 @@ export default async function AdminOverviewPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-charcoal">Recently Uploaded Materials</h2>
+            <h2 className="text-sm font-semibold text-charcoal">Recently added</h2>
             <Link href="/admin/resources" className="text-xs font-semibold text-burgundy hover:underline">
               Manage All
             </Link>
@@ -272,7 +267,7 @@ export default async function AdminOverviewPage() {
 
         <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-charcoal">Most Downloaded Resources</h2>
+            <h2 className="text-sm font-semibold text-charcoal">Most downloaded</h2>
             <Link href="/admin/analytics" className="text-xs font-semibold text-burgundy hover:underline">
               Analytics
             </Link>
@@ -310,11 +305,11 @@ export default async function AdminOverviewPage() {
         </section>
       </div>
 
-      {/* Recent Student Activity & Audit Trail */}
+      {/* New students & Audit Trail */}
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-charcoal">Recent Student Activity</h2>
+            <h2 className="text-sm font-semibold text-charcoal">New students</h2>
             <Link href="/admin/students" className="text-xs font-semibold text-burgundy hover:underline">
               All Students
             </Link>
@@ -350,7 +345,7 @@ export default async function AdminOverviewPage() {
 
         <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-charcoal">Recent Administrative Audit Log</h2>
+            <h2 className="text-sm font-semibold text-charcoal">Recent changes</h2>
             <Link href="/admin/analytics" className="text-xs font-semibold text-burgundy hover:underline">
               Full Audit Log
             </Link>
