@@ -174,6 +174,7 @@ export async function POST(
       description: body.description ? String(body.description).trim() : null,
       icon_name: body.icon_name ? String(body.icon_name).trim() : 'FileText',
       is_question_paper: Boolean(body.is_question_paper),
+      is_short_note: Boolean(body.is_short_note),
       display_order: Number(body.display_order || 0),
       is_active: body.is_active !== false,
     };

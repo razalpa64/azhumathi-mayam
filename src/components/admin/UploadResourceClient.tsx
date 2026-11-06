@@ -599,9 +599,19 @@ export function UploadResourceClient({
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
+                      {cat.is_short_note
+                        ? ' — Short Notes hub'
+                        : cat.is_question_paper
+                          ? ' — Question Papers hub'
+                          : ''}
                     </option>
                   ))}
                 </select>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-muted">
+                  Pick <span className="font-semibold text-charcoal">Short Notes</span> or{' '}
+                  <span className="font-semibold text-charcoal">Cheat Sheets</span> and the file
+                  lands in the students’ Short Notes &amp; Exam Special section automatically.
+                </p>
               </div>
 
               <div>

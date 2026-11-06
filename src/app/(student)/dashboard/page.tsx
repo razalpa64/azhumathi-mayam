@@ -160,10 +160,18 @@ export default async function StudentDashboardPage() {
   }
 
   // 5b. Short Notes & Exam Special (latest for this semester)
-  const { data: snCats } = await supabase
+  const snByFlag = await supabase
     .from('resource_categories')
     .select('id')
-    .in('slug', ['short-notes', 'cheat-sheets']);
+    .eq('is_short_note', true);
+  const snCats = !snByFlag.error
+    ? snByFlag.data
+    : (
+        await supabase
+          .from('resource_categories')
+          .select('id')
+          .in('slug', ['short-notes', 'cheat-sheets'])
+      ).data;
   const snCatIds = (snCats || []).map((c) => c.id);
 
   let shortNotesQuery = supabase

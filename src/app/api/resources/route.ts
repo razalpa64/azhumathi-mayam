@@ -93,12 +93,23 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // "Short Notes & Exam Special" collection (short-notes + cheat-sheets)
+  // "Short Notes & Exam Special" collection (categories flagged is_short_note)
   if (sp.get('collection') === 'short-notes') {
-    const { data: snCats } = await supabase
+    let snCats: { id: string }[] | null = null;
+    const byFlag = await supabase
       .from('resource_categories')
       .select('id')
-      .in('slug', ['short-notes', 'cheat-sheets']);
+      .eq('is_short_note', true);
+    if (!byFlag.error) {
+      snCats = byFlag.data;
+    } else {
+      // Migration 0003 not applied yet — fall back to the canonical slugs
+      const bySlug = await supabase
+        .from('resource_categories')
+        .select('id')
+        .in('slug', ['short-notes', 'cheat-sheets']);
+      snCats = bySlug.data;
+    }
     const ids = (snCats || []).map((c) => c.id);
     if (ids.length > 0) {
       query = query.in('category_id', ids);
