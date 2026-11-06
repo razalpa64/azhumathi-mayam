@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --brand-logo: #660000;
+  --brand-primary: #790000;
+  --brand-dark: #530000;
+  --brand-deep: #240707;
+  --surface-base: #FFFDFC;
+  --surface-subtle: #F5F3F1;
+  --surface-muted: #EDE8E4;
+  --text-primary: #252323;
+  --text-muted: #77716F;
+  --border-subtle: #E8E2DF;
+  --border-strong: #D5CCC7;
+}
+
+@theme inline {
+  --color-burgundy: #790000;
+  --color-burgundy-logo: #660000;
+  --color-burgundy-dark: #530000;
+  --color-burgundy-deep: #240707;
+  --color-burgundy-tint: #FAF3F2;
+  --color-burgundy-border: #E6CECC;
+
+  --color-canvas: #FFFDFC;
+  --color-neutral-soft: #F5F3F1;
+  --color-neutral-inset: #EDE8E4;
+  --color-charcoal: #252323;
+  --color-muted: #77716F;
+  --color-line: #E8E2DF;
+  --color-line-strong: #D5CCC7;
+
+  --font-sans: var(--font-jakarta), var(--font-malayalam), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+  --font-malayalam: var(--font-malayalam), system-ui, sans-serif;
+}
+
+* {
+  border-color: var(--border-subtle);
+}
+
+html {
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--surface-base);
+  color: var(--text-primary);
+  font-family: var(--font-jakarta), var(--font-malayalam), system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+::selection {
+  background-color: #790000;
+  color: #FFFDFC;
+}
+
+/* Subtle custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F3F1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D5CCC7;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #77716F;
+}
