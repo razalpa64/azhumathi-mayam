@@ -40,6 +40,7 @@ export function CoursesUniversitiesClient({
   const [catName, setCatName] = useState('');
   const [catDesc, setCatDesc] = useState('');
   const [catIsQp, setCatIsQp] = useState(false);
+  const [catIsShortNote, setCatIsShortNote] = useState(false);
 
   async function createProgramme(e: React.FormEvent) {
     e.preventDefault();
@@ -115,6 +116,7 @@ export function CoursesUniversitiesClient({
           name: catName,
           description: catDesc || null,
           is_question_paper: catIsQp,
+          is_short_note: catIsShortNote,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -125,6 +127,7 @@ export function CoursesUniversitiesClient({
       setCatName('');
       setCatDesc('');
       setCatIsQp(false);
+      setCatIsShortNote(false);
       router.refresh();
     } finally {
       setBusy(false);
@@ -138,6 +141,21 @@ export function CoursesUniversitiesClient({
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
       body: JSON.stringify({ id, is_active: !current }),
+    });
+    router.refresh();
+  }
+
+  async function toggleHub(
+    id: string,
+    field: 'is_question_paper' | 'is_short_note',
+    current: boolean
+  ) {
+    setError(null);
+    await fetch('/api/admin/taxonomy/resource_categories', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ id, [field]: !current }),
     });
     router.refresh();
   }
@@ -472,6 +490,15 @@ export function CoursesUniversitiesClient({
               />
               <span>Include in Question Papers section</span>
             </label>
+            <label className="flex items-center gap-2 text-xs text-charcoal cursor-pointer">
+              <input
+                type="checkbox"
+                checked={catIsShortNote}
+                onChange={(e) => setCatIsShortNote(e.target.checked)}
+                className="rounded accent-burgundy"
+              />
+              <span>Include in Short Notes &amp; Exam Special section</span>
+            </label>
             <Button type="submit" size="sm" disabled={busy} className="w-full">
               <Plus className="h-3.5 w-3.5" />
               <span>Add Category</span>
@@ -483,7 +510,7 @@ export function CoursesUniversitiesClient({
               <thead className="border-b border-line bg-neutral-soft/80 text-[11px] font-semibold uppercase tracking-wider text-muted">
                 <tr>
                   <th className="p-3.5">Category</th>
-                  <th className="p-3.5">Question Paper Hub</th>
+                  <th className="p-3.5">Shows in</th>
                   <th className="p-3.5">Status</th>
                   <th className="p-3.5 text-right">Actions</th>
                 </tr>
@@ -498,11 +525,33 @@ export function CoursesUniversitiesClient({
                       ) : null}
                     </td>
                     <td className="p-3.5">
-                      {c.is_question_paper ? (
-                        <Badge variant="burgundy">Exam Paper</Badge>
-                      ) : (
-                        <span className="text-muted">General Material</span>
-                      )}
+                      <div className="flex flex-wrap gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => toggleHub(c.id, 'is_question_paper', c.is_question_paper)}
+                          title="Toggle Question Papers hub"
+                          className="cursor-pointer"
+                        >
+                          {c.is_question_paper ? (
+                            <Badge variant="burgundy">Question Papers ✓</Badge>
+                          ) : (
+                            <Badge variant="muted">Question Papers</Badge>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleHub(c.id, 'is_short_note', Boolean(c.is_short_note))}
+                          title="Toggle Short Notes & Exam Special hub"
+                          className="cursor-pointer"
+                        >
+                          {c.is_short_note ? (
+                            <Badge variant="burgundy">Short Notes ✓</Badge>
+                          ) : (
+                            <Badge variant="muted">Short Notes</Badge>
+                          )}
+                        </button>
+                      </div>
+                      <p className="mt-1 text-[10px] text-muted">Click a badge to toggle the hub.</p>
                     </td>
                     <td className="p-3.5">
                       <Badge variant={c.is_active ? 'success' : 'muted'}>

@@ -141,7 +141,7 @@ export function MaterialsBrowserClient({
   const visibleCategories = useMemo(
     () =>
       shortNotesOnly
-        ? taxonomy.categories.filter((c) => SHORT_NOTE_SLUGS.includes(c.slug))
+        ? taxonomy.categories.filter((c) => c.is_short_note || SHORT_NOTE_SLUGS.includes(c.slug))
         : onlyQuestionPapers
           ? taxonomy.categories.filter((c) => c.is_question_paper)
           : taxonomy.categories,

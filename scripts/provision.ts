@@ -44,6 +44,13 @@ async function main() {
     );
     await pg.query(requestsSql);
 
+    console.log('2c. Applying 0003_short_note_hub.sql...');
+    const shortNoteHubSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0003_short_note_hub.sql'),
+      'utf8'
+    );
+    await pg.query(shortNoteHubSql);
+
     console.log('3. Applying seed.sql (authentic Kerala taxonomy, zero fake data)...');
     const seedSql = fs.readFileSync(path.resolve(process.cwd(), 'supabase/seed.sql'), 'utf8');
     await pg.query(seedSql);

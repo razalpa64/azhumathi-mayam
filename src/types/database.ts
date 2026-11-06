@@ -120,6 +120,7 @@ export interface ResourceCategory {
   description: string | null;
   icon_name: string;
   is_question_paper: boolean;
+  is_short_note: boolean;
   display_order: number;
   is_active: boolean;
   created_at: string;
