@@ -188,12 +188,12 @@ export function ProfileEditorClient({
       {/* Editable Form */}
       <form
         onSubmit={handleSubmit}
-        className="lg:col-span-8 rounded-xl border border-line bg-canvas p-6 sm:p-8 space-y-6"
+        className="lg:col-span-8 rounded-xl border border-line bg-paper p-6 sm:p-8 space-y-6"
       >
         <div>
-          <h2 className="text-lg font-semibold text-charcoal">Personal & Academic Enrollment</h2>
-          <p className="mt-1 text-xs text-muted">
-            Updating your course, specialization, or semester automatically personalizes your student homepage.
+          <h2 className="font-display text-xl font-medium text-charcoal">About you</h2>
+          <p className="mt-1 text-[13px] text-muted">
+            Change your course or semester and your home page follows along.
           </p>
         </div>
 

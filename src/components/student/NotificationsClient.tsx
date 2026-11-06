@@ -54,18 +54,16 @@ export function NotificationsClient({ initialItems }: NotificationsClientProps) 
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
-            Notifications & Academic Alerts
+          <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">
+            Notifications
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            Updates on newly published materials, examination schedules, and institutional notices.
-          </p>
+          <p className="mt-1.5 text-sm text-muted">New materials, exam dates and notices.</p>
         </div>
 
         {unreadCount > 0 ? (
           <Button variant="secondary" size="sm" onClick={markAllRead} disabled={busy}>
             <CheckCheck className="h-3.5 w-3.5 text-burgundy" />
-            <span>Mark all as read ({unreadCount})</span>
+            <span>Mark all read</span>
           </Button>
         ) : null}
       </div>
@@ -73,11 +71,11 @@ export function NotificationsClient({ initialItems }: NotificationsClientProps) 
       {items.length === 0 ? (
         <EmptyState
           icon={Bell}
-          title="You're all caught up"
-          description="Important academic updates, exam notices, and new semester resource alerts will appear here."
+          title="All caught up"
+          description="When something new arrives for your semester, it’ll show up here."
         />
       ) : (
-        <div className="divide-y divide-line rounded-lg border border-line bg-canvas overflow-hidden">
+        <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-paper">
           {items.map((item) => (
             <div
               key={item.id}

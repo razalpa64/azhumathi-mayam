@@ -44,7 +44,7 @@ export function AdSlot({ ad, adsEnabled, requireConsent = false, className }: Ad
         )}
       >
         <span>
-          Sponsored educational notices help support platform operations. Allow partner placements?
+          The occasional sponsored notice helps keep അഴിമതി മയം running. Show them?
         </span>
         <button
           type="button"

@@ -1,42 +1,14 @@
 import { Suspense } from 'react';
-import Image from 'next/image';
 import { redirect } from 'next/navigation';
-import { BookOpen, FileText, GraduationCap, Layers } from 'lucide-react';
 import { getAuthenticatedProfile } from '@/lib/auth/session';
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import { AuthAside } from '@/components/brand/AuthAside';
 import { LoginForm } from './LoginForm';
 
 export const metadata = {
-  title: 'Sign In',
-  description: 'Sign in to അഴിമതി മയം — Academic Resource & Student Learning Platform.',
+  title: 'Log in',
+  description: 'Log in to അഴിമതി മയം for your notes, syllabus and question papers.',
 };
-
-const PLATFORM_PILLARS = [
-  {
-    icon: GraduationCap,
-    title: 'Semester-Personalized Workspace',
-    description:
-      'Automatically surfaces subjects, syllabus materials, and updates mapped to your enrolled degree, specialization, and semester.',
-  },
-  {
-    icon: BookOpen,
-    title: 'Structured University Repository',
-    description:
-      'Organized across university regulations, modules, lecture notes, lab manuals, and reference texts.',
-  },
-  {
-    icon: FileText,
-    title: 'Question Paper Archive & Reader',
-    description:
-      'Read PDFs directly inside the integrated document viewer or open verified university examination papers.',
-  },
-  {
-    icon: Layers,
-    title: 'Official Academic Notices',
-    description:
-      'Receive timely examination schedules, syllabus updates, and deadline bulletins in one unified feed.',
-  },
-];
 
 export default async function LoginPage() {
   const profile = await getAuthenticatedProfile();
@@ -46,64 +18,15 @@ export default async function LoginPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-12 bg-canvas">
-      {/* Editorial Brand Column */}
-      <aside className="hidden lg:flex lg:col-span-5 xl:col-span-5 flex-col justify-between bg-burgundy-deep text-canvas p-10 xl:p-14 border-r border-white/10">
-        <div>
-          <div className="inline-flex items-center gap-4">
-            <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-burgundy-logo ring-1 ring-white/15">
-              <Image
-                src="/brand/logo.png"
-                alt="അഴിമതി മയം"
-                width={64}
-                height={64}
-                className="h-full w-full object-cover"
-                priority
-              />
-            </div>
-            <div>
-              <h1 className="font-malayalam text-2xl font-bold tracking-tight text-canvas">
-                അഴിമതി മയം
-              </h1>
-              <p className="mt-0.5 text-xs font-medium uppercase tracking-widest text-canvas/65">
-                Academic Resource Platform
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-12 border-t border-white/10 pt-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-canvas/60">
-              Academic Resource Repository
-            </p>
-            <h2 className="mt-3 text-2xl xl:text-3xl font-semibold tracking-tight text-canvas leading-snug">
-              Curated study materials, syllabus notes, and examination archives in one disciplined workspace.
-            </h2>
-          </div>
-
-          <div className="mt-10 space-y-6">
-            {PLATFORM_PILLARS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.title} className="flex items-start gap-3.5">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded border border-white/15 bg-burgundy-logo text-canvas">
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-canvas">{item.title}</h3>
-                    <p className="mt-1 text-xs leading-relaxed text-canvas/70">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="pt-10 border-t border-white/10 flex items-center justify-between text-xs text-canvas/55">
-          <span className="font-malayalam font-semibold text-canvas/80">അഴിമതി മയം</span>
-          <span>Student Learning Portal</span>
-        </div>
-      </aside>
+      <AuthAside
+        headline="Your semester, sorted."
+        intro="Notes, syllabi and previous question papers for your course — kept in one place, so you can just sit down and study."
+        items={[
+          { title: 'Your subjects first', note: 'Set your course and semester once. Everything after that is already filtered for you.' },
+          { title: 'Read in the browser', note: 'Open PDFs right here — no downloads needed until you want the file.' },
+          { title: 'Papers from past years', note: 'Previous question papers sit beside the notes, subject by subject.' },
+        ]}
+      />
 
       {/* Sign-In Form Column */}
       <main className="lg:col-span-7 xl:col-span-7 flex flex-col justify-between px-6 py-8 sm:px-12 lg:px-16">
@@ -111,30 +34,22 @@ export default async function LoginPage() {
           <div className="lg:hidden">
             <BrandLogo size="md" subtitle="Academic Portal" />
           </div>
-          <span className="inline-flex items-center gap-2 rounded border border-line bg-neutral-soft px-2.5 py-1 text-xs font-medium text-muted">
-            <span className="h-1.5 w-1.5 rounded-full bg-burgundy" />
-            Student Learning Portal
-          </span>
+          <span className="text-[13px] text-muted">Student portal</span>
         </div>
 
         <div className="mx-auto w-full max-w-md py-10">
           <div className="mb-8">
-            <div className="mb-5 hidden lg:inline-flex items-center gap-2.5 rounded border border-burgundy-border bg-burgundy-tint px-3 py-1 text-xs font-medium text-burgundy">
-              <span className="font-malayalam font-bold">അഴിമതി മയം</span>
-              <span className="text-burgundy/40">•</span>
-              <span>Student Sign-In</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-charcoal">
-              Sign in to your account
+            <h2 className="font-display text-[30px] font-medium leading-tight text-charcoal sm:text-[34px]">
+              Welcome back
             </h2>
-            <p className="mt-2 text-sm text-muted leading-relaxed">
-              Enter your username and password to access your study dashboard, syllabus notes, and examination resources, or create an account below.
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              Log in with the username you registered with.
             </p>
           </div>
 
           <Suspense
             fallback={
-              <div className="h-64 animate-pulse rounded-lg border border-line bg-neutral-soft" />
+              <div className="h-64 animate-pulse rounded-xl bg-neutral-soft" />
             }
           >
             <LoginForm />
@@ -147,7 +62,7 @@ export default async function LoginPage() {
             <span className="font-malayalam font-semibold text-charcoal">അഴിമതി മയം</span>. All
             rights reserved.
           </span>
-          <span>Academic Resource Platform</span>
+          <span>അഴിമതി മയം</span>
         </footer>
       </main>
     </div>

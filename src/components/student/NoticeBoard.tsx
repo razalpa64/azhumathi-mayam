@@ -1,15 +1,15 @@
-import { ExternalLink, FileText, Image as ImageIcon, Megaphone, Pin } from 'lucide-react';
+import { ExternalLink, FileText, Image as ImageIcon, Pin } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import type { Notice, NoticeType } from '@/types/database';
 import { cn, formatDate } from '@/lib/utils';
 
 const NOTICE_TYPE_LABELS: Record<NoticeType, string> = {
-  general: 'General Announcement',
-  exam: 'Exam Notification',
-  assignment: 'Assignment Deadline',
-  academic_update: 'Academic Update',
-  material_update: 'Study Material Update',
-  college: 'College Announcement',
+  general: 'General',
+  exam: 'Exam',
+  assignment: 'Assignment',
+  academic_update: 'Update',
+  material_update: 'New material',
+  college: 'College',
 };
 
 interface NoticeBoardProps {
@@ -23,111 +23,87 @@ export function NoticeBoard({ notices, noticesEnabled }: NoticeBoardProps) {
   }
 
   return (
-    <section aria-label="Official academic notices" className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Megaphone className="h-4 w-4 text-burgundy" />
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-charcoal">
-            Academic Notices & Bulletins
-          </h2>
-        </div>
-        <span className="text-xs text-muted">{notices.length} active</span>
+    <section aria-label="Notices" className="mt-14">
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 className="font-display text-xl font-medium text-charcoal">Notices</h2>
+        <span className="text-[13px] text-muted">
+          {notices.length} new
+        </span>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <ul className="mt-4 divide-y divide-line border-y border-line">
         {notices.map((notice) => {
-          const isHighPriority = notice.priority === 'urgent' || notice.priority === 'important';
+          const isUrgent = notice.priority === 'urgent';
           return (
-            <article
-              key={notice.id}
-              className={cn(
-                'rounded-lg border p-4 transition-colors',
-                isHighPriority
-                  ? 'border-burgundy-border bg-burgundy-tint/65'
-                  : 'border-line bg-canvas'
-              )}
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {notice.is_pinned ? (
-                    <Badge variant="solid" className="gap-1">
-                      <Pin className="h-3 w-3" />
-                      <span>Pinned</span>
-                    </Badge>
-                  ) : null}
-                  {notice.priority === 'urgent' ? (
-                    <Badge variant="danger">Urgent</Badge>
-                  ) : notice.priority === 'important' ? (
-                    <Badge variant="burgundy">Important</Badge>
-                  ) : null}
-                  <Badge variant="neutral">{NOTICE_TYPE_LABELS[notice.notice_type]}</Badge>
-                </div>
-                <time className="text-[11px] font-mono text-muted">
-                  {formatDate(notice.start_date)}
-                </time>
+            <li key={notice.id} className="py-5">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[12.5px]">
+                {notice.is_pinned ? (
+                  <span className="inline-flex items-center gap-1 font-semibold text-burgundy">
+                    <Pin className="h-3 w-3" /> Pinned
+                  </span>
+                ) : null}
+                {isUrgent ? (
+                  <Badge variant="danger">Urgent</Badge>
+                ) : notice.priority === 'important' ? (
+                  <Badge variant="burgundy">Important</Badge>
+                ) : null}
+                <span className="font-medium text-charcoal/70">
+                  {NOTICE_TYPE_LABELS[notice.notice_type]}
+                </span>
+                <span className="text-muted">{formatDate(notice.start_date)}</span>
+                {notice.expiry_date ? (
+                  <span className="text-muted">· until {formatDate(notice.expiry_date)}</span>
+                ) : null}
               </div>
 
-              <h3 className="mt-2.5 text-sm font-semibold text-charcoal leading-snug">
+              <h3 className="mt-2 text-[15.5px] font-semibold leading-snug text-charcoal">
                 {notice.title}
               </h3>
-              <p className="mt-1.5 text-xs text-muted leading-relaxed whitespace-pre-line">
+              <p className="mt-1 max-w-2xl whitespace-pre-line text-sm leading-relaxed text-muted">
                 {notice.description}
               </p>
 
               {notice.attachment_url && notice.attachment_type === 'image' ? (
-                <div className="mt-3 overflow-hidden rounded-md border border-line bg-neutral-soft">
+                <div className="mt-3 max-w-xl overflow-hidden rounded-lg">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={notice.attachment_url}
-                    alt={notice.title}
-                    className="max-h-48 w-full object-cover"
-                  />
+                  <img src={notice.attachment_url} alt={notice.title} className="max-h-52 w-full object-cover" />
                 </div>
               ) : null}
 
-              {(notice.attachment_url || notice.external_link || notice.expiry_date) ? (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-line/80 pt-2.5">
-                  <div className="flex flex-wrap items-center gap-3">
-                    {notice.attachment_url ? (
-                      <a
-                        href={notice.attachment_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-burgundy hover:underline"
-                      >
-                        {notice.attachment_type === 'image' ? (
-                          <ImageIcon className="h-3.5 w-3.5" />
-                        ) : (
-                          <FileText className="h-3.5 w-3.5" />
-                        )}
-                        <span>{notice.attachment_name || 'View Attachment'}</span>
-                      </a>
-                    ) : null}
-
-                    {notice.external_link ? (
-                      <a
-                        href={notice.external_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-charcoal hover:text-burgundy"
-                      >
-                        <span>{notice.external_link_label || 'Official Link'}</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    ) : null}
-                  </div>
-
-                  {notice.expiry_date ? (
-                    <span className="text-[11px] text-muted">
-                      Valid until {formatDate(notice.expiry_date)}
-                    </span>
+              {notice.attachment_url || notice.external_link ? (
+                <p className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 text-[13.5px]">
+                  {notice.attachment_url ? (
+                    <a
+                      href={notice.attachment_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 font-semibold text-burgundy hover:underline underline-offset-4"
+                    >
+                      {notice.attachment_type === 'image' ? (
+                        <ImageIcon className="h-4 w-4" strokeWidth={1.8} />
+                      ) : (
+                        <FileText className="h-4 w-4" strokeWidth={1.8} />
+                      )}
+                      {notice.attachment_name || 'Attachment'}
+                    </a>
                   ) : null}
-                </div>
+                  {notice.external_link ? (
+                    <a
+                      href={notice.external_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn('inline-flex items-center gap-1.5 font-semibold text-burgundy hover:underline underline-offset-4')}
+                    >
+                      {notice.external_link_label || 'More details'}
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  ) : null}
+                </p>
               ) : null}
-            </article>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </section>
   );
 }
