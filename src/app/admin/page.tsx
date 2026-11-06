@@ -136,30 +136,35 @@ export default async function AdminOverviewPage() {
       {/* Header & Quick Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-5">
         <div>
-          <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">
+          <p className="text-xs font-semibold uppercase tracking-wider text-burgundy">
+            Admin
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-charcoal">
             Overview
           </h1>
-          <p className="mt-1.5 text-sm text-muted">How the library is doing today.</p>
+          <p className="mt-1 text-sm text-muted">
+            Students, materials and downloads — the latest numbers.
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/admin/upload"
-            className="inline-flex h-9.5 items-center gap-1.5 rounded-lg bg-burgundy px-4 text-[13px] font-semibold text-paper hover:bg-burgundy-dark transition-colors"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-3.5 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors"
           >
             <FilePlus2 className="h-3.5 w-3.5" />
             <span>Add a resource</span>
           </Link>
           <Link
             href="/admin/students"
-            className="inline-flex h-9.5 items-center gap-1.5 rounded-lg border border-line-strong bg-paper px-4 text-[13px] font-semibold text-charcoal hover:bg-neutral-soft"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
           >
             <UserPlus className="h-3.5 w-3.5 text-burgundy" />
             <span>Add student</span>
           </Link>
           <Link
             href="/admin/notices"
-            className="inline-flex h-9.5 items-center gap-1.5 rounded-lg border border-line-strong bg-paper px-4 text-[13px] font-semibold text-charcoal hover:bg-neutral-soft"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
           >
             <Megaphone className="h-3.5 w-3.5 text-burgundy" />
             <span>Post a notice</span>
@@ -175,7 +180,7 @@ export default async function AdminOverviewPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="group rounded-xl border border-line bg-paper p-5 transition-all hover:-translate-y-0.5 hover:border-line-strong"
+              className="group rounded-xl border border-line bg-canvas p-5 hover:border-burgundy-border transition-colors"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-muted">{stat.label}</span>
@@ -183,7 +188,7 @@ export default async function AdminOverviewPage() {
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <p className="font-display mt-3 text-[30px] font-medium text-charcoal">{stat.value}</p>
+              <p className="mt-3 font-mono text-2xl font-semibold text-charcoal">{stat.value}</p>
               <div className="mt-2 flex items-center justify-between text-xs text-muted">
                 <span>{stat.sub}</span>
                 <ArrowRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100 text-burgundy" />

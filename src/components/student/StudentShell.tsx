@@ -1,13 +1,16 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Bell,
   Bookmark,
-  ChevronDown,
+  BookOpen,
   Clock,
+  FileQuestion,
+  GraduationCap,
+  Home,
   Layers,
   LogOut,
   Menu,
@@ -25,51 +28,35 @@ interface StudentShellProps {
   children: React.ReactNode;
 }
 
-const PRIMARY_NAV = [
-  { href: '/dashboard', label: 'Home', exact: true },
-  { href: '/dashboard/materials', label: 'Materials' },
-  { href: '/dashboard/question-papers', label: 'Question papers' },
-  { href: '/dashboard/courses', label: 'Courses' },
+const TOP_NAV = [
+  { href: '/dashboard', label: 'Home', icon: Home, exact: true },
+  { href: '/dashboard/materials', label: 'Browse Materials', icon: BookOpen },
+  { href: '/dashboard/courses', label: 'Courses', icon: GraduationCap },
+  { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
 ];
 
-const ACCOUNT_LINKS = [
-  { href: '/dashboard/semester', label: 'My semester', icon: Layers },
-  { href: '/dashboard/bookmarks', label: 'Saved', icon: Bookmark },
-  { href: '/dashboard/history', label: 'Recently opened', icon: Clock },
-  { href: '/dashboard/profile', label: 'Profile', icon: User },
+const WORKSPACE_TABS = [
+  { href: '/dashboard', label: 'Overview', icon: Home, exact: true },
+  { href: '/dashboard/semester', label: 'My Semester', icon: Layers },
+  { href: '/dashboard/courses', label: 'My Courses', icon: GraduationCap },
+  { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },
+  { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
+  { href: '/dashboard/bookmarks', label: 'Saved Materials', icon: Bookmark },
+  { href: '/dashboard/history', label: 'Recently Viewed', icon: Clock },
+  { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
+  { href: '/dashboard/profile', label: 'My Profile', icon: User },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
-export function StudentShell({ profile, unreadNotifications, children }: StudentShellProps) {
+export function StudentShell({
+  profile,
+  unreadNotifications,
+  children,
+}: StudentShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        setMenuOpen(false);
-        setMobileOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', onClick);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onClick);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, []);
-
-  useEffect(() => {
-    setMobileOpen(false);
-    setMenuOpen(false);
-  }, [pathname]);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -86,27 +73,26 @@ export function StudentShell({ profile, unreadNotifications, children }: Student
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
-  const firstName = profile.full_name.split(' ')[0];
-
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
-      <header className="sticky top-0 z-40 bg-canvas/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <div className="flex items-center gap-9">
+      {/* Primary Top Navigation */}
+      <header className="sticky top-0 z-40 border-b border-line bg-canvas/95 backdrop-blur-xs">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-8">
             <BrandLogo href="/dashboard" size="sm" />
-            <nav aria-label="Primary" className="hidden md:flex items-center gap-6">
-              {PRIMARY_NAV.map((item) => {
+
+            <nav aria-label="Primary student navigation" className="hidden md:flex items-center gap-1">
+              {TOP_NAV.map((item) => {
                 const active = isActive(item.href, item.exact);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    aria-current={active ? 'page' : undefined}
                     className={cn(
-                      'relative py-1.5 text-[14px] transition-colors',
+                      'rounded-md px-3 py-2 text-sm font-medium transition-colors',
                       active
-                        ? 'font-semibold text-charcoal after:absolute after:inset-x-0 after:-bottom-[13px] after:h-[2px] after:bg-burgundy'
-                        : 'text-charcoal/65 hover:text-charcoal'
+                        ? 'bg-burgundy-tint text-burgundy font-semibold'
+                        : 'text-charcoal/80 hover:bg-neutral-soft hover:text-charcoal'
                     )}
                   >
                     {item.label}
@@ -116,169 +102,188 @@ export function StudentShell({ profile, unreadNotifications, children }: Student
             </nav>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Notifications Link */}
             <Link
               href="/dashboard/notifications"
-              aria-label={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'}
+              aria-label="Notifications"
               className={cn(
-                'relative inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors',
+                'relative inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors',
                 pathname === '/dashboard/notifications'
-                  ? 'bg-burgundy-tint text-burgundy'
-                  : 'text-charcoal/70 hover:bg-neutral-soft hover:text-charcoal'
+                  ? 'border-burgundy-border bg-burgundy-tint text-burgundy'
+                  : 'border-line bg-canvas text-charcoal hover:bg-neutral-soft'
               )}
             >
-              <Bell className="h-[18px] w-[18px]" strokeWidth={1.8} />
+              <Bell className="h-4 w-4" />
               {unreadNotifications > 0 ? (
-                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-burgundy px-1 text-[9px] font-bold text-paper">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-burgundy px-1 text-[10px] font-bold text-canvas">
                   {unreadNotifications > 9 ? '9+' : unreadNotifications}
                 </span>
               ) : null}
             </Link>
 
-            {/* Account menu */}
-            <div ref={menuRef} className="relative">
-              <button
-                type="button"
-                onClick={() => setMenuOpen((v) => !v)}
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-neutral-soft cursor-pointer"
-              >
-                {profile.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-burgundy text-[11px] font-bold text-paper">
-                    {getInitials(profile.full_name)}
-                  </span>
-                )}
-                <span className="hidden sm:block max-w-[110px] truncate text-[13.5px] font-medium text-charcoal">
-                  {firstName}
-                </span>
-                <ChevronDown
-                  className={cn('hidden sm:block h-3.5 w-3.5 text-muted transition-transform', menuOpen && 'rotate-180')}
-                />
-              </button>
-
-              {menuOpen ? (
-                <div
-                  role="menu"
-                  className="animate-rise absolute right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-line bg-paper shadow-[0_12px_32px_-12px_rgba(33,26,22,0.25)]"
-                >
-                  <div className="px-4 py-3.5">
-                    <p className="truncate text-sm font-semibold text-charcoal">{profile.full_name}</p>
-                    <p className="truncate text-xs text-muted">
-                      {profile.programme
-                        ? `${profile.programme.name}${profile.semester ? ` · ${profile.semester.label}` : ''}`
-                        : `@${profile.username}`}
-                    </p>
-                  </div>
-                  <div className="border-t border-line py-1.5">
-                    {ACCOUNT_LINKS.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          role="menuitem"
-                          className="flex items-center gap-2.5 px-4 py-2 text-[13.5px] text-charcoal/85 hover:bg-neutral-soft hover:text-charcoal"
-                        >
-                          <Icon className="h-4 w-4 text-muted" strokeWidth={1.8} />
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                  <div className="border-t border-line py-1.5">
-                    <button
-                      type="button"
-                      onClick={handleLogout}
-                      disabled={loggingOut}
-                      className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-[13.5px] text-charcoal/85 hover:bg-neutral-soft cursor-pointer disabled:opacity-50"
-                    >
-                      <LogOut className="h-4 w-4 text-muted" strokeWidth={1.8} />
-                      {loggingOut ? 'Signing out…' : 'Sign out'}
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setMobileOpen((v) => !v)}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={mobileOpen}
-              className="inline-flex md:hidden h-9 w-9 items-center justify-center rounded-full text-charcoal hover:bg-neutral-soft cursor-pointer"
-            >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-        <div className="border-b border-line" />
-
-        {/* Mobile menu — one quiet list, no boxes */}
-        {mobileOpen ? (
-          <div className="md:hidden border-b border-line bg-canvas px-4 pb-5 pt-2">
-            <nav aria-label="Mobile" className="divide-y divide-line/70">
-              {[...PRIMARY_NAV, ...ACCOUNT_LINKS.map((l) => ({ href: l.href, label: l.label }))].map(
-                (item) => (
-                  <Link
-                    key={item.href + item.label}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center justify-between py-3 text-[15px]',
-                      isActive(item.href, (item as { exact?: boolean }).exact)
-                        ? 'font-semibold text-burgundy'
-                        : 'text-charcoal'
-                    )}
-                  >
-                    {item.label}
-                    {item.href === '/dashboard/notifications' ? null : null}
-                  </Link>
-                )
+            {/* Profile Chip */}
+            <Link
+              href="/dashboard/profile"
+              className={cn(
+                'hidden sm:inline-flex items-center gap-2.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors',
+                pathname === '/dashboard/profile'
+                  ? 'border-burgundy-border bg-burgundy-tint text-burgundy'
+                  : 'border-line bg-canvas text-charcoal hover:bg-neutral-soft'
               )}
-              <Link href="/dashboard/notifications" className="flex items-center justify-between py-3 text-[15px] text-charcoal">
-                Notifications
-                {unreadNotifications > 0 ? (
-                  <span className="rounded-full bg-burgundy px-2 py-0.5 text-[10px] font-bold text-paper">
-                    {unreadNotifications}
-                  </span>
-                ) : null}
-              </Link>
-            </nav>
+            >
+              {profile.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.full_name}
+                  className="h-6 w-6 rounded-full object-cover border border-line"
+                />
+              ) : (
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-burgundy text-[10px] font-bold text-canvas">
+                  {getInitials(profile.full_name)}
+                </span>
+              )}
+              <span className="max-w-[130px] truncate">{profile.full_name}</span>
+            </Link>
+
+            {/* Logout Button */}
             <button
               type="button"
               onClick={handleLogout}
               disabled={loggingOut}
-              className="mt-4 text-[14px] font-medium text-muted hover:text-charcoal cursor-pointer disabled:opacity-50"
+              className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-canvas px-3 text-xs font-medium text-muted hover:border-line-strong hover:bg-neutral-soft hover:text-charcoal cursor-pointer disabled:opacity-50"
             >
-              {loggingOut ? 'Signing out…' : 'Sign out'}
+              <LogOut className="h-3.5 w-3.5" />
+              <span>{loggingOut ? 'Signing out…' : 'Logout'}</span>
+            </button>
+
+            {/* Mobile Drawer Trigger */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen((prev) => !prev)}
+              aria-label="Toggle navigation menu"
+              className="inline-flex md:hidden h-9 w-9 items-center justify-center rounded-md border border-line bg-canvas text-charcoal hover:bg-neutral-soft cursor-pointer"
+            >
+              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Workspace Secondary Bar (Desktop & Tablet Horizontal Scroll) */}
+        <div className="border-t border-line bg-neutral-soft/75">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <nav
+              aria-label="Student workspace sections"
+              className="flex items-center gap-1 overflow-x-auto py-1.5 no-scrollbar"
+            >
+              {WORKSPACE_TABS.map((tab) => {
+                const Icon = tab.icon;
+                const active = isActive(tab.href, tab.exact);
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    className={cn(
+                      'inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition-colors',
+                      active
+                        ? 'bg-canvas text-burgundy border border-burgundy-border font-semibold'
+                        : 'text-muted hover:text-charcoal hover:bg-canvas/70 border border-transparent'
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span>{tab.label}</span>
+                    {tab.href === '/dashboard/notifications' && unreadNotifications > 0 ? (
+                      <span className="ml-0.5 rounded bg-burgundy px-1.5 py-0.2 text-[10px] font-semibold text-canvas">
+                        {unreadNotifications}
+                      </span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Mobile Drawer */}
+        {mobileOpen ? (
+          <div className="md:hidden border-t border-line bg-canvas px-4 py-4 space-y-4">
+            <div className="flex items-center justify-between rounded-md border border-line bg-neutral-soft px-3 py-2.5">
+              <div>
+                <p className="text-sm font-semibold text-charcoal">{profile.full_name}</p>
+                <p className="text-xs text-muted font-mono">@{profile.username}</p>
+              </div>
+              {profile.programme ? (
+                <span className="rounded border border-burgundy-border bg-burgundy-tint px-2 py-0.5 text-xs font-medium text-burgundy">
+                  {profile.programme.name}
+                  {profile.semester ? ` • S${profile.semester.semester_number}` : ''}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5">
+              {WORKSPACE_TABS.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href, item.exact);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium',
+                      active
+                        ? 'border-burgundy-border bg-burgundy-tint text-burgundy font-semibold'
+                        : 'border-line bg-canvas text-charcoal hover:bg-neutral-soft'
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={loggingOut}
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-line-strong bg-neutral-soft py-2.5 text-xs font-semibold text-charcoal hover:bg-neutral-inset cursor-pointer"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>{loggingOut ? 'Signing out...' : 'Sign out'}</span>
             </button>
           </div>
         ) : null}
       </header>
 
-      <main className="animate-rise mx-auto w-full max-w-6xl flex-1 px-4 pb-20 pt-8 sm:px-6 sm:pt-10">
+      {/* Main Content */}
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
         {children}
       </main>
 
-      <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-7 text-[13px] text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>
-            <span className="font-malayalam font-semibold text-charcoal">അഴിമതി മയം</span>
-            <span className="mx-2 text-line-strong">·</span>
-            notes, syllabus &amp; question papers
-          </p>
-          <nav className="flex items-center gap-5">
-            <Link href="/dashboard/materials" className="hover:text-charcoal">Materials</Link>
-            <Link href="/dashboard/question-papers" className="hover:text-charcoal">Question papers</Link>
-            <Link href="/dashboard/bookmarks" className="hover:text-charcoal">Saved</Link>
-          </nav>
+      {/* Clean Institutional Footer */}
+      <footer className="border-t border-line bg-neutral-soft/60 mt-12">
+        <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-8 text-xs text-muted">
+          <div className="flex items-center gap-2.5">
+            <span className="font-malayalam font-bold text-sm text-burgundy">അഴിമതി മയം</span>
+            <span>•</span>
+            <span>notes, syllabus & question papers</span>
+          </div>
+          <div className="flex items-center gap-5">
+            <Link href="/dashboard/materials" className="hover:text-charcoal">
+              Library
+            </Link>
+            <Link href="/dashboard/question-papers" className="hover:text-charcoal">
+              Question Papers
+            </Link>
+            <Link href="/dashboard/profile" className="hover:text-charcoal">
+              Academic Profile
+            </Link>
+            <Link href="/dashboard/settings" className="hover:text-charcoal">
+              Security
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

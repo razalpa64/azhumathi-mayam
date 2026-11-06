@@ -34,7 +34,7 @@ interface GlobalSearchBarProps {
 
 export function GlobalSearchBar({
   initialQuery = '',
-  placeholder = 'Search notes, subjects, question papers…',
+  placeholder = 'Search a subject, its code (like CST201), or a topic…',
   className,
 }: GlobalSearchBarProps) {
   const router = useRouter();
@@ -152,7 +152,7 @@ export function GlobalSearchBar({
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
           aria-label="Search notes, subjects and question papers"
-          className="h-12.5 w-full rounded-full border border-line-strong bg-paper pl-11 pr-24 text-[14.5px] text-charcoal shadow-[0_1px_2px_rgba(33,26,22,0.05)] placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+          className="h-12 w-full rounded-lg border border-line-strong bg-canvas pl-11 pr-28 text-sm text-charcoal placeholder:text-muted/80 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15"
         />
         {query ? (
           <button
@@ -166,7 +166,7 @@ export function GlobalSearchBar({
         ) : null}
         <button
           type="submit"
-          className="absolute right-1.5 inline-flex h-9.5 items-center gap-1.5 rounded-full bg-burgundy px-4 text-[13px] font-semibold text-paper hover:bg-burgundy-dark transition-colors cursor-pointer"
+          className="absolute right-1.5 inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-3.5 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors cursor-pointer"
         >
           <span>Search</span>
           <ArrowRight className="h-3.5 w-3.5" />
@@ -174,11 +174,13 @@ export function GlobalSearchBar({
       </form>
 
       {showDropdown ? (
-        <div className="animate-rise absolute left-0 right-0 top-[calc(100%+8px)] z-30 overflow-hidden rounded-xl border border-line bg-paper shadow-[0_16px_40px_-16px_rgba(33,26,22,0.3)]">
+        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 overflow-hidden rounded-lg border border-line-strong bg-canvas shadow-lg">
           {query.trim().length < 2 && recentSearches.length > 0 ? (
             <div className="p-3">
               <div className="mb-2 flex items-center justify-between px-2">
-                <span className="text-xs font-semibold text-muted">Recent</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                  Recent
+                </span>
                 <button
                   type="button"
                   onClick={clearRecent}
@@ -217,13 +219,15 @@ export function GlobalSearchBar({
                 </div>
               ) : subjects.length === 0 && resources.length === 0 ? (
                 <div className="px-4 py-4 text-xs text-muted">
-                  Nothing found for <span className="font-semibold text-charcoal">&ldquo;{query.trim()}&rdquo;</span>. Try Enter for a full search.
+                  Nothing found for <span className="font-semibold text-charcoal">&ldquo;{query.trim()}&rdquo;</span>. Press Enter to search everything.
                 </div>
               ) : (
                 <>
                   {subjects.length > 0 ? (
                     <div className="p-2.5">
-                      <p className="px-2 pb-1.5 text-xs font-semibold text-muted">Subjects</p>
+                      <p className="px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                        Subjects
+                      </p>
                       {subjects.map((subj) => (
                         <Link
                           key={subj.id}
@@ -251,7 +255,9 @@ export function GlobalSearchBar({
 
                   {resources.length > 0 ? (
                     <div className="p-2.5">
-                      <p className="px-2 pb-1.5 text-xs font-semibold text-muted">Materials</p>
+                      <p className="px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                        Materials
+                      </p>
                       {resources.map((res) => (
                         <Link
                           key={res.id}

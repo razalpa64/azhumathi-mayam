@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   BarChart3,
   BookOpen,
+  Building2,
   CalendarRange,
   FilePlus2,
   FolderKanban,
@@ -30,45 +31,20 @@ interface AdminShellProps {
   children: React.ReactNode;
 }
 
-const ADMIN_GROUPS: { label?: string; items: { href: string; label: string; icon: typeof Users; exact?: boolean }[] }[] = [
-  {
-    items: [{ href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true }],
-  },
-  {
-    label: 'People',
-    items: [{ href: '/admin/students', label: 'Students', icon: Users }],
-  },
-  {
-    label: 'Curriculum',
-    items: [
-      { href: '/admin/courses', label: 'Courses & universities', icon: GraduationCap },
-      { href: '/admin/specializations', label: 'Specializations', icon: GitBranch },
-      { href: '/admin/regulations', label: 'Regulations', icon: Scale },
-      { href: '/admin/semesters', label: 'Semesters', icon: CalendarRange },
-      { href: '/admin/subjects', label: 'Subjects', icon: BookOpen },
-    ],
-  },
-  {
-    label: 'Library',
-    items: [
-      { href: '/admin/upload', label: 'Add a resource', icon: FilePlus2 },
-      { href: '/admin/resources', label: 'Materials', icon: FolderKanban },
-    ],
-  },
-  {
-    label: 'Reach',
-    items: [
-      { href: '/admin/notices', label: 'Notices', icon: Megaphone },
-      { href: '/admin/advertisements', label: 'Sponsors', icon: Sparkles },
-    ],
-  },
-  {
-    label: 'System',
-    items: [
-      { href: '/admin/analytics', label: 'Analytics & audit', icon: BarChart3 },
-      { href: '/admin/settings', label: 'Settings', icon: Settings },
-    ],
-  },
+const ADMIN_NAV = [
+  { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
+  { href: '/admin/students', label: 'Students', icon: Users },
+  { href: '/admin/courses', label: 'Courses & Universities', icon: GraduationCap },
+  { href: '/admin/specializations', label: 'Specializations', icon: GitBranch },
+  { href: '/admin/regulations', label: 'Academic Regulations', icon: Scale },
+  { href: '/admin/semesters', label: 'Semesters', icon: CalendarRange },
+  { href: '/admin/subjects', label: 'Subjects', icon: BookOpen },
+  { href: '/admin/resources', label: 'Study Materials', icon: FolderKanban },
+  { href: '/admin/upload', label: 'Upload Resources', icon: FilePlus2 },
+  { href: '/admin/notices', label: 'Notices', icon: Megaphone },
+  { href: '/admin/advertisements', label: 'Advertisements', icon: Sparkles },
+  { href: '/admin/analytics', label: 'Analytics & Audit', icon: BarChart3 },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 export function AdminShell({ profile, children }: AdminShellProps) {
@@ -93,68 +69,65 @@ export function AdminShell({ profile, children }: AdminShellProps) {
   }
 
   const sidebarContent = (
-    <div className="flex h-full flex-col justify-between bg-burgundy-deep text-paper">
-      <div className="px-4 py-5">
-        <div className="flex items-center justify-between px-1">
-          <BrandLogo href="/admin" size="sm" theme="dark" subtitle="Admin" />
+    <div className="flex h-full flex-col justify-between bg-burgundy-deep text-canvas">
+      <div className="p-5">
+        <div className="flex items-center justify-between">
+          <BrandLogo href="/admin" size="sm" theme="dark" subtitle="Admin Console" />
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden rounded-full p-1.5 text-paper/70 hover:bg-white/10 hover:text-paper cursor-pointer"
+            className="lg:hidden rounded p-1.5 text-canvas/70 hover:bg-white/10 hover:text-canvas cursor-pointer"
             aria-label="Close menu"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <nav aria-label="Admin" className="mt-6">
-          {ADMIN_GROUPS.map((group, gi) => (
-            <div key={group.label || `g${gi}`} className={gi > 0 ? 'mt-6' : ''}>
-              {group.label ? (
-                <p className="px-3 pb-1.5 text-[11px] font-semibold text-paper/40">{group.label}</p>
-              ) : null}
-              <ul className="space-y-0.5">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href, item.exact);
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        aria-current={active ? 'page' : undefined}
-                        className={cn(
-                          'flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13.5px] transition-colors',
-                          active
-                            ? 'bg-paper font-semibold text-burgundy-deep'
-                            : 'text-paper/70 hover:bg-white/[0.07] hover:text-paper'
-                        )}
-                      >
-                        <Icon className="h-4 w-4 shrink-0" strokeWidth={1.8} />
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+        <nav aria-label="Administrator navigation" className="mt-7 space-y-0.5">
+          {ADMIN_NAV.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href, item.exact);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  'flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium transition-colors',
+                  active
+                    ? 'bg-burgundy text-canvas font-semibold ring-1 ring-white/15'
+                    : 'text-canvas/75 hover:bg-white/8 hover:text-canvas'
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
-      <div className="px-4 pb-5">
-        <div className="border-t border-white/10 px-2 pb-3 pt-4">
-          <p className="truncate text-[13px] font-semibold">{profile.full_name}</p>
-          <p className="truncate font-mono text-[11px] text-paper/50">{profile.username}</p>
+      <div className="border-t border-white/10 p-4 space-y-3">
+        <div className="rounded-md bg-white/5 px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-3.5 w-3.5 text-canvas/65" />
+            <span className="text-xs font-semibold text-canvas truncate">
+              {profile.full_name}
+            </span>
+          </div>
+          <p className="mt-0.5 font-mono text-[11px] text-canvas/65 truncate">
+            {profile.username}
+          </p>
         </div>
+
         <button
           type="button"
           onClick={handleLogout}
           disabled={loggingOut}
-          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13.5px] text-paper/70 transition-colors hover:bg-white/[0.07] hover:text-paper cursor-pointer disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/5 py-2 text-xs font-semibold text-canvas hover:bg-white/15 transition-colors cursor-pointer disabled:opacity-50"
         >
-          <LogOut className="h-4 w-4" strokeWidth={1.8} />
-          <span>{loggingOut ? 'Signing out…' : 'Sign out'}</span>
+          <LogOut className="h-3.5 w-3.5" />
+          <span>{loggingOut ? 'Signing out...' : 'Logout'}</span>
         </button>
       </div>
     </div>
@@ -162,40 +135,50 @@ export function AdminShell({ profile, children }: AdminShellProps) {
 
   return (
     <div className="min-h-screen flex bg-canvas">
-      <aside className="hidden lg:block lg:w-60 lg:shrink-0">
+      {/* Desktop Fixed Sidebar */}
+      <aside className="hidden lg:block lg:w-64 lg:shrink-0 border-r border-white/10">
         <div className="sticky top-0 h-screen overflow-y-auto">{sidebarContent}</div>
       </aside>
 
+      {/* Mobile Drawer Overlay */}
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 flex lg:hidden">
-          <div className="fixed inset-0 bg-black/45" onClick={() => setMobileOpen(false)} />
-          <div className="relative z-10 h-full w-72 max-w-[85vw] overflow-y-auto">{sidebarContent}</div>
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="relative z-10 w-72 max-w-[85vw] h-full overflow-y-auto">
+            {sidebarContent}
+          </div>
         </div>
       ) : null}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-canvas/90 px-4 backdrop-blur-md sm:px-6 lg:hidden">
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Mobile & Tablet Header */}
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-canvas px-4 sm:px-6 lg:hidden">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-charcoal hover:bg-neutral-soft cursor-pointer"
+              aria-label="Open administrator navigation"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line bg-canvas text-charcoal hover:bg-neutral-soft cursor-pointer"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </button>
             <BrandLogo href="/admin" size="sm" subtitle="Admin" />
           </div>
+
           <Link
             href="/admin/upload"
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-burgundy px-3.5 text-[13px] font-semibold text-paper hover:bg-burgundy-dark"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
           >
-            <FilePlus2 className="h-4 w-4" />
-            <span>Add</span>
+            <FilePlus2 className="h-3.5 w-3.5" />
+            <span>Upload</span>
           </Link>
         </header>
 
-        <main className="animate-rise mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <main className="flex-1 p-5 sm:p-7 lg:p-9 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>

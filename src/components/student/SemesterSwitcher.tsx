@@ -44,7 +44,7 @@ export function SemesterSwitcher({ profile, semesters }: SemesterSwitcherProps) 
   return (
     <div className="inline-flex items-center gap-2">
       <label htmlFor="quick-sem-switch" className="text-xs font-medium text-muted">
-        Active Semester:
+        Semester:
       </label>
       <div className="relative">
         <select

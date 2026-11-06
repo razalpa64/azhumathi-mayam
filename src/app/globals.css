@@ -1,49 +1,38 @@
 @import "tailwindcss";
 
-/*
-  അഴിമതി മയം — design language
-  A reading room, not a dashboard: warm paper, ink-black text, burgundy used
-  like ink (sparingly), serif display type, hairline rules instead of boxes.
-*/
-
 :root {
   --brand-logo: #660000;
   --brand-primary: #790000;
   --brand-dark: #530000;
-  --brand-deep: #2a0a0a;
-  --surface-base: #fbf8f3;
-  --surface-card: #fffdf9;
-  --surface-subtle: #f4efe8;
-  --surface-muted: #eae2d8;
-  --text-primary: #211a16;
-  --text-muted: #756a5f;
-  --border-subtle: #e9e1d6;
-  --border-strong: #d9cec0;
+  --brand-deep: #240707;
+  --surface-base: #FFFDFC;
+  --surface-subtle: #F5F3F1;
+  --surface-muted: #EDE8E4;
+  --text-primary: #252323;
+  --text-muted: #77716F;
+  --border-subtle: #E8E2DF;
+  --border-strong: #D5CCC7;
 }
 
 @theme inline {
   --color-burgundy: #790000;
   --color-burgundy-logo: #660000;
   --color-burgundy-dark: #530000;
-  --color-burgundy-deep: #2a0a0a;
-  --color-burgundy-tint: #f8efec;
-  --color-burgundy-border: #e3cfca;
+  --color-burgundy-deep: #240707;
+  --color-burgundy-tint: #FAF3F2;
+  --color-burgundy-border: #E6CECC;
 
-  --color-canvas: #fbf8f3;
-  --color-paper: #fffdf9;
-  --color-neutral-soft: #f4efe8;
-  --color-neutral-inset: #eae2d8;
-  --color-charcoal: #211a16;
-  --color-muted: #756a5f;
-  --color-line: #e9e1d6;
-  --color-line-strong: #d9cec0;
+  --color-canvas: #FFFDFC;
+  --color-neutral-soft: #F5F3F1;
+  --color-neutral-inset: #EDE8E4;
+  --color-charcoal: #252323;
+  --color-muted: #77716F;
+  --color-line: #E8E2DF;
+  --color-line-strong: #D5CCC7;
 
   --font-sans: "Plus Jakarta Sans Variable", "Noto Sans Malayalam Variable",
     system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Fraunces Variable", "Noto Sans Malayalam Variable", Georgia,
-    "Times New Roman", serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo,
-    monospace;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
   --font-malayalam: "Noto Sans Malayalam Variable", "Plus Jakarta Sans Variable",
     system-ui, sans-serif;
 }
@@ -57,84 +46,50 @@ html {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 body {
   background-color: var(--surface-base);
   color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.55;
-}
-
-/* Serif display type — headlines, greetings, the wordmark moments */
-.font-display {
-  font-family: var(--font-display);
-  font-optical-sizing: auto;
-  letter-spacing: -0.01em;
+  font-family: "Plus Jakarta Sans Variable", "Noto Sans Malayalam Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 ::selection {
   background-color: #790000;
-  color: #fffdf9;
+  color: #FFFDFC;
+}
+
+/* Subtle custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F3F1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D5CCC7;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #77716F;
 }
 
 /* One calm focus style everywhere */
 :focus-visible {
   outline: 2px solid #790000;
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
-/* Quiet scrollbars */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #d9cec0;
-  border: 3px solid var(--surface-base);
-  border-radius: 8px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #756a5f;
-}
-
-/* Hide scrollbars for chip rows */
+/* Hide scrollbars for chip rows (used by the workspace tab strip) */
 .no-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
-}
-
-/* Gentle entrance for page content */
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-rise {
-  animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-rise {
-    animation: none;
-  }
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
-  }
 }

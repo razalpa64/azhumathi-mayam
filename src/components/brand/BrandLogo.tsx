@@ -54,7 +54,7 @@ export function BrandLogo({
         {subtitle ? (
           <span
             className={cn(
-              'font-medium',
+              'font-medium tracking-wide uppercase',
               dimensions.sub,
               theme === 'dark' ? 'text-canvas/65' : 'text-muted'
             )}

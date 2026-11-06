@@ -15,8 +15,10 @@ export default async function StudentProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">Profile</h1>
-        <p className="mt-1.5 text-sm text-muted">Your details, photo, and course.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">Profile</h1>
+        <p className="mt-1 text-sm text-muted">
+          Your details, photo, and course.
+        </p>
       </div>
 
       <ProfileEditorClient

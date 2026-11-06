@@ -49,10 +49,14 @@ export default async function HistoryPage() {
     );
 
   return (
-    <div>
+    <div className="space-y-6">
       <div>
-        <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">Recently opened</h1>
-        <p className="mt-1.5 text-sm text-muted">Pick up right where you left off.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+          Recently opened
+        </h1>
+        <p className="mt-1 text-sm text-muted">
+          Pick up right where you left off.
+        </p>
       </div>
 
       {entries.length === 0 ? (
@@ -63,17 +67,17 @@ export default async function HistoryPage() {
           action={
             <Link
               href="/dashboard/materials"
-              className="inline-flex h-10 items-center rounded-lg bg-burgundy px-5 text-sm font-semibold text-paper hover:bg-burgundy-dark"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-4 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
             >
               Browse materials
             </Link>
           }
         />
       ) : (
-        <div className="mt-7 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {entries.map((entry) => (
             <div key={entry.resource.id} className="space-y-1.5">
-              <p className="text-xs text-muted">
+              <p className="text-[11px] font-mono text-muted">
                 Opened {formatDateTime(entry.viewedAt)}
               </p>
               <ResourceCard

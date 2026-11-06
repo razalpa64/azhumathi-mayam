@@ -16,8 +16,12 @@ export default function GlobalError({
 
   return (
     <div className="min-h-[65vh] flex flex-col items-center justify-center px-4 text-center">
-      <p className="font-display text-[15px] text-burgundy">Hmm.</p>
-      <h2 className="font-display mt-2 text-[24px] font-medium text-charcoal">Something went wrong</h2>
+      <p className="font-mono text-xs font-semibold uppercase tracking-widest text-burgundy">
+        Hmm.
+      </p>
+      <h2 className="mt-2 text-xl font-semibold text-charcoal">
+        Something went wrong
+      </h2>
       <p className="mt-1.5 max-w-md text-sm text-muted">
         Try again — if it keeps happening, let your administrator know.
       </p>

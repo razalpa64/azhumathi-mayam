@@ -26,15 +26,19 @@ export default async function CoursesPage() {
     : [];
 
   return (
-    <div>
+    <div className="space-y-9">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">Courses</h1>
-          <p className="mt-1.5 text-sm text-muted">Your course, semester by semester.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+            Courses
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            Your course, semester by semester.
+          </p>
         </div>
         <Link
           href="/dashboard/profile"
-          className="text-[13.5px] font-semibold text-burgundy hover:underline underline-offset-4"
+          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
         >
           Change course
         </Link>
@@ -42,11 +46,11 @@ export default async function CoursesPage() {
 
       {/* Primary Enrolled Programme Card */}
       {enrolledProgramme ? (
-        <section className="mt-8 rounded-xl border border-line bg-paper p-6 space-y-6">
+        <section className="rounded-xl border border-burgundy-border bg-burgundy-tint/45 p-6 space-y-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[13px] font-semibold text-burgundy">You’re enrolled in</span>
+                <Badge variant="solid">Your course</Badge>
                 <Badge variant="neutral">{enrolledProgramme.degree_level}</Badge>
                 {profile.university ? (
                   <Badge variant="neutral">{profile.university.short_name}</Badge>
@@ -55,12 +59,12 @@ export default async function CoursesPage() {
                   <Badge variant="muted">{profile.regulation.name}</Badge>
                 ) : null}
               </div>
-              <h2 className="font-display mt-2.5 text-[22px] font-medium text-charcoal">
+              <h2 className="mt-3 text-xl font-semibold text-charcoal">
                 {enrolledProgramme.name}
                 {enrolledProgramme.full_title ? ` — ${enrolledProgramme.full_title}` : ''}
               </h2>
               {profile.specialization ? (
-                <p className="mt-1 text-sm text-muted">
+                <p className="mt-1 text-sm font-medium text-burgundy">
                   {profile.specialization.name} ({profile.specialization.code})
                 </p>
               ) : null}
@@ -73,7 +77,7 @@ export default async function CoursesPage() {
 
             <Link
               href={`/dashboard/materials?programmeId=${enrolledProgramme.id}`}
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-burgundy px-4.5 text-sm font-semibold text-paper hover:bg-burgundy-dark"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-4 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
             >
               <span>All {enrolledProgramme.name} materials</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -98,10 +102,10 @@ export default async function CoursesPage() {
                   href={`/dashboard/materials?programmeId=${enrolledProgramme.id}&semesterId=${sem.id}${
                     profile.specialization_id ? `&specializationId=${profile.specialization_id}` : ''
                   }`}
-                  className={`flex flex-col justify-between rounded-xl border p-4.5 transition-all hover:-translate-y-0.5 ${
+                  className={`flex flex-col justify-between rounded-lg border p-4 transition-colors ${
                     isCurrent
-                      ? 'border-burgundy/40 bg-burgundy-tint/50'
-                      : 'border-line bg-paper hover:border-line-strong'
+                      ? 'border-burgundy bg-canvas ring-1 ring-burgundy/20'
+                      : 'border-line bg-canvas hover:border-burgundy-border'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -124,7 +128,7 @@ export default async function CoursesPage() {
           action={
             <Link
               href="/dashboard/profile"
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-burgundy px-4.5 text-sm font-semibold text-paper hover:bg-burgundy-dark"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-4 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
             >
               Go to profile
             </Link>
@@ -134,10 +138,12 @@ export default async function CoursesPage() {
 
       {/* Other University Programmes */}
       {settings.allow_cross_programme_browsing && otherProgrammes.length > 0 ? (
-        <section className="mt-12 space-y-4">
+        <section className="space-y-4">
           <div>
-            <h2 className="font-display text-xl font-medium text-charcoal">Other programmes</h2>
-            <p className="mt-1 text-sm text-muted">Materials from other courses, if you’re curious.</p>
+            <h2 className="text-base font-semibold text-charcoal">Other programmes</h2>
+            <p className="text-xs text-muted">
+              Materials from other courses, if you’re curious.
+            </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -147,7 +153,7 @@ export default async function CoursesPage() {
               return (
                 <div
                   key={prog.id}
-                  className="flex flex-col justify-between rounded-xl border border-line bg-paper p-5 transition-all hover:-translate-y-0.5 hover:border-line-strong"
+                  className="flex flex-col justify-between rounded-lg border border-line bg-canvas p-5"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2">
@@ -156,7 +162,7 @@ export default async function CoursesPage() {
                         {sems.length || prog.total_semesters} Semesters
                       </span>
                     </div>
-                    <h3 className="mt-3 text-[15px] font-semibold text-charcoal">
+                    <h3 className="mt-3 text-base font-semibold text-charcoal">
                       {prog.name}
                       {prog.full_title ? (
                         <span className="block text-xs font-normal text-muted mt-0.5">
