@@ -1,42 +1,13 @@
 import { Suspense } from 'react';
-import Image from 'next/image';
 import { redirect } from 'next/navigation';
-import { BookOpen, FileText, GraduationCap, Layers } from 'lucide-react';
+import '@fontsource-variable/fraunces';
 import { getAuthenticatedProfile } from '@/lib/auth/session';
-import { BrandLogo } from '@/components/brand/BrandLogo';
 import { LoginForm } from './LoginForm';
 
 export const metadata = {
   title: 'Sign in',
   description: 'Sign in to അഴിമതി മയം for your notes, syllabus and question papers.',
 };
-
-const PLATFORM_PILLARS = [
-  {
-    icon: GraduationCap,
-    title: 'Set up for your semester',
-    description:
-      'Your programme, branch and semester are set once. After that, your subjects and notes are just there.',
-  },
-  {
-    icon: BookOpen,
-    title: 'Notes, kept in order',
-    description:
-      'Lecture notes, lab manuals and reference books, arranged module by module.',
-  },
-  {
-    icon: FileText,
-    title: 'Past question papers',
-    description:
-      'Open previous years’ university papers right in your browser — no downloading first.',
-  },
-  {
-    icon: Layers,
-    title: 'Notices that matter',
-    description:
-      'Exam timetables, syllabus changes and deadlines, in one feed.',
-  },
-];
 
 export default async function LoginPage() {
   const profile = await getAuthenticatedProfile();
@@ -45,111 +16,97 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-12 bg-canvas">
-      {/* Editorial Brand Column */}
-      <aside className="hidden lg:flex lg:col-span-5 xl:col-span-5 flex-col justify-between bg-burgundy-deep text-canvas p-10 xl:p-14 border-r border-white/10">
-        <div>
-          <div className="inline-flex items-center gap-4">
-            <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-burgundy-logo ring-1 ring-white/15">
-              <Image
-                src="/brand/logo.png"
-                alt="അഴിമതി മയം"
-                width={64}
-                height={64}
-                className="h-full w-full object-cover"
-                priority
-              />
-            </div>
-            <div>
-              <h1 className="font-malayalam text-2xl font-bold tracking-tight text-canvas">
-                അഴിമതി മയം
-              </h1>
-              <p className="mt-0.5 text-xs font-medium uppercase tracking-widest text-canvas/65">
-                Student study portal
-              </p>
-            </div>
-          </div>
+    <div className="relative min-h-dvh overflow-hidden bg-[#FFFBF7]">
+      {/* ── Burgundy wave header ─────────────────────────────── */}
+      <header className="relative bg-gradient-to-b from-[#330202] via-[#4A0404] to-[#5E0505]">
+        {/* soft sheen, top-right like light on silk */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_90%_at_85%_0%,rgba(255,255,255,0.13),transparent_65%)]"
+        />
+        <div className="relative mx-auto flex max-w-2xl flex-col items-center px-6 pb-36 pt-14 text-center sm:pb-40 sm:pt-20">
+          <h1 className="font-malayalam text-[44px] font-extrabold leading-[1.18] tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] sm:text-6xl sm:leading-[1.15]">
+            അഴിമതി
+            <br />
+            മയം
+          </h1>
+          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/60">
+            Learn · Prepare · Excel
+          </p>
+        </div>
 
-          <div className="mt-12 border-t border-white/10 pt-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-canvas/60">
-              Notes · Syllabus · Question Papers
-            </p>
-            <h2 className="mt-3 text-2xl xl:text-3xl font-semibold tracking-tight text-canvas leading-snug">
-              Your course notes and question papers, in one place.
-            </h2>
-          </div>
+        {/* layered waves — dark ribbon behind, page cream in front */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 1440 130"
+          preserveAspectRatio="none"
+          className="absolute -bottom-px left-0 h-[74px] w-full sm:h-[96px]"
+        >
+          <path
+            d="M0,64 C240,120 420,128 720,84 C1020,40 1200,16 1440,52 L1440,130 L0,130 Z"
+            fill="#2A0202"
+            opacity="0.55"
+          />
+          <path
+            d="M0,88 C260,130 520,122 820,82 C1100,46 1260,38 1440,72 L1440,130 L0,130 Z"
+            fill="#FFFBF7"
+          />
+        </svg>
+      </header>
 
-          <div className="mt-10 space-y-6">
-            {PLATFORM_PILLARS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.title} className="flex items-start gap-3.5">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded border border-white/15 bg-burgundy-logo text-canvas">
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-canvas">{item.title}</h3>
-                    <p className="mt-1 text-xs leading-relaxed text-canvas/70">
-                      {item.description}
-                    </p>
-                  </div>
+      {/* ── Sign-in card, tucked into the wave ───────────────── */}
+      <main className="relative z-10 mx-auto w-full max-w-[430px] px-5 sm:px-0">
+        <section className="-mt-24 rounded-[28px] border border-[#F3E2DC] bg-white px-6 pb-7 pt-8 shadow-[0_24px_50px_-20px_rgba(74,4,4,0.35)] sm:-mt-28 sm:px-8">
+          <h2 className="font-login-display text-center text-[30px] font-semibold leading-tight text-[#43060A]">
+            Welcome Back
+          </h2>
+          <p className="mt-2 text-center text-sm text-[#8A7A74]">
+            Sign in to access your academic resources
+          </p>
+
+          <div className="mt-7">
+            <Suspense
+              fallback={
+                <div className="space-y-4" aria-hidden="true">
+                  <div className="h-14 animate-pulse rounded-2xl bg-[#F7ECE8]" />
+                  <div className="h-14 animate-pulse rounded-2xl bg-[#F7ECE8]" />
+                  <div className="h-14 animate-pulse rounded-2xl bg-[#F3D9D2]" />
                 </div>
-              );
-            })}
+              }
+            >
+              <LoginForm />
+            </Suspense>
           </div>
-        </div>
+        </section>
 
-        <div className="pt-10 border-t border-white/10 flex items-center justify-between text-xs text-canvas/55">
-          <span className="font-malayalam font-semibold text-canvas/80">അഴിമതി മയം</span>
-          <span>Student portal</span>
-        </div>
-      </aside>
-
-      {/* Sign-In Form Column */}
-      <main className="lg:col-span-7 xl:col-span-7 flex flex-col justify-between px-6 py-8 sm:px-12 lg:px-16">
-        <div className="flex items-center justify-between lg:justify-end gap-3">
-          <div className="lg:hidden">
-            <BrandLogo size="md" subtitle="Student portal" />
-          </div>
-          <span className="inline-flex items-center gap-2 rounded border border-line bg-neutral-soft px-2.5 py-1 text-xs font-medium text-muted">
-            <span className="h-1.5 w-1.5 rounded-full bg-burgundy" />
-            Student Learning Portal
-          </span>
-        </div>
-
-        <div className="mx-auto w-full max-w-md py-10">
-          <div className="mb-8">
-            <div className="mb-5 hidden lg:inline-flex items-center gap-2.5 rounded border border-burgundy-border bg-burgundy-tint px-3 py-1 text-xs font-medium text-burgundy">
-              <span className="font-malayalam font-bold">അഴിമതി മയം</span>
-              <span className="text-burgundy/40">•</span>
-              <span>Student sign-in</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-charcoal">
-              Welcome back
-            </h2>
-            <p className="mt-2 text-sm text-muted leading-relaxed">
-              Sign in with your username to see your subjects, notes and question papers. New here? Create an account below.
-            </p>
-          </div>
-
-          <Suspense
-            fallback={
-              <div className="h-64 animate-pulse rounded-lg border border-line bg-neutral-soft" />
-            }
-          >
-            <LoginForm />
-          </Suspense>
-        </div>
-
-        <footer className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-line pt-5 text-xs text-muted">
-          <span>
-            © {new Date().getFullYear()}{' '}
-            <span className="font-malayalam font-semibold text-charcoal">അഴിമതി മയം</span>. All
-            rights reserved.
-          </span>
-          <span>അഴിമതി മയം</span>
-        </footer>
+        <p className="pb-40 pt-6 text-center text-xs text-[#A68F86]">
+          © {new Date().getFullYear()}{' '}
+          <span className="font-malayalam font-semibold text-[#7A655E]">അഴിമതി മയം</span>
+          {' · '}Made for students
+        </p>
       </main>
+
+      {/* ── Bottom waves ─────────────────────────────────────── */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 1440 220"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute bottom-0 left-0 h-[150px] w-full sm:h-[190px]"
+      >
+        <path
+          d="M0,110 C240,60 480,40 760,78 C1040,116 1220,140 1440,96 L1440,220 L0,220 Z"
+          fill="#F8E9E2"
+        />
+        <path
+          d="M0,150 C260,104 540,92 840,124 C1100,152 1260,168 1440,138 L1440,220 L0,220 Z"
+          fill="#F0D8CE"
+          opacity="0.8"
+        />
+        <path
+          d="M0,190 C280,150 560,142 860,168 C1120,190 1280,198 1440,178 L1440,220 L0,220 Z"
+          fill="#4A0404"
+        />
+      </svg>
     </div>
   );
 }

@@ -85,6 +85,12 @@ body {
   outline-offset: 2px;
 }
 
+/* Serif used only for the login "Welcome Back" headline (per brand mock) */
+.font-login-display {
+  font-family: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+}
+
 /* Hide scrollbars for chip rows (used by the workspace tab strip) */
 .no-scrollbar {
   scrollbar-width: none;
