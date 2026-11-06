@@ -69,8 +69,9 @@ export function AdminShell({ profile, children }: AdminShellProps) {
   }
 
   const sidebarContent = (
-    <div className="flex h-full flex-col justify-between bg-burgundy-deep text-canvas">
-      <div className="p-5">
+    <div className="flex h-full min-h-0 flex-col bg-burgundy-deep text-canvas">
+      {/* Scrollable top: logo + nav. The footer below stays pinned. */}
+      <div className="min-h-0 flex-1 overflow-y-auto p-5">
         <div className="flex items-center justify-between">
           <BrandLogo href="/admin" size="sm" theme="dark" subtitle="Admin Console" />
           <button
@@ -107,7 +108,8 @@ export function AdminShell({ profile, children }: AdminShellProps) {
         </nav>
       </div>
 
-      <div className="border-t border-white/10 p-4 space-y-3">
+      {/* Pinned footer — profile + logout are always on screen */}
+      <div className="shrink-0 space-y-3 border-t border-white/10 bg-burgundy-deep p-4">
         <div className="rounded-md bg-white/5 px-3 py-2.5">
           <div className="flex items-center gap-2">
             <Building2 className="h-3.5 w-3.5 text-canvas/65" />
@@ -124,10 +126,10 @@ export function AdminShell({ profile, children }: AdminShellProps) {
           type="button"
           onClick={handleLogout}
           disabled={loggingOut}
-          className="flex w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/5 py-2 text-xs font-semibold text-canvas hover:bg-white/15 transition-colors cursor-pointer disabled:opacity-50"
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-burgundy px-3 text-[13px] font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.25)] transition-colors hover:bg-burgundy-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer disabled:opacity-50"
         >
-          <LogOut className="h-3.5 w-3.5" />
-          <span>{loggingOut ? 'Signing out...' : 'Logout'}</span>
+          <LogOut className="h-4 w-4 shrink-0" />
+          <span>{loggingOut ? 'Signing out…' : 'Logout'}</span>
         </button>
       </div>
     </div>
@@ -137,7 +139,7 @@ export function AdminShell({ profile, children }: AdminShellProps) {
     <div className="min-h-screen flex bg-canvas">
       {/* Desktop Fixed Sidebar */}
       <aside className="hidden lg:block lg:w-64 lg:shrink-0 border-r border-white/10">
-        <div className="sticky top-0 h-screen overflow-y-auto">{sidebarContent}</div>
+        <div className="sticky top-0 h-dvh">{sidebarContent}</div>
       </aside>
 
       {/* Mobile Drawer Overlay */}
@@ -147,7 +149,7 @@ export function AdminShell({ profile, children }: AdminShellProps) {
             className="fixed inset-0 bg-black/50"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative z-10 w-72 max-w-[85vw] h-full overflow-y-auto">
+          <div className="relative z-10 h-full w-72 max-w-[85vw]">
             {sidebarContent}
           </div>
         </div>
