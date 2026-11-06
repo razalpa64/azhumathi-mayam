@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Bell,
@@ -21,7 +22,6 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { BrandLogo } from '@/components/brand/BrandLogo';
 import type { Profile } from '@/types/database';
 import { cn, getInitials } from '@/lib/utils';
 
@@ -88,155 +88,169 @@ export function StudentShell({
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
+  const contextLine = [
+    profile.university?.short_name,
+    profile.programme?.name,
+    profile.specialization?.code,
+  ]
+    .filter(Boolean)
+    .join(' • ');
+
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
-      {/* Primary Top Navigation */}
-      <header className="sticky top-0 z-40 border-b border-line bg-canvas/95 backdrop-blur-xs">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-8">
-            <BrandLogo href="/dashboard" size="sm" />
-
-            <nav aria-label="Primary student navigation" className="hidden md:flex items-center gap-1">
-              {TOP_NAV.map((item) => {
-                const active = isActive(item.href, item.exact);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-burgundy-tint text-burgundy font-semibold'
-                        : 'text-charcoal/80 hover:bg-neutral-soft hover:text-charcoal'
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Notifications Link */}
-            <Link
-              href="/dashboard/notifications"
-              aria-label="Notifications"
-              className={cn(
-                'relative inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors',
-                pathname === '/dashboard/notifications'
-                  ? 'border-burgundy-border bg-burgundy-tint text-burgundy'
-                  : 'border-line bg-canvas text-charcoal hover:bg-neutral-soft'
-              )}
-            >
-              <Bell className="h-4 w-4" />
-              {unreadNotifications > 0 ? (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-burgundy px-1 text-[10px] font-bold text-canvas">
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                </span>
-              ) : null}
-            </Link>
-
-            {/* Profile Chip */}
-            <Link
-              href="/dashboard/profile"
-              className={cn(
-                'hidden sm:inline-flex items-center gap-2.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors',
-                pathname === '/dashboard/profile'
-                  ? 'border-burgundy-border bg-burgundy-tint text-burgundy'
-                  : 'border-line bg-canvas text-charcoal hover:bg-neutral-soft'
-              )}
-            >
-              {profile.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.full_name}
-                  className="h-6 w-6 rounded-full object-cover border border-line"
-                />
-              ) : (
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-burgundy text-[10px] font-bold text-canvas">
-                  {getInitials(profile.full_name)}
-                </span>
-              )}
-              <span className="max-w-[130px] truncate">{profile.full_name}</span>
-            </Link>
-
-            {/* Logout Button */}
-            <button
-              type="button"
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="hidden sm:inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-canvas px-3 text-xs font-medium text-muted hover:border-line-strong hover:bg-neutral-soft hover:text-charcoal cursor-pointer disabled:opacity-50"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              <span>{loggingOut ? 'Signing out…' : 'Logout'}</span>
-            </button>
-
-            {/* Mobile Drawer Trigger */}
-            <button
-              type="button"
-              onClick={() => setMobileOpen((prev) => !prev)}
-              aria-label="Toggle navigation menu"
-              className="inline-flex md:hidden h-9 w-9 items-center justify-center rounded-md border border-line bg-canvas text-charcoal hover:bg-neutral-soft cursor-pointer"
-            >
-              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Workspace Secondary Bar (Desktop & Tablet Horizontal Scroll) */}
-        <div className="border-t border-line bg-neutral-soft/75">
+      <header className="sticky top-0 z-40">
+        {/* Burgundy wave header */}
+        <div className="relative bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <nav
-              aria-label="Student workspace sections"
-              className="flex items-center gap-1 overflow-x-auto py-1.5 no-scrollbar"
-            >
-              {WORKSPACE_TABS.map((tab) => {
-                const Icon = tab.icon;
-                const active = isActive(tab.href, tab.exact);
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href}
-                    className={cn(
-                      'inline-flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition-colors',
-                      active
-                        ? 'bg-canvas text-burgundy border border-burgundy-border font-semibold'
-                        : 'text-muted hover:text-charcoal hover:bg-canvas/70 border border-transparent'
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span>{tab.label}</span>
-                    {tab.href === '/dashboard/notifications' && unreadNotifications > 0 ? (
-                      <span className="ml-0.5 rounded bg-burgundy px-1.5 py-0.2 text-[10px] font-semibold text-canvas">
-                        {unreadNotifications}
-                      </span>
-                    ) : null}
-                  </Link>
-                );
-              })}
-            </nav>
+            <div className="flex items-center justify-between gap-3 pt-4 pb-9 sm:pt-5 sm:pb-11">
+              {/* Brand */}
+              <Link
+                href="/dashboard"
+                className="flex min-w-0 items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              >
+                <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-burgundy-logo ring-1 ring-white/25 sm:h-12 sm:w-12">
+                  <Image
+                    src="/brand/logo.png"
+                    alt="അഴിമതി മയം"
+                    width={48}
+                    height={48}
+                    className="h-full w-full object-cover"
+                    priority
+                  />
+                </span>
+                <span className="min-w-0 leading-tight">
+                  <span className="block truncate font-logo text-[21px] font-bold tracking-tight text-white sm:text-2xl">
+                    അഴിമതി മയം
+                  </span>
+                  <span className="mt-0.5 block truncate text-[11px] font-medium tracking-wide text-white/65 sm:text-xs">
+                    {contextLine || 'Notes, syllabus & question papers'}
+                  </span>
+                </span>
+              </Link>
+
+              {/* Desktop primary nav */}
+              <nav aria-label="Primary student navigation" className="hidden lg:flex items-center gap-1">
+                {TOP_NAV.map((item) => {
+                  const active = isActive(item.href, item.exact);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors',
+                        active
+                          ? 'bg-white text-burgundy font-semibold shadow-sm'
+                          : 'text-white/80 hover:bg-white/10 hover:text-white'
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+                {/* Notifications */}
+                <Link
+                  href="/dashboard/notifications"
+                  aria-label="Notifications"
+                  className={cn(
+                    'relative inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors',
+                    pathname === '/dashboard/notifications'
+                      ? 'bg-white text-burgundy ring-white'
+                      : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
+                  )}
+                >
+                  <Bell className="h-[18px] w-[18px]" />
+                  {unreadNotifications > 0 ? (
+                    <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#E5484D] px-1 text-[10px] font-bold text-white ring-2 ring-burgundy-dark">
+                      {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                    </span>
+                  ) : null}
+                </Link>
+
+                {/* Profile chip (desktop) */}
+                <Link
+                  href="/dashboard/profile"
+                  className={cn(
+                    'hidden md:inline-flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-xs font-medium ring-1 transition-colors',
+                    pathname === '/dashboard/profile'
+                      ? 'bg-white text-burgundy ring-white'
+                      : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
+                  )}
+                >
+                  {profile.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profile.avatar_url}
+                      alt={profile.full_name}
+                      className="h-7 w-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[10px] font-bold text-burgundy">
+                      {getInitials(profile.full_name)}
+                    </span>
+                  )}
+                  <span className="max-w-[130px] truncate">{profile.full_name}</span>
+                </Link>
+
+                {/* Logout (desktop) */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  aria-label="Logout"
+                  title="Logout"
+                  className="hidden md:inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer disabled:opacity-50"
+                >
+                  <LogOut className="h-[18px] w-[18px]" />
+                </button>
+
+                {/* Mobile drawer trigger */}
+                <button
+                  type="button"
+                  onClick={() => setMobileOpen((prev) => !prev)}
+                  aria-label="Toggle navigation menu"
+                  aria-expanded={mobileOpen}
+                  className="inline-flex lg:hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer"
+                >
+                  {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Wave edge */}
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 1440 90"
+            preserveAspectRatio="none"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[26px] w-full text-canvas sm:h-[34px]"
+          >
+            <path
+              d="M0 90 L0 52 C 300 84, 860 92, 1440 10 L1440 90 Z"
+              fill="currentColor"
+            />
+          </svg>
         </div>
 
-        {/* Mobile Drawer */}
+        {/* Mobile drawer */}
         {mobileOpen ? (
-          <div className="md:hidden border-t border-line bg-canvas px-4 py-4 space-y-4">
-            <div className="flex items-center justify-between rounded-md border border-line bg-neutral-soft px-3 py-2.5">
-              <div>
-                <p className="text-sm font-semibold text-charcoal">{profile.full_name}</p>
-                <p className="text-xs text-muted font-mono">@{profile.username}</p>
+          <div className="lg:hidden border-b border-line bg-canvas px-4 pb-5 pt-1 space-y-4 shadow-[0_18px_30px_-20px_rgba(36,7,7,0.4)]">
+            <div className="flex items-center justify-between gap-3 rounded-2xl bg-burgundy-tint px-4 py-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-charcoal">{profile.full_name}</p>
+                <p className="text-xs text-muted">@{profile.username}</p>
               </div>
               {profile.programme ? (
-                <span className="rounded border border-burgundy-border bg-burgundy-tint px-2 py-0.5 text-xs font-medium text-burgundy">
+                <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-burgundy ring-1 ring-burgundy-border">
                   {profile.programme.name}
                   {profile.semester ? ` • S${profile.semester.semester_number}` : ''}
                 </span>
               ) : null}
             </div>
 
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 gap-2">
               {WORKSPACE_TABS.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href, item.exact);
@@ -246,13 +260,13 @@ export function StudentShell({
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      'flex items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium',
+                      'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium',
                       active
-                        ? 'border-burgundy-border bg-burgundy-tint text-burgundy font-semibold'
+                        ? 'border-burgundy bg-burgundy text-white font-semibold'
                         : 'border-line bg-canvas text-charcoal hover:bg-neutral-soft'
                     )}
                   >
-                    <Icon className="h-3.5 w-3.5 shrink-0" />
+                    <Icon className="h-4 w-4 shrink-0" />
                     <span className="truncate">{item.label}</span>
                   </Link>
                 );
@@ -263,26 +277,64 @@ export function StudentShell({
               type="button"
               onClick={handleLogout}
               disabled={loggingOut}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-line-strong bg-neutral-soft py-2.5 text-xs font-semibold text-charcoal hover:bg-neutral-inset cursor-pointer"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-burgundy py-3 text-[13px] font-semibold text-white hover:bg-burgundy-dark cursor-pointer disabled:opacity-60"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogOut className="h-4 w-4" />
               <span>{loggingOut ? 'Signing out...' : 'Sign out'}</span>
             </button>
           </div>
         ) : null}
+
+        {/* Workspace pill tabs */}
+        <div className="bg-canvas/95 backdrop-blur-sm">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <nav
+              aria-label="Student workspace sections"
+              className="no-scrollbar -mx-1 flex items-center gap-2 overflow-x-auto px-1 py-2.5"
+            >
+              {WORKSPACE_TABS.map((tab) => {
+                const Icon = tab.icon;
+                const active = isActive(tab.href, tab.exact);
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium transition-colors',
+                      active
+                        ? 'bg-burgundy text-white font-semibold shadow-[0_8px_16px_-8px_rgba(121,0,0,0.7)]'
+                        : 'bg-neutral-soft text-charcoal/75 ring-1 ring-line hover:bg-burgundy-tint hover:text-burgundy'
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span>{tab.label}</span>
+                    {tab.href === '/dashboard/notifications' && unreadNotifications > 0 ? (
+                      <span
+                        className={cn(
+                          'ml-0.5 rounded-full px-1.5 py-px text-[10px] font-bold',
+                          active ? 'bg-white text-burgundy' : 'bg-burgundy text-white'
+                        )}
+                      >
+                        {unreadNotifications}
+                      </span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 pt-7 pb-24 sm:px-6 lg:px-8 lg:pb-7">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-32 sm:px-6 lg:px-8 lg:pb-10">
         {children}
       </main>
 
-      {/* Mobile bottom navigation */}
-      <nav
-        aria-label="Bottom"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
-      >
-        <div className="mx-auto grid max-w-md grid-cols-5">
+      {/* Floating mobile bottom navigation */}
+      <nav aria-label="Bottom" className="fixed inset-x-3 bottom-3 z-40 lg:hidden">
+        <div className="mx-auto grid max-w-md grid-cols-5 rounded-full border border-line bg-canvas/95 px-2 py-2 shadow-[0_16px_32px_-14px_rgba(36,7,7,0.45)] backdrop-blur-md">
           {BOTTOM_NAV.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href, item.exact);
@@ -292,15 +344,15 @@ export function StudentShell({
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors',
+                  'flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[10px] font-medium transition-colors',
                   active ? 'text-burgundy' : 'text-muted hover:text-charcoal'
                 )}
               >
-                <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.8} />
-                <span className={cn(active && 'font-bold')}>{item.label}</span>
+                <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.3 : 1.8} />
+                <span className={cn('leading-none', active && 'font-bold')}>{item.label}</span>
                 <span
                   className={cn(
-                    'h-0.5 w-6 rounded-full bg-burgundy transition-opacity',
+                    'mt-0.5 h-[3px] w-5 rounded-full bg-burgundy transition-opacity',
                     active ? 'opacity-100' : 'opacity-0'
                   )}
                 />
@@ -310,15 +362,15 @@ export function StudentShell({
         </div>
       </nav>
 
-      {/* Clean Institutional Footer */}
-      <footer className="border-t border-line bg-neutral-soft/60 mt-12">
-        <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:px-8 text-xs text-muted">
+      {/* Footer */}
+      <footer className="mt-4 border-t border-line bg-neutral-soft/60">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row sm:px-6 lg:px-8">
           <div className="flex items-center gap-2.5">
-            <span className="font-logo font-bold text-sm text-burgundy">അഴിമതി മയം</span>
-            <span>•</span>
-            <span>notes, syllabus & question papers</span>
+            <span className="font-logo text-base font-bold text-burgundy">അഴിമതി മയം</span>
+            <span aria-hidden="true">•</span>
+            <span>notes, syllabus &amp; question papers</span>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             <Link href="/dashboard/materials" className="hover:text-charcoal">
               Library
             </Link>

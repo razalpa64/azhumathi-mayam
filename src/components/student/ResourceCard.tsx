@@ -81,7 +81,7 @@ export function ResourceCard({
   }
 
   return (
-    <article className="group flex flex-col justify-between rounded-lg border border-line bg-canvas p-5 transition-colors hover:border-line-strong">
+    <article className="group flex flex-col justify-between rounded-[24px] border border-line bg-canvas p-5 shadow-[0_10px_20px_-14px_rgba(36,7,7,0.18)] transition-all hover:-translate-y-0.5 hover:border-burgundy-border hover:shadow-[0_16px_28px_-16px_rgba(36,7,7,0.3)]">
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -105,7 +105,7 @@ export function ResourceCard({
             aria-label={bookmarked ? 'Remove from saved materials' : 'Save material'}
             title={bookmarked ? 'Saved in Bookmarks' : 'Save to Bookmarks'}
             className={cn(
-              'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors cursor-pointer',
+              'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors cursor-pointer',
               bookmarked
                 ? 'border-burgundy-border bg-burgundy-tint text-burgundy'
                 : 'border-line bg-canvas text-muted hover:bg-neutral-soft hover:text-charcoal'
@@ -123,7 +123,7 @@ export function ResourceCard({
           href={`/resources/${resource.id}`}
           className="mt-3 block focus:outline-none focus-visible:underline"
         >
-          <h3 className="text-base font-semibold text-charcoal group-hover:text-burgundy transition-colors leading-snug">
+          <h3 className="text-base font-bold text-charcoal group-hover:text-burgundy transition-colors leading-snug">
             {resource.title}
           </h3>
         </Link>
@@ -179,7 +179,7 @@ export function ResourceCard({
         <div className="flex items-center gap-2">
           <Link
             href={`/resources/${resource.id}`}
-            className="inline-flex flex-1 h-9 items-center justify-center gap-1.5 rounded-md bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors"
+            className="inline-flex flex-1 h-9 items-center justify-center gap-1.5 rounded-full bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors"
           >
             {resource.file_type === 'PDF' ? (
               <>
@@ -198,7 +198,7 @@ export function ResourceCard({
             type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft transition-colors cursor-pointer disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft transition-colors cursor-pointer disabled:opacity-50"
           >
             {downloading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
