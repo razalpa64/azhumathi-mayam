@@ -12,9 +12,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
-  UserPlus,
+  ShieldCheck,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 
 export function LoginForm() {
   const router = useRouter();
@@ -28,9 +27,10 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [showForgotHelp, setShowForgotHelp] = useState(false);
   const [error, setError] = useState<string | null>(
     reason === 'deactivated'
-      ? 'This account has been paused. Please talk to your administrator.'
+      ? 'This account has been paused. Please check with your college office.'
       : null
   );
 
@@ -92,12 +92,15 @@ export function LoginForm() {
     }
   }
 
+  const inputClass =
+    'h-14 w-full rounded-2xl border border-[#EBD9D3] bg-[#FFFBF8] pl-12 pr-4 text-[15px] text-charcoal placeholder:text-[#B29A91] transition-colors focus:border-burgundy focus:bg-white focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60';
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {registered && !error ? (
         <div
           role="status"
-          className="flex items-start gap-3 rounded-md border border-[#BBF7D0] bg-[#F0FDF4] px-3.5 py-3 text-sm text-[#166534]"
+          className="flex items-start gap-3 rounded-2xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 text-sm text-[#166534]"
         >
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
           <span>Account created — sign in below.</span>
@@ -107,22 +110,22 @@ export function LoginForm() {
       {error ? (
         <div
           role="alert"
-          className="flex items-start gap-3 rounded-md border border-[#FECACA] bg-[#FEF2F2] px-3.5 py-3 text-sm text-[#991B1B]"
+          className="flex items-start gap-3 rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       ) : null}
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="username"
-          className="block text-xs font-semibold uppercase tracking-wider text-charcoal"
-        >
+      <div>
+        <label htmlFor="username" className="sr-only">
           Username
         </label>
         <div className="relative">
-          <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <User
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-burgundy"
+            strokeWidth={1.9}
+          />
           <input
             id="username"
             name="username"
@@ -135,21 +138,21 @@ export function LoginForm() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={loading}
-            placeholder="e.g. anjali.cs"
-            className="h-11 w-full rounded-md border border-line-strong bg-canvas pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60"
+            placeholder="Username"
+            className={inputClass}
           />
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <label
-          htmlFor="password"
-          className="block text-xs font-semibold uppercase tracking-wider text-charcoal"
-        >
+      <div>
+        <label htmlFor="password" className="sr-only">
           Password
         </label>
         <div className="relative">
-          <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <Lock
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-burgundy"
+            strokeWidth={1.9}
+          />
           <input
             id="password"
             name="password"
@@ -159,67 +162,87 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            placeholder="Enter your password"
-            className="h-11 w-full rounded-md border border-line-strong bg-canvas pl-10 pr-11 text-sm text-charcoal placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60"
+            placeholder="Password"
+            className={`${inputClass} pr-12`}
           />
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1.5 text-muted hover:bg-neutral-soft hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy cursor-pointer"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-[#B29A91] transition-colors hover:text-burgundy focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy cursor-pointer"
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
           </button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-0.5">
-        <label className="inline-flex items-center gap-2.5 text-sm text-charcoal cursor-pointer select-none">
+      <div className="flex items-center justify-between px-0.5 pt-0.5">
+        <label className="inline-flex cursor-pointer select-none items-center gap-2.5 text-sm text-charcoal">
           <input
             type="checkbox"
             checked={remember}
             onChange={(e) => setRemember(e.target.checked)}
-            className="h-4 w-4 rounded border-line-strong accent-burgundy focus:ring-burgundy"
+            className="h-5 w-5 rounded-md border-[#D8BDB4] accent-burgundy focus:ring-burgundy"
           />
-          <span>Stay signed in on this device</span>
+          <span>Remember me</span>
         </label>
+        <button
+          type="button"
+          onClick={() => setShowForgotHelp((prev) => !prev)}
+          aria-expanded={showForgotHelp}
+          className="text-sm font-medium text-burgundy hover:underline underline-offset-4 cursor-pointer"
+        >
+          Forgot password?
+        </button>
       </div>
 
-      <Button
+      {showForgotHelp ? (
+        <p role="status" className="rounded-2xl bg-burgundy-tint px-4 py-3 text-[13px] leading-relaxed text-charcoal">
+          Forgot your password? Ask your college office to reset it for you — then come back
+          here and sign in with the new one.
+        </p>
+      ) : null}
+
+      <button
         type="submit"
-        size="lg"
         disabled={loading}
-        className="w-full justify-center font-semibold"
+        className="flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-b from-[#6D0000] to-[#4A0404] text-base font-semibold text-white shadow-[0_12px_24px_-10px_rgba(74,4,4,0.55)] transition-all hover:brightness-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy focus-visible:ring-offset-2 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
       >
         {loading ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Signing you in…</span>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Logging in…</span>
           </>
         ) : (
           <>
-            <span>Sign in</span>
-            <ArrowRight className="h-4 w-4" />
+            <span>Login</span>
+            <ArrowRight className="h-5 w-5" />
           </>
         )}
-      </Button>
+      </button>
 
-      <div className="relative py-1">
+      <div className="relative py-2">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-line" />
+          <div className="w-full border-t border-[#F0E0D9]" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase tracking-wider">
-          <span className="bg-canvas px-3 font-medium text-muted">New here?</span>
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-white px-3 font-medium text-[#A68F86]">New to അഴിമതി മയം?</span>
         </div>
       </div>
 
       <Link
         href={registerHref}
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-burgundy-border bg-burgundy-tint px-4 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
+        className="flex h-12.5 w-full items-center justify-center rounded-2xl border-[1.5px] border-burgundy/25 bg-burgundy-tint/60 px-4 text-[15px] font-semibold text-burgundy transition-colors hover:border-burgundy hover:bg-burgundy hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
       >
-        <UserPlus className="h-4 w-4" />
-        <span>Create an account</span>
+        Create new account
       </Link>
+
+      <p className="flex items-center justify-center gap-2 pt-3 text-[13px] text-[#8A7A74]">
+        <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-burgundy" />
+        <span className="font-malayalam font-bold text-burgundy">അഴിമതി മയം</span>
+        <span aria-hidden="true" className="text-[#D8BDB4]">•</span>
+        <span>Learn. Prepare. Excel.</span>
+      </p>
     </form>
   );
 }
