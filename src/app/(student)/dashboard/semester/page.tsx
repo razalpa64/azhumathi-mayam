@@ -30,7 +30,7 @@ export default async function MySemesterPage() {
   if (!profile.programme_id || !profile.semester_id) {
     return (
       <div className="space-y-6">
-        <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">My semester</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">My Semester</h1>
         <EmptyState
           icon={GraduationCap}
           title="Pick your course first"
@@ -38,7 +38,7 @@ export default async function MySemesterPage() {
           action={
             <Link
               href="/dashboard/profile"
-              className="inline-flex h-10 items-center rounded-lg bg-burgundy px-5 text-sm font-semibold text-paper hover:bg-burgundy-dark"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-4 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
             >
               Go to profile
             </Link>
@@ -109,12 +109,11 @@ export default async function MySemesterPage() {
             ) : null}
             <Badge variant="solid">{profile.semester?.label}</Badge>
           </div>
-          <h1 className="font-display mt-2.5 text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">
+          <h1 className="mt-2.5 text-2xl font-semibold tracking-tight text-charcoal">
             {profile.semester?.label}
           </h1>
-          <p className="mt-1.5 text-sm text-muted">
-            {profile.programme?.name}
-            {profile.specialization ? ` · ${profile.specialization.name}` : ''} — switch semester anytime.
+          <p className="mt-1 text-sm text-muted">
+            Switch semester anytime — your home page updates with it.
           </p>
         </div>
 
@@ -123,7 +122,9 @@ export default async function MySemesterPage() {
 
       {/* Subjects Grid */}
       <section className="space-y-4">
-        <h2 className="font-display text-xl font-medium text-charcoal">Subjects <span className="text-base text-muted">({semSubjects.length})</span></h2>
+        <h2 className="text-base font-semibold text-charcoal">
+          Subjects ({semSubjects.length})
+        </h2>
 
         {semSubjects.length === 0 ? (
           <EmptyState
@@ -136,13 +137,13 @@ export default async function MySemesterPage() {
             {semSubjects.map((subj) => (
               <div
                 key={subj.id}
-                className="flex flex-col justify-between rounded-xl border border-line bg-paper p-5 transition-all hover:border-line-strong"
+                className="flex flex-col justify-between rounded-lg border border-line bg-canvas p-5"
               >
                 <div>
-                  <span className="font-mono text-[13px] font-semibold text-burgundy">
+                  <span className="inline-block rounded border border-burgundy-border bg-burgundy-tint px-2 py-0.5 font-mono text-xs font-semibold text-burgundy">
                     {subj.subject_code}
                   </span>
-                  <h3 className="mt-2 text-[15px] font-semibold text-charcoal leading-snug">
+                  <h3 className="mt-3 text-base font-semibold text-charcoal leading-snug">
                     {subj.name}
                   </h3>
                   {subj.description ? (
@@ -155,14 +156,14 @@ export default async function MySemesterPage() {
                 <div className="mt-5 flex items-center gap-2 border-t border-line pt-3.5">
                   <Link
                     href={`/dashboard/materials?subjectId=${subj.id}&programmeId=${subj.programme_id}&semesterId=${subj.semester_id}`}
-                    className="inline-flex flex-1 h-9 items-center justify-center gap-1 rounded-lg bg-burgundy px-3 text-[13px] font-semibold text-paper hover:bg-burgundy-dark"
+                    className="inline-flex flex-1 h-8 items-center justify-center gap-1 rounded bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
                   >
                     <span>Notes</span>
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                   <Link
                     href={`/dashboard/question-papers?subjectId=${subj.id}&programmeId=${subj.programme_id}&semesterId=${subj.semester_id}`}
-                    className="inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-line-strong bg-paper px-3 text-[13px] font-semibold text-charcoal hover:bg-neutral-soft"
+                    className="inline-flex h-8 items-center justify-center gap-1 rounded border border-line-strong bg-canvas px-3 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
                   >
                     <FileQuestion className="h-3.5 w-3.5 text-burgundy" />
                     <span>Papers</span>
@@ -177,12 +178,12 @@ export default async function MySemesterPage() {
       {/* Semester Resources */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-medium text-charcoal">
+          <h2 className="text-base font-semibold text-charcoal">
             Materials in {profile.semester?.label}
           </h2>
           <Link
             href={`/dashboard/materials?programmeId=${profile.programme_id}&semesterId=${profile.semester_id}`}
-            className="text-[13px] font-semibold text-burgundy hover:underline underline-offset-4"
+            className="text-xs font-semibold text-burgundy hover:underline"
           >
             See all →
           </Link>
@@ -195,7 +196,7 @@ export default async function MySemesterPage() {
             description="Nothing uploaded for this semester yet."
           />
         ) : (
-          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {semResources.map((res) => (
               <ResourceCard
                 key={res.id}

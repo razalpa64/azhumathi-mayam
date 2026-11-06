@@ -100,7 +100,7 @@ export function LoginForm() {
           className="flex items-start gap-3 rounded-md border border-[#BBF7D0] bg-[#F0FDF4] px-3.5 py-3 text-sm text-[#166534]"
         >
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>Account created. Log in below to get started.</span>
+          <span>Account created — sign in below.</span>
         </div>
       ) : null}
 
@@ -117,7 +117,7 @@ export function LoginForm() {
       <div className="space-y-1.5">
         <label
           htmlFor="username"
-          className="block text-[13px] font-semibold text-charcoal"
+          className="block text-xs font-semibold uppercase tracking-wider text-charcoal"
         >
           Username
         </label>
@@ -136,7 +136,7 @@ export function LoginForm() {
             onChange={(e) => setUsername(e.target.value)}
             disabled={loading}
             placeholder="e.g. anjali.cs"
-            className="h-11.5 w-full rounded-lg border border-line-strong bg-paper pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/60 focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60"
+            className="h-11 w-full rounded-md border border-line-strong bg-canvas pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60"
           />
         </div>
       </div>
@@ -144,7 +144,7 @@ export function LoginForm() {
       <div className="space-y-1.5">
         <label
           htmlFor="password"
-          className="block text-[13px] font-semibold text-charcoal"
+          className="block text-xs font-semibold uppercase tracking-wider text-charcoal"
         >
           Password
         </label>
@@ -159,8 +159,8 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            placeholder="Your password"
-            className="h-11.5 w-full rounded-lg border border-line-strong bg-paper pl-10 pr-11 text-sm text-charcoal placeholder:text-muted/60 focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60"
+            placeholder="Enter your password"
+            className="h-11 w-full rounded-md border border-line-strong bg-canvas pl-10 pr-11 text-sm text-charcoal placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60"
           />
           <button
             type="button"
@@ -194,11 +194,11 @@ export function LoginForm() {
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Logging in…</span>
+            <span>Signing you in…</span>
           </>
         ) : (
           <>
-            <span>Log in</span>
+            <span>Sign in</span>
             <ArrowRight className="h-4 w-4" />
           </>
         )}
@@ -208,17 +208,17 @@ export function LoginForm() {
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
           <div className="w-full border-t border-line" />
         </div>
-        <div className="relative flex justify-center text-xs">
+        <div className="relative flex justify-center text-xs uppercase tracking-wider">
           <span className="bg-canvas px-3 font-medium text-muted">New here?</span>
         </div>
       </div>
 
       <Link
         href={registerHref}
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-line-strong bg-paper px-4 text-sm font-semibold text-charcoal transition-colors hover:border-burgundy hover:text-burgundy focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-burgundy-border bg-burgundy-tint px-4 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
       >
         <UserPlus className="h-4 w-4" />
-        <span>Create an account — it takes a minute</span>
+        <span>Create an account</span>
       </Link>
     </form>
   );

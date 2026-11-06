@@ -54,10 +54,12 @@ export function NotificationsClient({ initialItems }: NotificationsClientProps) 
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">
+          <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
             Notifications
           </h1>
-          <p className="mt-1.5 text-sm text-muted">New materials, exam dates and notices.</p>
+          <p className="mt-1 text-sm text-muted">
+            New materials, exam dates and notices.
+          </p>
         </div>
 
         {unreadCount > 0 ? (
@@ -72,10 +74,10 @@ export function NotificationsClient({ initialItems }: NotificationsClientProps) 
         <EmptyState
           icon={Bell}
           title="All caught up"
-          description="When something new arrives for your semester, it’ll show up here."
+          description="When something new arrives for your semester, it will show up here."
         />
       ) : (
-        <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-paper">
+        <div className="divide-y divide-line rounded-lg border border-line bg-canvas overflow-hidden">
           {items.map((item) => (
             <div
               key={item.id}

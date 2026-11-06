@@ -4,7 +4,7 @@ import { PasswordChangeForm } from '@/components/student/PasswordChangeForm';
 import { formatDateTime } from '@/lib/utils';
 
 export const metadata = {
-  title: 'Account Settings',
+  title: 'Settings',
 };
 
 export default async function StudentSettingsPage() {
@@ -13,8 +13,12 @@ export default async function StudentSettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">Settings</h1>
-        <p className="mt-1.5 text-sm text-muted">Password and account.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+          Settings
+        </h1>
+        <p className="mt-1 text-sm text-muted">
+          Password and account.
+        </p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-12">
@@ -23,7 +27,7 @@ export default async function StudentSettingsPage() {
         </div>
 
         <aside className="lg:col-span-5 space-y-4">
-          <div className="rounded-xl border border-line bg-paper p-6 space-y-4">
+          <div className="rounded-xl border border-line bg-neutral-soft/65 p-6 space-y-4">
             <div className="flex items-center gap-2.5">
               <ShieldCheck className="h-5 w-5 text-burgundy" />
               <h2 className="text-sm font-semibold text-charcoal">Your sign-in</h2>

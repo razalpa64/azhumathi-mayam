@@ -186,7 +186,7 @@ export function RegisterForm({
         <div className="space-y-1.5">
           <label
             htmlFor="full_name"
-            className="block text-[13px] font-semibold text-charcoal"
+            className="block text-xs font-semibold uppercase tracking-wider text-charcoal"
           >
             Your name <span className="text-burgundy">*</span>
           </label>
@@ -202,7 +202,7 @@ export function RegisterForm({
               onChange={(e) => setFullName(e.target.value)}
               disabled={loading}
               placeholder="e.g. Arjun Nair"
-              className="h-11.5 w-full rounded-lg border border-line-strong bg-paper pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/60 focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60"
+              className="h-11 w-full rounded-md border border-line-strong bg-canvas pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60"
             />
           </div>
         </div>
@@ -210,7 +210,7 @@ export function RegisterForm({
         <div className="space-y-1.5">
           <label
             htmlFor="username"
-            className="block text-[13px] font-semibold text-charcoal"
+            className="block text-xs font-semibold uppercase tracking-wider text-charcoal"
           >
             Username <span className="text-burgundy">*</span>
           </label>
@@ -229,7 +229,7 @@ export function RegisterForm({
               onChange={(e) => setUsername(e.target.value)}
               disabled={loading}
               placeholder="e.g. arjun_cs26"
-              className="h-11.5 w-full rounded-lg border border-line-strong bg-paper pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/60 focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60"
+              className="h-11 w-full rounded-md border border-line-strong bg-canvas pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60"
             />
           </div>
         </div>
@@ -239,7 +239,7 @@ export function RegisterForm({
         <div className="space-y-1.5">
           <label
             htmlFor="password"
-            className="block text-[13px] font-semibold text-charcoal"
+            className="block text-xs font-semibold uppercase tracking-wider text-charcoal"
           >
             Password <span className="text-burgundy">*</span>
           </label>
@@ -255,7 +255,7 @@ export function RegisterForm({
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
               placeholder="Min. 8 characters"
-              className="h-11.5 w-full rounded-lg border border-line-strong bg-paper pl-10 pr-10 text-sm text-charcoal placeholder:text-muted/60 focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60"
+              className="h-11 w-full rounded-md border border-line-strong bg-canvas pl-10 pr-10 text-sm text-charcoal placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60"
             />
             <button
               type="button"
@@ -271,7 +271,7 @@ export function RegisterForm({
         <div className="space-y-1.5">
           <label
             htmlFor="confirmPassword"
-            className="block text-[13px] font-semibold text-charcoal"
+            className="block text-xs font-semibold uppercase tracking-wider text-charcoal"
           >
             Password, again <span className="text-burgundy">*</span>
           </label>
@@ -287,18 +287,18 @@ export function RegisterForm({
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={loading}
               placeholder="Same password again"
-              className="h-11.5 w-full rounded-lg border border-line-strong bg-paper pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/60 focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60"
+              className="h-11 w-full rounded-md border border-line-strong bg-canvas pl-10 pr-3.5 text-sm text-charcoal placeholder:text-muted/75 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60"
             />
           </div>
         </div>
       </div>
 
       {/* Academic Personalization Box */}
-      <div className="space-y-3.5 border-t border-line pt-5">
+      <div className="rounded-lg border border-line bg-neutral-soft p-4 space-y-3.5">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-4 w-4 text-burgundy" />
-            <span className="text-[13px] font-semibold text-charcoal">
+            <span className="text-xs font-semibold uppercase tracking-wider text-charcoal">
               Your course
             </span>
           </div>
@@ -315,7 +315,7 @@ export function RegisterForm({
               value={universityId}
               onChange={(e) => handleUniversityChange(e.target.value)}
               disabled={loading}
-              className="h-10.5 w-full rounded-lg border border-line-strong bg-paper px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Select University (Optional)</option>
               {universities.map((u) => (
@@ -335,7 +335,7 @@ export function RegisterForm({
               value={programmeId}
               onChange={(e) => handleProgrammeChange(e.target.value)}
               disabled={loading}
-              className="h-10.5 w-full rounded-lg border border-line-strong bg-paper px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Select Programme</option>
               {programmes.map((p) => (
@@ -355,7 +355,7 @@ export function RegisterForm({
               value={semesterId}
               onChange={(e) => setSemesterId(e.target.value)}
               disabled={loading || !programmeId}
-              className="h-10.5 w-full rounded-lg border border-line-strong bg-paper px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-55"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
             >
               <option value="">
                 {programmeId ? 'Select Semester' : 'Choose Programme first'}
@@ -377,7 +377,7 @@ export function RegisterForm({
               value={specializationId}
               onChange={(e) => setSpecializationId(e.target.value)}
               disabled={loading || filteredSpecializations.length === 0}
-              className="h-10.5 w-full rounded-lg border border-line-strong bg-paper px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-55"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
             >
               <option value="">
                 {!programmeId
@@ -403,7 +403,7 @@ export function RegisterForm({
               value={regulationId}
               onChange={(e) => setRegulationId(e.target.value)}
               disabled={loading}
-              className="h-10.5 w-full rounded-lg border border-line-strong bg-paper px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Select Scheme (Optional)</option>
               {filteredRegulations.map((reg) => (
@@ -441,7 +441,7 @@ export function RegisterForm({
           href={loginHref}
           className="font-semibold text-burgundy hover:text-burgundy-dark underline-offset-4 hover:underline"
         >
-          Log in
+          Sign in here
         </Link>
       </p>
     </form>

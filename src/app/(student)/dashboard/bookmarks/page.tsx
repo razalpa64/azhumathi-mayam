@@ -36,14 +36,18 @@ export default async function BookmarksPage() {
     .filter((r): r is Resource => Boolean(r && r.publication_status === 'published'));
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">Saved</h1>
-          <p className="mt-1.5 text-sm text-muted">The notes and papers you kept for later.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+            Saved
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            The notes and papers you kept for later.
+          </p>
         </div>
-        <span className="text-[13px] text-muted">
-          {resources.length} {resources.length === 1 ? 'item' : 'items'}
+        <span className="text-xs font-mono text-muted">
+          {resources.length} saved
         </span>
       </div>
 
@@ -51,18 +55,18 @@ export default async function BookmarksPage() {
         <EmptyState
           icon={Bookmark}
           title="Nothing saved yet"
-          description="Tap the bookmark on any note or paper and it’ll wait for you here."
+          description="Tap the bookmark on any note or paper and it will wait for you here."
           action={
             <Link
               href="/dashboard/materials"
-              className="inline-flex h-10 items-center rounded-lg bg-burgundy px-5 text-sm font-semibold text-paper hover:bg-burgundy-dark"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-burgundy px-4 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
             >
               Browse materials
             </Link>
           }
         />
       ) : (
-        <div className="mt-7 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {resources.map((res) => (
             <ResourceCard key={res.id} resource={res} initialBookmarked={true} />
           ))}

@@ -90,11 +90,6 @@ export function MaterialsBrowserClient({
 
   const queryParam = searchParams.get('q') || '';
 
-  const hasActiveFilters = Boolean(
-    universityId || programmeId || specializationId || regulationId || semesterId || subjectId || categoryId
-  );
-  const [filtersOpen, setFiltersOpen] = useState(hasActiveFilters);
-
   const [items, setItems] = useState<Resource[]>([]);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [total, setTotal] = useState(0);
@@ -215,65 +210,41 @@ export function MaterialsBrowserClient({
     );
   }
 
-  const activeFilterCount = [
-    universityId,
-    programmeId,
-    specializationId,
-    regulationId,
-    semesterId,
-    subjectId,
-    categoryId,
-  ].filter(Boolean).length;
-
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header & Search */}
-      <div className="max-w-2xl">
-        <h1 className="font-display text-[28px] font-medium leading-tight text-charcoal sm:text-[32px]">
-          {onlyQuestionPapers ? 'Question papers' : 'Materials'}
-        </h1>
-        <p className="mt-1.5 text-sm text-muted">
-          {onlyQuestionPapers
-            ? 'Previous years’ papers and question banks, by subject.'
-            : 'Notes, manuals and references for your subjects.'}
-        </p>
-        <div className="mt-5">
-          <GlobalSearchBar initialQuery={queryParam} />
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+              {onlyQuestionPapers
+                ? 'Question papers'
+                : 'Study materials'}
+            </h1>
+            <p className="mt-1 text-sm text-muted">
+              {onlyQuestionPapers
+                ? 'Previous years’ papers, model papers and question banks, by subject.'
+                : 'Notes, lab manuals, presentations and references for your subjects.'}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {profile.programme_id ? (
+              <Button variant="secondary" size="sm" onClick={handleResetToMyCourse}>
+                My semester ({profile.programme?.name}
+                {profile.semester ? ` • S${profile.semester.semester_number}` : ''})
+              </Button>
+            ) : null}
+            {allowCrossProgrammeBrowsing ? (
+              <Button variant="subtle" size="sm" onClick={handleBrowseAll}>
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>All programmes</span>
+              </Button>
+            ) : null}
+          </div>
         </div>
-        <p className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13.5px]">
-          {profile.programme_id ? (
-            <button
-              type="button"
-              onClick={handleResetToMyCourse}
-              className="font-medium text-charcoal/80 hover:text-burgundy cursor-pointer"
-            >
-              My semester
-              {profile.semester ? ` (${profile.semester.label})` : ''}
-            </button>
-          ) : null}
-          {allowCrossProgrammeBrowsing ? (
-            <button
-              type="button"
-              onClick={handleBrowseAll}
-              className="inline-flex items-center gap-1.5 font-medium text-charcoal/80 hover:text-burgundy cursor-pointer"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              Everything
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((v) => !v)}
-            aria-expanded={filtersOpen}
-            className="inline-flex items-center gap-1.5 font-semibold text-burgundy hover:underline underline-offset-4 cursor-pointer"
-          >
-            <Filter className="h-3.5 w-3.5" />
-            Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
-          </button>
-          <span className="text-muted">
-            {loading ? 'Loading…' : `${total} ${total === 1 ? 'item' : 'items'}`}
-          </span>
-        </p>
+
+        <GlobalSearchBar initialQuery={queryParam} />
       </div>
 
       {/* Subject-specific Ad Slot */}
@@ -285,22 +256,31 @@ export function MaterialsBrowserClient({
         />
       ) : null}
 
-      {/* Filters — tucked away until asked for */}
-      {filtersOpen ? (
+      {/* Structured Filter Matrix */}
       <section
-        aria-label="Filters"
-        className="animate-rise mt-6 rounded-xl border border-line bg-paper p-5"
+        aria-label="Resource filters"
+        className="rounded-lg border border-line bg-neutral-soft/65 p-4 space-y-3"
       >
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-charcoal">
+            <Filter className="h-3.5 w-3.5 text-burgundy" />
+            <span>Filters</span>
+          </div>
+          <span className="text-xs font-mono text-muted">
+            {loading ? 'Loading...' : `${total} found`}
+          </span>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted">University</label>
+            <label className="mb-1 block text-[11px] font-medium text-muted">University</label>
             <select
               value={universityId}
               onChange={(e) => {
                 setUniversityId(e.target.value);
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-line-strong bg-paper px-3 text-[13.5px] text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Any university</option>
               {taxonomy.universities.map((u) => (
@@ -312,7 +292,7 @@ export function MaterialsBrowserClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted">Programme</label>
+            <label className="mb-1 block text-[11px] font-medium text-muted">Programme</label>
             <select
               value={programmeId}
               disabled={!allowCrossProgrammeBrowsing && Boolean(profile.programme_id)}
@@ -323,7 +303,7 @@ export function MaterialsBrowserClient({
                 setSubjectId('');
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-line-strong bg-paper px-3 text-[13.5px] text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60"
+              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-60"
             >
               <option value="">Any programme</option>
               {taxonomy.programmes.map((p) => (
@@ -335,7 +315,7 @@ export function MaterialsBrowserClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted">Specialization</label>
+            <label className="mb-1 block text-[11px] font-medium text-muted">Specialization</label>
             <select
               value={specializationId}
               onChange={(e) => {
@@ -343,7 +323,7 @@ export function MaterialsBrowserClient({
                 setSubjectId('');
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-line-strong bg-paper px-3 text-[13.5px] text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Any specialization</option>
               {filteredSpecializations.map((sp) => (
@@ -355,7 +335,7 @@ export function MaterialsBrowserClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted">Semester</label>
+            <label className="mb-1 block text-[11px] font-medium text-muted">Semester</label>
             <select
               value={semesterId}
               onChange={(e) => {
@@ -363,7 +343,7 @@ export function MaterialsBrowserClient({
                 setSubjectId('');
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-line-strong bg-paper px-3 text-[13.5px] text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Any semester</option>
               {filteredSemesters.map((sem) => (
@@ -375,14 +355,14 @@ export function MaterialsBrowserClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted">Subject</label>
+            <label className="mb-1 block text-[11px] font-medium text-muted">Subject</label>
             <select
               value={subjectId}
               onChange={(e) => {
                 setSubjectId(e.target.value);
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-line-strong bg-paper px-3 text-[13.5px] text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Any subject</option>
               {filteredSubjects.map((sub) => (
@@ -394,17 +374,17 @@ export function MaterialsBrowserClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted">Type</label>
+            <label className="mb-1 block text-[11px] font-medium text-muted">Type</label>
             <select
               value={categoryId}
               onChange={(e) => {
                 setCategoryId(e.target.value);
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-line-strong bg-paper px-3 text-[13.5px] text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">
-                {onlyQuestionPapers ? 'All Question Paper Types' : 'All Resource Categories'}
+                {onlyQuestionPapers ? 'Any type' : 'Any type'}
               </option>
               {visibleCategories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
@@ -415,14 +395,14 @@ export function MaterialsBrowserClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted">Regulation</label>
+            <label className="mb-1 block text-[11px] font-medium text-muted">Regulation</label>
             <select
               value={regulationId}
               onChange={(e) => {
                 setRegulationId(e.target.value);
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-line-strong bg-paper px-3 text-[13.5px] text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">All Regulations</option>
               {taxonomy.regulations.map((reg) => (
@@ -434,36 +414,35 @@ export function MaterialsBrowserClient({
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-muted">Sort</label>
+            <label className="mb-1 block text-[11px] font-medium text-muted">Sort</label>
             <select
               value={sort}
               onChange={(e) => {
                 setSort(e.target.value);
                 setPage(1);
               }}
-              className="h-10 w-full rounded-lg border border-line-strong bg-paper px-3 text-[13.5px] text-charcoal focus:border-burgundy focus:outline-none focus:ring-4 focus:ring-burgundy/10"
+              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="latest">Newest first</option>
               <option value="popular">Most downloaded</option>
-              <option value="title">Title A–Z</option>
+              <option value="title">Title (A – Z)</option>
             </select>
           </div>
         </div>
       </section>
-      ) : null}
 
-      {/* Results */}
+      {/* Results Grid */}
       {loading ? (
-        <div className="mt-8 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, idx) => (
             <div
               key={idx}
-              className="h-44 animate-pulse rounded-xl bg-neutral-soft"
+              className="h-52 animate-pulse rounded-lg border border-line bg-neutral-soft"
             />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <EmptyState className="mt-4"
+        <EmptyState
           icon={BookOpen}
           title="Nothing matches"
           description="Try removing a filter or two — or browse everything."
@@ -476,8 +455,8 @@ export function MaterialsBrowserClient({
           }
         />
       ) : (
-        <div className="mt-8 space-y-6">
-          <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {items.slice(0, 6).map((res) => (
               <ResourceCard
                 key={res.id}
@@ -497,7 +476,7 @@ export function MaterialsBrowserClient({
           ) : null}
 
           {items.length > 6 ? (
-            <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {items.slice(6).map((res) => (
                 <ResourceCard
                   key={res.id}

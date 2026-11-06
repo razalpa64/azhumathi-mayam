@@ -2,7 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Bookmark, Download, Loader2 } from 'lucide-react';
+import {
+  Bookmark,
+  BookmarkCheck,
+  Calendar,
+  Download,
+  Eye,
+  FileText,
+  Loader2,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
 import type { Resource } from '@/types/database';
 import { cn, formatDate } from '@/lib/utils';
 
@@ -58,7 +67,9 @@ export function ResourceCard({
           setDownloadCount(data.downloadCount);
         }
         window.open(data.downloadUrl, '_blank', 'noopener,noreferrer');
-        setDownloadHint('Opened in Google Drive — the download should start there.');
+        setDownloadHint(
+          'Opened in Google Drive — your download should start there.'
+        );
       } else {
         setDownloadHint(data.error || 'Couldn’t start the download. Try opening the file first.');
       }
@@ -69,90 +80,137 @@ export function ResourceCard({
     }
   }
 
-  const meta = [
-    resource.programme?.name,
-    resource.semester?.label,
-    resource.file_type,
-    resource.file_size,
-  ].filter(Boolean) as string[];
-
   return (
-    <article className="group flex h-full flex-col rounded-xl border border-line bg-paper p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_10px_28px_-16px_rgba(33,26,22,0.28)]">
-      <div className="flex items-start justify-between gap-3">
-        <p className="min-w-0 truncate text-[13px]">
-          {resource.subject ? (
-            <>
-              <span className="font-mono font-semibold text-burgundy">
-                {resource.subject.subject_code}
-              </span>
-              <span className="text-charcoal/75"> · {resource.subject.name}</span>
-            </>
-          ) : resource.category ? (
-            <span className="text-charcoal/75">{resource.category.name}</span>
-          ) : null}
-        </p>
-        <button
-          type="button"
-          onClick={handleToggleBookmark}
-          disabled={bookmarking}
-          aria-label={bookmarked ? 'Remove from saved' : 'Save for later'}
-          aria-pressed={bookmarked}
-          title={bookmarked ? 'Saved' : 'Save for later'}
-          className={cn(
-            '-mr-1.5 -mt-1.5 shrink-0 rounded-full p-2 transition-colors cursor-pointer disabled:opacity-50',
-            bookmarked
-              ? 'text-burgundy'
-              : 'text-charcoal/35 hover:bg-neutral-soft hover:text-charcoal'
-          )}
+    <article className="group flex flex-col justify-between rounded-lg border border-line bg-canvas p-5 transition-colors hover:border-line-strong">
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {resource.category ? (
+              <Badge variant={resource.category.is_question_paper ? 'burgundy' : 'neutral'}>
+                {resource.category.name}
+              </Badge>
+            ) : null}
+            <span className="inline-flex items-center rounded border border-line bg-neutral-soft px-1.5 py-0.5 font-mono text-[11px] font-semibold text-charcoal">
+              {resource.file_type}
+            </span>
+            {resource.file_size ? (
+              <span className="font-mono text-[11px] text-muted">{resource.file_size}</span>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleToggleBookmark}
+            disabled={bookmarking}
+            aria-label={bookmarked ? 'Remove from saved materials' : 'Save material'}
+            title={bookmarked ? 'Saved in Bookmarks' : 'Save to Bookmarks'}
+            className={cn(
+              'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors cursor-pointer',
+              bookmarked
+                ? 'border-burgundy-border bg-burgundy-tint text-burgundy'
+                : 'border-line bg-canvas text-muted hover:bg-neutral-soft hover:text-charcoal'
+            )}
+          >
+            {bookmarked ? (
+              <BookmarkCheck className="h-4 w-4" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+
+        <Link
+          href={`/resources/${resource.id}`}
+          className="mt-3 block focus:outline-none focus-visible:underline"
         >
-          <Bookmark className={cn('h-[18px] w-[18px]', bookmarked && 'fill-burgundy')} strokeWidth={1.8} />
-        </button>
+          <h3 className="text-base font-semibold text-charcoal group-hover:text-burgundy transition-colors leading-snug">
+            {resource.title}
+          </h3>
+        </Link>
+
+        {resource.subject ? (
+          <p className="mt-1.5 text-xs font-medium text-charcoal/85">
+            <span className="font-mono font-semibold text-burgundy">
+              {resource.subject.subject_code}
+            </span>{' '}
+            — {resource.subject.name}
+          </p>
+        ) : null}
+
+        {resource.description ? (
+          <p className="mt-2 line-clamp-2 text-xs text-muted leading-relaxed">
+            {resource.description}
+          </p>
+        ) : null}
       </div>
 
-      <Link href={`/resources/${resource.id}`} className="mt-1.5 block">
-        <h3 className="text-[15px] font-semibold leading-snug text-charcoal group-hover:text-burgundy transition-colors">
-          {resource.title}
-        </h3>
-      </Link>
+      <div className="mt-4 pt-3.5 border-t border-line space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {resource.programme ? (
+              <span className="font-medium text-charcoal">{resource.programme.name}</span>
+            ) : null}
+            {resource.specialization ? (
+              <>
+                <span>•</span>
+                <span>{resource.specialization.code}</span>
+              </>
+            ) : null}
+            {resource.semester ? (
+              <>
+                <span>•</span>
+                <span>{resource.semester.label}</span>
+              </>
+            ) : null}
+          </div>
 
-      {resource.description ? (
-        <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted">
-          {resource.description}
-        </p>
-      ) : null}
+          <div className="flex items-center gap-3 font-mono">
+            <span className="inline-flex items-center gap-1" title="Upload date">
+              <Calendar className="h-3 w-3" />
+              {formatDate(resource.created_at)}
+            </span>
+            <span className="inline-flex items-center gap-1" title="Downloads">
+              <Download className="h-3 w-3" />
+              {downloadCount}
+            </span>
+          </div>
+        </div>
 
-      <div className="mt-auto pt-5">
-        <p className="truncate text-xs text-muted">
-          {meta.join(' · ')}
-          {meta.length > 0 ? ' · ' : ''}
-          {formatDate(resource.created_at)}
-        </p>
-
-        <div className="mt-3 flex items-center justify-between border-t border-line pt-3.5">
+        <div className="flex items-center gap-2">
           <Link
             href={`/resources/${resource.id}`}
-            className="text-[13.5px] font-semibold text-burgundy hover:underline underline-offset-4"
+            className="inline-flex flex-1 h-9 items-center justify-center gap-1.5 rounded-md bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors"
           >
-            {resource.file_type === 'PDF' ? 'Read PDF →' : 'Open →'}
+            {resource.file_type === 'PDF' ? (
+              <>
+                <Eye className="h-3.5 w-3.5" />
+                <span>Open PDF</span>
+              </>
+            ) : (
+              <>
+                <FileText className="h-3.5 w-3.5" />
+                <span>Open</span>
+              </>
+            )}
           </Link>
+
           <button
             type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-charcoal/70 transition-colors hover:text-charcoal cursor-pointer disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft transition-colors cursor-pointer disabled:opacity-50"
           >
             {downloading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Download className="h-4 w-4" strokeWidth={1.8} />
+              <Download className="h-3.5 w-3.5" />
             )}
             <span>Download</span>
-            <span className="font-mono text-[11px] text-muted">{downloadCount}</span>
           </button>
         </div>
 
         {downloadHint ? (
-          <p className="mt-2.5 text-xs leading-snug text-muted">{downloadHint}</p>
+          <p className="text-[11px] text-muted leading-snug">{downloadHint}</p>
         ) : null}
       </div>
     </article>

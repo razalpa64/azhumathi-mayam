@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import '@fontsource-variable/fraunces';
 import '@fontsource-variable/plus-jakarta-sans';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/noto-sans-malayalam';
@@ -8,7 +7,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: {
     default: 'അഴിമതി മയം — notes, syllabus & question papers',
-    template: '%s · അഴിമതി മയം',
+    template: '%s | അഴിമതി മയം',
   },
   description:
     'അഴിമതി മയം — study notes, syllabi and previous question papers, organised by your course and semester.',
