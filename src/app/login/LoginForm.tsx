@@ -93,14 +93,14 @@ export function LoginForm() {
   }
 
   const inputClass =
-    'h-12 w-full rounded-xl border border-[#EBD9D3] bg-[#FFFBF8] pl-11 pr-4 text-[15px] text-charcoal placeholder:text-[#B29A91] transition-colors focus:border-burgundy focus:bg-white focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60';
+    'h-14 w-full rounded-2xl border border-[#EBD9D3] bg-[#FFFBF8] pl-12 pr-4 text-[15px] text-charcoal placeholder:text-[#B29A91] transition-colors focus:border-burgundy focus:bg-white focus:outline-none focus:ring-4 focus:ring-burgundy/10 disabled:opacity-60';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {registered && !error ? (
         <div
           role="status"
-          className="flex items-start gap-3 rounded-xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 text-sm text-[#166534]"
+          className="flex items-start gap-3 rounded-2xl border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3 text-sm text-[#166534]"
         >
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
           <span>Account created — sign in below.</span>
@@ -110,7 +110,7 @@ export function LoginForm() {
       {error ? (
         <div
           role="alert"
-          className="flex items-start gap-3 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]"
+          className="flex items-start gap-3 rounded-2xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
@@ -123,7 +123,7 @@ export function LoginForm() {
         </label>
         <div className="relative">
           <User
-            className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-burgundy"
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-burgundy"
             strokeWidth={1.9}
           />
           <input
@@ -150,7 +150,7 @@ export function LoginForm() {
         </label>
         <div className="relative">
           <Lock
-            className="pointer-events-none absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-burgundy"
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-burgundy"
             strokeWidth={1.9}
           />
           <input
@@ -171,7 +171,7 @@ export function LoginForm() {
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-[#B29A91] transition-colors hover:text-burgundy focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy cursor-pointer"
           >
-            {showPassword ? <Eye className="h-[18px] w-[18px]" /> : <EyeOff className="h-[18px] w-[18px]" />}
+            {showPassword ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
           </button>
         </div>
       </div>
@@ -182,7 +182,7 @@ export function LoginForm() {
             type="checkbox"
             checked={remember}
             onChange={(e) => setRemember(e.target.checked)}
-            className="h-[18px] w-[18px] rounded border-[#D8BDB4] accent-burgundy focus:ring-burgundy"
+            className="h-5 w-5 rounded-md border-[#D8BDB4] accent-burgundy focus:ring-burgundy"
           />
           <span>Remember me</span>
         </label>
@@ -197,7 +197,7 @@ export function LoginForm() {
       </div>
 
       {showForgotHelp ? (
-        <p role="status" className="rounded-xl bg-burgundy-tint px-4 py-3 text-[13px] leading-relaxed text-charcoal">
+        <p role="status" className="rounded-2xl bg-burgundy-tint px-4 py-3 text-[13px] leading-relaxed text-charcoal">
           Forgot your password? Ask your college office to reset it for you — then come back
           here and sign in with the new one.
         </p>
@@ -206,22 +206,22 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-burgundy text-[15px] font-semibold text-white transition-colors hover:bg-burgundy-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy focus-visible:ring-offset-2 disabled:opacity-60 cursor-pointer"
+        className="flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-b from-[#6D0000] to-[#4A0404] text-base font-semibold text-white shadow-[0_12px_24px_-10px_rgba(74,4,4,0.55)] transition-all hover:brightness-125 focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy focus-visible:ring-offset-2 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
       >
         {loading ? (
           <>
-            <Loader2 className="h-[18px] w-[18px] animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
             <span>Logging in…</span>
           </>
         ) : (
           <>
             <span>Login</span>
-            <ArrowRight className="h-[18px] w-[18px]" />
+            <ArrowRight className="h-5 w-5" />
           </>
         )}
       </button>
 
-      <div className="relative py-1">
+      <div className="relative py-2">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
           <div className="w-full border-t border-[#F0E0D9]" />
         </div>
@@ -232,13 +232,13 @@ export function LoginForm() {
 
       <Link
         href={registerHref}
-        className="flex h-11 w-full items-center justify-center rounded-xl border border-burgundy/30 bg-white px-4 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
+        className="flex h-12.5 w-full items-center justify-center rounded-2xl border-[1.5px] border-burgundy/25 bg-burgundy-tint/60 px-4 text-[15px] font-semibold text-burgundy transition-colors hover:border-burgundy hover:bg-burgundy hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy"
       >
         Create new account
       </Link>
 
-      <p className="flex items-center justify-center gap-2 pt-2.5 text-[13px] text-[#8A7A74]">
-        <ShieldCheck className="h-4 w-4 shrink-0 text-burgundy" />
+      <p className="flex items-center justify-center gap-2 pt-3 text-[13px] text-[#8A7A74]">
+        <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-burgundy" />
         <span className="font-logo font-bold text-burgundy">അഴിമതി മയം</span>
         <span aria-hidden="true" className="text-[#D8BDB4]">•</span>
         <span>Learn. Prepare. Excel.</span>
