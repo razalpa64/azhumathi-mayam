@@ -281,7 +281,8 @@ export default async function StudentDashboardPage() {
           className="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-white/[0.06]"
         />
 
-        <div className="relative">
+        <div className="relative lg:flex lg:items-center lg:justify-between lg:gap-12">
+          <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {contextBits.length > 0 ? (
               <span className="inline-flex items-center gap-2 rounded-full bg-black/30 px-3.5 py-1.5 text-[11px] font-semibold text-canvas ring-1 ring-white/15">
@@ -308,6 +309,33 @@ export default async function StudentDashboardPage() {
             <span>{hasAcademicSetup ? 'Change course / semester' : 'Set course & semester'}</span>
             <ChevronRight className="h-4 w-4 opacity-60" />
           </Link>
+          </div>
+
+          {/* At a glance — fills the hero's empty right half on desktop */}
+          {hasAcademicSetup ? (
+            <div className="hidden shrink-0 grid-cols-3 gap-3 lg:grid">
+              {[
+                { value: String(semesterSubjects.length), label: 'Subjects' },
+                { value: String(bookmarkSet.size), label: 'Saved' },
+                {
+                  value: profile.semester ? `S${profile.semester.semester_number}` : '—',
+                  label: 'Semester',
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="min-w-[106px] rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/15"
+                >
+                  <p className="text-[26px] font-extrabold leading-none text-white">
+                    {stat.value}
+                  </p>
+                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/60">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -392,7 +420,7 @@ export default async function StudentDashboardPage() {
             description="Subjects haven’t been added for this semester yet. Check back soon."
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {semesterSubjects.map((subj) => {
               const stats = subjectStats.get(subj.id) || { notes: 0, qps: 0, updated: null };
               const updatedLabel = monthLabel(stats.updated);
@@ -482,7 +510,7 @@ export default async function StudentDashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {(shortNoteResources as unknown as Resource[]).map((res, i) => (
               <ResourceCard
                 key={res.id}
@@ -536,7 +564,7 @@ export default async function StudentDashboardPage() {
             }
           />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {(latestResources as unknown as Resource[]).map((res, i) => (
               <ResourceCard
                 key={res.id}
@@ -690,7 +718,7 @@ export default async function StudentDashboardPage() {
               History
             </Link>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
             {recentlyViewed.map((res, i) => (
               <ResourceCard
                 key={res.id}
