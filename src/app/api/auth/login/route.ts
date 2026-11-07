@@ -90,7 +90,8 @@ export async function POST(request: NextRequest) {
       .update({ last_login_at: new Date().toISOString() })
       .eq('id', profile.id);
 
-    const redirectTo = profile.role === 'admin' ? '/admin' : '/dashboard';
+    const redirectTo =
+      profile.role === 'admin' || profile.role === 'sub_admin' ? '/admin' : '/dashboard';
 
     return NextResponse.json({
       ok: true,

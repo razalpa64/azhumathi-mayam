@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireApiAuth } from '@/lib/auth/session';
+import { isStaffRole, requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export async function GET() {
@@ -7,7 +7,7 @@ export async function GET() {
   if (!auth.ok) return auth.response;
 
   const supabase = await createSupabaseServerClient();
-  const isAdmin = auth.profile.role === 'admin';
+  const isAdmin = isStaffRole(auth.profile.role);
 
   let univQuery = supabase.from('universities').select('*').order('display_order').order('name');
   let progQuery = supabase.from('programmes').select('*').order('display_order').order('name');

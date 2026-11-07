@@ -1,4 +1,4 @@
-import { requireAdminUser, getWebsiteSettings } from '@/lib/auth/session';
+import { requireMainAdminUser, getWebsiteSettings } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { AdsManagerClient } from '@/components/admin/AdsManagerClient';
 import type { Advertisement } from '@/types/database';
@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 export default async function AdminAdvertisementsPage() {
-  await requireAdminUser();
+  await requireMainAdminUser();
   const adminClient = createSupabaseAdminClient();
 
   const [{ data: ads }, settings] = await Promise.all([

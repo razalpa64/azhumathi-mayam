@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { BookOpen, FileText, GraduationCap, Layers } from 'lucide-react';
-import { getAuthenticatedProfile } from '@/lib/auth/session';
+import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { RegisterForm } from './RegisterForm';
@@ -52,7 +52,7 @@ const REGISTRATION_BENEFITS = [
 export default async function RegisterPage() {
   const profile = await getAuthenticatedProfile();
   if (profile) {
-    redirect(profile.role === 'admin' ? '/admin' : '/dashboard');
+    redirect(isStaffRole(profile.role) ? '/admin' : '/dashboard');
   }
 
   const adminClient = createSupabaseAdminClient();

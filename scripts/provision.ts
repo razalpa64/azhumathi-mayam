@@ -111,6 +111,13 @@ async function main() {
     );
     await pg.query(dedupeSubjectsSql);
 
+    console.log('3h. Applying 0012_sub_admins.sql (sub-administrator role & staff policies)...');
+    const subAdminsSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0012_sub_admins.sql'),
+      'utf8'
+    );
+    await pg.query(subAdminsSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {

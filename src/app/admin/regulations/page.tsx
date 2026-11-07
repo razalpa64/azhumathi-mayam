@@ -1,4 +1,4 @@
-import { requireAdminUser } from '@/lib/auth/session';
+import { requireStaffUser } from '@/lib/auth/session';
 import { getAdminTaxonomyBundle } from '@/lib/admin-taxonomy';
 import { RegulationsClient } from '@/components/admin/RegulationsClient';
 
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function AdminRegulationsPage() {
-  await requireAdminUser();
+  await requireStaffUser();
   const taxonomy = await getAdminTaxonomyBundle();
 
   return (

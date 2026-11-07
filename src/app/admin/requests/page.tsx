@@ -1,3 +1,4 @@
+import { requireStaffUser } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { RequestsManagerClient } from '@/components/admin/RequestsManagerClient';
 import type { ResourceRequest } from '@/types/database';
@@ -7,6 +8,7 @@ export const metadata = {
 };
 
 export default async function AdminRequestsPage() {
+  await requireStaffUser();
   const adminClient = createSupabaseAdminClient();
   const { data, error } = await adminClient
     .from('resource_requests')

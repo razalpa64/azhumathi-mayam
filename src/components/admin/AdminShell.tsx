@@ -20,6 +20,7 @@ import {
   Scale,
   Settings,
   Sparkles,
+  UserCog,
   Users,
   X,
 } from 'lucide-react';
@@ -33,9 +34,11 @@ interface AdminShellProps {
   children: React.ReactNode;
 }
 
+/** mainOnly items are super-admin territory: sub-admins never see them. */
 const ADMIN_NAV = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
-  { href: '/admin/students', label: 'Students', icon: Users },
+  { href: '/admin/students', label: 'Students', icon: Users, mainOnly: true },
+  { href: '/admin/team', label: 'Sub-admin Team', icon: UserCog, mainOnly: true },
   { href: '/admin/courses', label: 'Courses & Universities', icon: GraduationCap },
   { href: '/admin/specializations', label: 'Specializations', icon: GitBranch },
   { href: '/admin/regulations', label: 'Academic Regulations', icon: Scale },
@@ -43,11 +46,19 @@ const ADMIN_NAV = [
   { href: '/admin/subjects', label: 'Subjects', icon: BookOpen },
   { href: '/admin/resources', label: 'Study Materials', icon: FolderKanban },
   { href: '/admin/upload', label: 'Upload Resources', icon: FilePlus2 },
-  { href: '/admin/notices', label: 'Notices', icon: Megaphone },
+  { href: '/admin/notices', label: 'Notices', icon: Megaphone, mainOnly: true },
   { href: '/admin/requests', label: 'Student Requests', icon: Inbox, badge: 'requests' },
-  { href: '/admin/advertisements', label: 'Advertisements', icon: Sparkles },
-  { href: '/admin/analytics', label: 'Analytics & Audit', icon: BarChart3 },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
+  { href: '/admin/advertisements', label: 'Advertisements', icon: Sparkles, mainOnly: true },
+  { href: '/admin/analytics', label: 'Analytics & Audit', icon: BarChart3, mainOnly: true },
+  { href: '/admin/settings', label: 'Settings', icon: Settings, mainOnly: true },
+];
+
+/** One-thumb destinations for phones; everything else is in the drawer. */
+const MOBILE_NAV = [
+  { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true, badge: '' },
+  { href: '/admin/upload', label: 'Upload', icon: FilePlus2, exact: false, badge: '' },
+  { href: '/admin/resources', label: 'Materials', icon: FolderKanban, exact: false, badge: '' },
+  { href: '/admin/requests', label: 'Requests', icon: Inbox, exact: false, badge: 'requests' },
 ];
 
 export function AdminShell({ profile, pendingRequests = 0, children }: AdminShellProps) {
@@ -71,6 +82,9 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
     }
   }
 
+  const isMainAdmin = profile.role === 'admin';
+  const navItems = ADMIN_NAV.filter((item) => !item.mainOnly || isMainAdmin);
+
   const sidebarContent = (
     <div className="flex h-full min-h-0 flex-col bg-burgundy-deep text-canvas">
       {/* Scrollable top: logo + nav. The footer below stays pinned. */}
@@ -88,7 +102,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
         </div>
 
         <nav aria-label="Administrator navigation" className="mt-7 space-y-0.5">
-          {ADMIN_NAV.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href, item.exact);
             return (
@@ -118,7 +132,11 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
 
       {/* Pinned footer — profile + logout are always on screen */}
       <div className="shrink-0 space-y-3 border-t border-white/10 bg-burgundy-deep p-4">
-        <div className="rounded-md bg-white/5 px-3 py-2.5">
+        <Link
+          href="/admin/account"
+          onClick={() => setMobileOpen(false)}
+          className="block rounded-md bg-white/5 px-3 py-2.5 transition-colors hover:bg-white/10"
+        >
           <div className="flex items-center gap-2">
             <Building2 className="h-3.5 w-3.5 text-canvas/65" />
             <span className="text-xs font-semibold text-canvas truncate">
@@ -126,9 +144,12 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             </span>
           </div>
           <p className="mt-0.5 font-mono text-[11px] text-canvas/65 truncate">
-            {profile.username}
+            @{profile.username}
           </p>
-        </div>
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-canvas/50">
+            {isMainAdmin ? 'Super Administrator' : 'Sub Administrator'} · My account
+          </p>
+        </Link>
 
         <button
           type="button"
@@ -188,10 +209,48 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           </Link>
         </header>
 
-        <main className="flex-1 p-5 sm:p-7 lg:p-9 max-w-7xl w-full mx-auto 2xl:max-w-[1560px]">
+        <main className="flex-1 p-5 pb-24 sm:p-7 sm:pb-24 lg:p-9 max-w-7xl w-full mx-auto 2xl:max-w-[1560px]">
           {children}
         </main>
       </div>
+
+      {/* Mobile bottom navigation — the daily tools, one thumb away */}
+      <nav aria-label="Admin quick navigation" className="fixed inset-x-3 bottom-3 z-40 lg:hidden">
+        <div className="mx-auto grid max-w-md grid-cols-5 rounded-full bg-burgundy-deep/95 px-2 py-2 shadow-[0_16px_32px_-14px_rgba(36,7,7,0.55)] ring-1 ring-white/15 backdrop-blur-md">
+          {MOBILE_NAV.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href, item.exact);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'relative flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[10px] font-medium transition-colors',
+                  active ? 'bg-burgundy text-white' : 'text-canvas/65 hover:text-canvas'
+                )}
+              >
+                <Icon className="h-[20px] w-[20px]" strokeWidth={active ? 2.2 : 1.8} />
+                <span className="leading-none">{item.label}</span>
+                {item.badge === 'requests' && pendingRequests > 0 ? (
+                  <span className="absolute right-2 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-canvas px-1 text-[9px] font-bold text-burgundy-deep">
+                    {pendingRequests > 99 ? '99+' : pendingRequests}
+                  </span>
+                ) : null}
+              </Link>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open full administrator menu"
+            className="flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[10px] font-medium text-canvas/65 transition-colors hover:text-canvas cursor-pointer"
+          >
+            <Menu className="h-[20px] w-[20px]" strokeWidth={1.8} />
+            <span className="leading-none">Menu</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }

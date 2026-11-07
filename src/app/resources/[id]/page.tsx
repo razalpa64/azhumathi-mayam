@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { requireAuthenticatedUser } from '@/lib/auth/session';
+import { isStaffRole, requireAuthenticatedUser } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getActiveAdvertisementsByPlacement } from '@/lib/ads';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
@@ -48,7 +48,7 @@ export default async function ResourceDetailPage({
   const { id } = await params;
   const profile = await requireAuthenticatedUser();
   const supabase = await createSupabaseServerClient();
-  const isAdmin = profile.role === 'admin';
+  const isAdmin = isStaffRole(profile.role);
 
   const { data: rawResource } = await supabase
     .from('resources')

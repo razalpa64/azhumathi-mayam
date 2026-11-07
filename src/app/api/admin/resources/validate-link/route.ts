@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { requireApiAdmin } from '@/lib/auth/session';
+import { requireApiStaff } from '@/lib/auth/session';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
 import { checkRateLimit } from '@/lib/security/rate-limit';
 
@@ -9,7 +9,7 @@ const validateSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const rate = checkRateLimit(`validate-link:${auth.profile.id}`, 30, 5 * 60 * 1000);

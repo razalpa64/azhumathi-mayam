@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { requireApiAuth } from '@/lib/auth/session';
+import { isStaffRole, requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
@@ -81,7 +81,7 @@ export async function POST(
   const result = await resolveAndRecordDownload(
     id,
     auth.profile.id,
-    auth.profile.role === 'admin',
+    isStaffRole(auth.profile.role),
     request.headers.get('user-agent')
   );
 
@@ -109,7 +109,7 @@ export async function GET(
   const result = await resolveAndRecordDownload(
     id,
     auth.profile.id,
-    auth.profile.role === 'admin',
+    isStaffRole(auth.profile.role),
     request.headers.get('user-agent')
   );
 

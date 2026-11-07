@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { requireApiAuth } from '@/lib/auth/session';
+import { isStaffRole, requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const bookmarkSchema = z.object({
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     .eq('id', resourceId)
     .maybeSingle();
 
-  if (!resource || (resource.publication_status !== 'published' && auth.profile.role !== 'admin')) {
+  if (!resource || (resource.publication_status !== 'published' && !isStaffRole(auth.profile.role))) {
     return NextResponse.json({ error: 'Resource not found.' }, { status: 404 });
   }
 

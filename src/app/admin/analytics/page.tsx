@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { BarChart3, Download, FileText, ShieldAlert, Users } from 'lucide-react';
-import { requireAdminUser } from '@/lib/auth/session';
+import { requireMainAdminUser } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { Badge } from '@/components/ui/Badge';
 import { formatDateTime } from '@/lib/utils';
@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 export default async function AdminAnalyticsPage() {
-  await requireAdminUser();
+  await requireMainAdminUser();
   const adminClient = createSupabaseAdminClient();
 
   const [
