@@ -76,6 +76,20 @@ async function main() {
     );
     await pg.query(subjectsSql);
 
+    console.log('3c. Applying 0007_subjects_ktu_btech_2024.sql (KTU 2024 scheme subjects)...');
+    const subjects2024Sql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0007_subjects_ktu_btech_2024.sql'),
+      'utf8'
+    );
+    await pg.query(subjects2024Sql);
+
+    console.log('3d. Applying 0008_subjects_ktu_btech_2019_me.sql (KTU 2019 Mechanical subjects)...');
+    const subjectsMeSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0008_subjects_ktu_btech_2019_me.sql'),
+      'utf8'
+    );
+    await pg.query(subjectsMeSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
