@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
-import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
+import { requireApiStaff, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
 
@@ -30,7 +30,7 @@ export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const { id } = await context.params;
@@ -124,7 +124,7 @@ export async function DELETE(
   _request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const { id } = await context.params;

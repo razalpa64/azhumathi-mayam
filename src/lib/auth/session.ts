@@ -49,6 +49,17 @@ async function fetchAuthenticatedProfile(): Promise<Profile | null> {
   return profile as unknown as Profile;
 }
 
+/** The super administrator (admin@invytra) — the only account tier that
+ *  may manage students, sub-admins, notices, ads and site settings. */
+export function isMainAdminRole(role: Profile['role']): boolean {
+  return role === 'admin';
+}
+
+/** Staff = super admin or sub-admin (content managers). */
+export function isStaffRole(role: Profile['role']): boolean {
+  return role === 'admin' || role === 'sub_admin';
+}
+
 export async function requireAuthenticatedUser(): Promise<Profile> {
   const profile = await getAuthenticatedProfile();
   if (!profile) {
@@ -62,21 +73,40 @@ export async function requireStudentAppUser(): Promise<Profile> {
   if (!profile) {
     redirect('/login');
   }
-  if (profile.role === 'admin') {
+  if (isStaffRole(profile.role)) {
     redirect('/admin');
   }
   return profile;
 }
 
-export async function requireAdminUser(): Promise<Profile> {
+/** Super-admin-only pages (students, team, notices, ads, analytics, settings). */
+export async function requireMainAdminUser(): Promise<Profile> {
   const profile = await getAuthenticatedProfile();
   if (!profile) {
     redirect('/login');
   }
-  if (profile.role !== 'admin') {
+  if (!isMainAdminRole(profile.role)) {
+    redirect(isStaffRole(profile.role) ? '/admin' : '/dashboard');
+  }
+  return profile;
+}
+
+/** Staff pages — super admin and sub-admins (content management). */
+export async function requireStaffUser(): Promise<Profile> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile) {
+    redirect('/login');
+  }
+  if (!isStaffRole(profile.role)) {
     redirect('/dashboard');
   }
   return profile;
+}
+
+/** @deprecated Use requireMainAdminUser / requireStaffUser. Kept as the
+ *  strict super-admin guard for any not-yet-migrated call site. */
+export async function requireAdminUser(): Promise<Profile> {
+  return requireMainAdminUser();
 }
 
 export async function requireApiAuth(): Promise<
@@ -113,6 +143,31 @@ export async function requireApiAdmin(): Promise<
       ok: false,
       response: NextResponse.json(
         { error: 'Forbidden: Administrator privileges required.' },
+        { status: 403 }
+      ),
+    };
+  }
+  return { ok: true, profile };
+}
+
+export async function requireApiStaff(): Promise<
+  { ok: true; profile: Profile } | { ok: false; response: NextResponse }
+> {
+  const profile = await getAuthenticatedProfile();
+  if (!profile) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: 'Authentication required. Please sign in.' },
+        { status: 401 }
+      ),
+    };
+  }
+  if (!isStaffRole(profile.role)) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: 'Forbidden: Staff privileges required.' },
         { status: 403 }
       ),
     };

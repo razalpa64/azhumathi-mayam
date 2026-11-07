@@ -1,4 +1,4 @@
-export type UserRole = 'student' | 'admin';
+export type UserRole = 'student' | 'admin' | 'sub_admin';
 
 export type PublicationStatus = 'draft' | 'published';
 
@@ -174,6 +174,8 @@ export interface Profile {
   semester_id: string | null;
   is_active: boolean;
   must_change_password: boolean;
+  /** Super admin who created this account (sub-admins); NULL otherwise. */
+  created_by?: string | null;
   last_login_at: string | null;
   created_at: string;
   updated_at: string;

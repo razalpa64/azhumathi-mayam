@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/baloo-chettan-2';
-import { getAuthenticatedProfile } from '@/lib/auth/session';
+import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { LoginForm } from './LoginForm';
 
 export const metadata = {
@@ -13,7 +13,7 @@ export const metadata = {
 export default async function LoginPage() {
   const profile = await getAuthenticatedProfile();
   if (profile) {
-    redirect(profile.role === 'admin' ? '/admin' : '/dashboard');
+    redirect(isStaffRole(profile.role) ? '/admin' : '/dashboard');
   }
 
   return (

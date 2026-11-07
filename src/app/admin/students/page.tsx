@@ -1,4 +1,4 @@
-import { requireAdminUser } from '@/lib/auth/session';
+import { requireMainAdminUser } from '@/lib/auth/session';
 import { getAdminTaxonomyBundle } from '@/lib/admin-taxonomy';
 import { StudentsManagerClient } from '@/components/admin/StudentsManagerClient';
 
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function AdminStudentsPage() {
-  await requireAdminUser();
+  await requireMainAdminUser();
   const taxonomy = await getAdminTaxonomyBundle();
 
   return (

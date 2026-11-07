@@ -1,4 +1,4 @@
-import { requireAdminUser, getWebsiteSettings } from '@/lib/auth/session';
+import { requireMainAdminUser, getWebsiteSettings } from '@/lib/auth/session';
 import { AdminSettingsClient } from '@/components/admin/AdminSettingsClient';
 
 export const metadata = {
@@ -6,7 +6,7 @@ export const metadata = {
 };
 
 export default async function AdminSettingsPage() {
-  await requireAdminUser();
+  await requireMainAdminUser();
   const settings = await getWebsiteSettings();
 
   return <AdminSettingsClient initialSettings={settings} />;

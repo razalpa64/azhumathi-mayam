@@ -1,4 +1,4 @@
-import { requireAdminUser, getWebsiteSettings } from '@/lib/auth/session';
+import { requireMainAdminUser, getWebsiteSettings } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getAdminTaxonomyBundle } from '@/lib/admin-taxonomy';
 import { NoticesManagerClient } from '@/components/admin/NoticesManagerClient';
@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 export default async function AdminNoticesPage() {
-  await requireAdminUser();
+  await requireMainAdminUser();
   const adminClient = createSupabaseAdminClient();
 
   const [{ data: notices }, taxonomy, settings] = await Promise.all([

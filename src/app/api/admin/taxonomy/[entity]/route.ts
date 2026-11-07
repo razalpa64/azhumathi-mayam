@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { friendlyDbError } from '@/lib/db-errors';
-import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
+import { requireApiStaff, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 const ALLOWED_ENTITIES = new Set([
@@ -25,7 +25,7 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ entity: string }> }
 ) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const { entity } = await context.params;
@@ -225,7 +225,7 @@ export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ entity: string }> }
 ) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const { entity } = await context.params;
@@ -288,7 +288,7 @@ export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ entity: string }> }
 ) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const { entity } = await context.params;

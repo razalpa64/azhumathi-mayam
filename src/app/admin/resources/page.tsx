@@ -1,4 +1,4 @@
-import { requireAdminUser } from '@/lib/auth/session';
+import { requireStaffUser } from '@/lib/auth/session';
 import { getAdminTaxonomyBundle } from '@/lib/admin-taxonomy';
 import { ResourcesManagerClient } from '@/components/admin/ResourcesManagerClient';
 
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function AdminResourcesPage() {
-  await requireAdminUser();
+  await requireStaffUser();
   const taxonomy = await getAdminTaxonomyBundle();
 
   return (

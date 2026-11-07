@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
-import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
+import { requireApiStaff, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
 
@@ -43,7 +43,7 @@ const ADMIN_RESOURCE_SELECT = `
 `;
 
 export async function GET(request: NextRequest) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const adminClient = createSupabaseAdminClient();
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const body = await request.json().catch(() => null);
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const auth = await requireApiAdmin();
+  const auth = await requireApiStaff();
   if (!auth.ok) return auth.response;
 
   const body = await request.json().catch(() => null);

@@ -8,11 +8,12 @@ import {
   FolderKanban,
   GraduationCap,
   HardDrive,
+  Inbox,
   Megaphone,
   UserPlus,
   Users,
 } from 'lucide-react';
-import { requireAdminUser } from '@/lib/auth/session';
+import { requireStaffUser } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { Badge } from '@/components/ui/Badge';
 import { formatDate, formatDateTime } from '@/lib/utils';
@@ -22,7 +23,8 @@ export const metadata = {
 };
 
 export default async function AdminOverviewPage() {
-  await requireAdminUser();
+  const profile = await requireStaffUser();
+  const isMainAdmin = profile.role === 'admin';
   const adminClient = createSupabaseAdminClient();
 
   const [
@@ -37,13 +39,18 @@ export default async function AdminOverviewPage() {
     topDownloadedRes,
     recentStudentsRes,
     recentAuditRes,
+    pendingRequestsRes,
   ] = await Promise.all([
-    adminClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'student'),
-    adminClient
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .eq('role', 'student')
-      .eq('is_active', true),
+    isMainAdmin
+      ? adminClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'student')
+      : Promise.resolve({ count: 0 }),
+    isMainAdmin
+      ? adminClient
+          .from('profiles')
+          .select('id', { count: 'exact', head: true })
+          .eq('role', 'student')
+          .eq('is_active', true)
+      : Promise.resolve({ count: 0 }),
     adminClient.from('programmes').select('id', { count: 'exact', head: true }),
     adminClient.from('subjects').select('id', { count: 'exact', head: true }),
     adminClient
@@ -68,17 +75,25 @@ export default async function AdminOverviewPage() {
       .eq('publication_status', 'published')
       .order('download_count', { ascending: false })
       .limit(6),
+    isMainAdmin
+      ? adminClient
+          .from('profiles')
+          .select('id, username, full_name, last_login_at, created_at, programme:programmes(name)')
+          .eq('role', 'student')
+          .order('last_login_at', { ascending: false, nullsFirst: false })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
+    isMainAdmin
+      ? adminClient
+          .from('admin_activity_logs')
+          .select('id, action_type, summary, created_at')
+          .order('created_at', { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [] }),
     adminClient
-      .from('profiles')
-      .select('id, username, full_name, last_login_at, created_at, programme:programmes(name)')
-      .eq('role', 'student')
-      .order('last_login_at', { ascending: false, nullsFirst: false })
-      .limit(6),
-    adminClient
-      .from('admin_activity_logs')
-      .select('id, action_type, summary, created_at')
-      .order('created_at', { ascending: false })
-      .limit(6),
+      .from('resource_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending'),
   ]);
 
   const totalDownloads = (allDownloadCountsRes.data || []).reduce(
@@ -86,50 +101,95 @@ export default async function AdminOverviewPage() {
     0
   );
 
-  const statCards = [
-    {
-      label: 'Registered Students',
-      value: totalStudentsRes.count || 0,
-      sub: `${activeStudentsRes.count || 0} active accounts`,
-      icon: Users,
-      href: '/admin/students',
-    },
-    {
-      label: 'Active Students',
-      value: activeStudentsRes.count || 0,
-      sub: 'Permitted portal access',
-      icon: Activity,
-      href: '/admin/students?status=active',
-    },
-    {
-      label: 'Degree Programmes',
-      value: totalProgrammesRes.count || 0,
-      sub: `${totalSubjectsRes.count || 0} configured subjects`,
-      icon: GraduationCap,
-      href: '/admin/courses',
-    },
-    {
-      label: 'Subjects',
-      value: totalSubjectsRes.count || 0,
-      sub: 'Dynamic curriculum entries',
-      icon: BookOpen,
-      href: '/admin/subjects',
-    },
-    {
-      label: 'Published Resources',
-      value: publishedResourcesRes.count || 0,
-      sub: `${draftResourcesRes.count || 0} saved as draft`,
-      icon: FolderKanban,
-      href: '/admin/resources',
-    },
-    {
-      label: 'Total Downloads',
-      value: totalDownloads,
-      sub: 'Deduplicated student downloads',
-      icon: Download,
-      href: '/admin/analytics',
-    },
-  ];
+  const statCards = isMainAdmin
+    ? [
+        {
+          label: 'Registered Students',
+          value: totalStudentsRes.count || 0,
+          sub: `${activeStudentsRes.count || 0} active accounts`,
+          icon: Users,
+          href: '/admin/students',
+        },
+        {
+          label: 'Active Students',
+          value: activeStudentsRes.count || 0,
+          sub: 'Permitted portal access',
+          icon: Activity,
+          href: '/admin/students?status=active',
+        },
+        {
+          label: 'Degree Programmes',
+          value: totalProgrammesRes.count || 0,
+          sub: `${totalSubjectsRes.count || 0} configured subjects`,
+          icon: GraduationCap,
+          href: '/admin/courses',
+        },
+        {
+          label: 'Subjects',
+          value: totalSubjectsRes.count || 0,
+          sub: 'Dynamic curriculum entries',
+          icon: BookOpen,
+          href: '/admin/subjects',
+        },
+        {
+          label: 'Published Resources',
+          value: publishedResourcesRes.count || 0,
+          sub: `${draftResourcesRes.count || 0} saved as draft`,
+          icon: FolderKanban,
+          href: '/admin/resources',
+        },
+        {
+          label: 'Total Downloads',
+          value: totalDownloads,
+          sub: 'Deduplicated student downloads',
+          icon: Download,
+          href: '/admin/analytics',
+        },
+      ]
+    : [
+        {
+          label: 'Degree Programmes',
+          value: totalProgrammesRes.count || 0,
+          sub: `${totalSubjectsRes.count || 0} configured subjects`,
+          icon: GraduationCap,
+          href: '/admin/courses',
+        },
+        {
+          label: 'Subjects',
+          value: totalSubjectsRes.count || 0,
+          sub: 'Dynamic curriculum entries',
+          icon: BookOpen,
+          href: '/admin/subjects',
+        },
+        {
+          label: 'Published Resources',
+          value: publishedResourcesRes.count || 0,
+          sub: 'Live for students right now',
+          icon: FolderKanban,
+          href: '/admin/resources',
+        },
+        {
+          label: 'Draft Resources',
+          value: draftResourcesRes.count || 0,
+          sub: 'Waiting to be published',
+          icon: FilePlus2,
+          href: '/admin/resources',
+        },
+        {
+          label: 'Requests Waiting',
+          value: pendingRequestsRes.count || 0,
+          sub: 'Students asked for materials',
+          icon: Inbox,
+          href: '/admin/requests',
+        },
+        {
+          label: 'Total Downloads',
+          value: totalDownloads,
+          sub: 'Across all published materials',
+          icon: Download,
+          href: '/admin/resources',
+        },
+      ];
 
   return (
     <div className="space-y-8">
@@ -137,13 +197,15 @@ export default async function AdminOverviewPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-5">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-burgundy">
-            Admin
+            {isMainAdmin ? 'Super Administrator' : 'Content Manager'}
           </p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-charcoal">
             Overview
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Students, materials and downloads — the latest numbers.
+            {isMainAdmin
+              ? 'Students, materials and downloads — the latest numbers.'
+              : 'Materials, courses and student requests — the latest numbers.'}
           </p>
         </div>
 
@@ -155,20 +217,32 @@ export default async function AdminOverviewPage() {
             <FilePlus2 className="h-3.5 w-3.5" />
             <span>Add a resource</span>
           </Link>
-          <Link
-            href="/admin/students"
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
-          >
-            <UserPlus className="h-3.5 w-3.5 text-burgundy" />
-            <span>Add student</span>
-          </Link>
-          <Link
-            href="/admin/notices"
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
-          >
-            <Megaphone className="h-3.5 w-3.5 text-burgundy" />
-            <span>Post a notice</span>
-          </Link>
+          {isMainAdmin ? (
+            <>
+              <Link
+                href="/admin/students"
+                className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
+              >
+                <UserPlus className="h-3.5 w-3.5 text-burgundy" />
+                <span>Add student</span>
+              </Link>
+              <Link
+                href="/admin/notices"
+                className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
+              >
+                <Megaphone className="h-3.5 w-3.5 text-burgundy" />
+                <span>Post a notice</span>
+              </Link>
+            </>
+          ) : (
+            <Link
+              href="/admin/requests"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
+            >
+              <Inbox className="h-3.5 w-3.5 text-burgundy" />
+              <span>Answer requests</span>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -310,7 +384,8 @@ export default async function AdminOverviewPage() {
         </section>
       </div>
 
-      {/* New students & Audit Trail */}
+      {/* New students & Audit Trail — super admin only */}
+      {isMainAdmin ? (
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
           <div className="flex items-center justify-between">
@@ -377,6 +452,7 @@ export default async function AdminOverviewPage() {
           )}
         </section>
       </div>
+      ) : null}
     </div>
   );
 }
