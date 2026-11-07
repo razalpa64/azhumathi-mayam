@@ -141,7 +141,7 @@ export function GlobalSearchBar({
   return (
     <div ref={wrapperRef} className={cn('relative w-full', className)}>
       <form onSubmit={handleSubmit} role="search" className="relative flex items-center">
-        <Search className="pointer-events-none absolute left-5 h-5 w-5 text-muted" />
+        <Search className="pointer-events-none absolute left-4 h-[18px] w-[18px] text-muted" />
         <input
           type="search"
           value={query}
@@ -152,21 +152,21 @@ export function GlobalSearchBar({
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
           aria-label="Search notes, subjects and question papers"
-          className="h-14 w-full rounded-full border border-line bg-canvas pl-12 pr-[7.25rem] text-sm text-charcoal shadow-[0_12px_24px_-16px_rgba(36,7,7,0.35)] placeholder:text-muted/80 focus:border-burgundy-border focus:outline-none focus:ring-2 focus:ring-burgundy/15"
+          className="h-12 w-full rounded-full border border-line bg-canvas pl-11 pr-[6.4rem] text-sm text-charcoal shadow-[0_8px_20px_-14px_rgba(36,7,7,0.3)] placeholder:text-muted/80 focus:border-burgundy-border focus:outline-none focus:ring-2 focus:ring-burgundy/15"
         />
         {query ? (
           <button
             type="button"
             onClick={() => setQuery('')}
             aria-label="Clear search query"
-            className="absolute right-[6.9rem] rounded-full p-1 text-muted hover:bg-neutral-soft hover:text-charcoal cursor-pointer"
+            className="absolute right-[5.9rem] rounded-full p-1 text-muted hover:bg-neutral-soft hover:text-charcoal cursor-pointer"
           >
             <X className="h-3.5 w-3.5" />
           </button>
         ) : null}
         <button
           type="submit"
-          className="absolute right-2 inline-flex h-10 items-center gap-1.5 rounded-full bg-burgundy px-5 text-[13px] font-semibold text-canvas shadow-[0_10px_18px_-10px_rgba(121,0,0,0.8)] hover:bg-burgundy-dark transition-colors cursor-pointer"
+          className="absolute right-1.5 inline-flex h-9 items-center gap-1.5 rounded-full bg-burgundy px-4 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors cursor-pointer"
         >
           <span>Search</span>
           <ArrowRight className="h-3.5 w-3.5" />

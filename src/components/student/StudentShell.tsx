@@ -31,15 +31,8 @@ interface StudentShellProps {
   children: React.ReactNode;
 }
 
-const TOP_NAV = [
-  { href: '/dashboard', label: 'Home', icon: Home, exact: true },
-  { href: '/dashboard/materials', label: 'Browse Materials', icon: BookOpen },
-  { href: '/dashboard/courses', label: 'Courses', icon: GraduationCap },
-  { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
-  { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
-];
-
-const WORKSPACE_TABS = [
+/** Everywhere a student can go — used by the mobile menu sheet. */
+const ALL_SECTIONS = [
   { href: '/dashboard', label: 'Overview', icon: Home, exact: true },
   { href: '/dashboard/semester', label: 'My Semester', icon: Layers },
   { href: '/dashboard/courses', label: 'My Courses', icon: GraduationCap },
@@ -53,6 +46,20 @@ const WORKSPACE_TABS = [
   { href: '/dashboard/profile', label: 'My Profile', icon: User },
   { href: '/dashboard/help', label: 'Help & Contact', icon: LifeBuoy },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+];
+
+/**
+ * The pill strip keeps only the everyday study destinations.
+ * Everything else lives one tap away (bottom nav, bell, avatar, menu),
+ * so the strip itself can stay short and quiet.
+ */
+const STRIP_TABS = [
+  { href: '/dashboard', label: 'Overview', icon: Home, exact: true },
+  { href: '/dashboard/semester', label: 'My Semester', icon: Layers },
+  { href: '/dashboard/courses', label: 'My Courses', icon: GraduationCap },
+  { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },
+  { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
+  { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
 ];
 
 const BOTTOM_NAV = [
@@ -98,145 +105,150 @@ export function StudentShell({
 
   return (
     <div className="min-h-screen flex flex-col bg-canvas">
-      <header className="sticky top-0 z-40">
-        {/* Burgundy wave header */}
-        <div className="relative bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between gap-3 pt-4 pb-9 sm:pt-5 sm:pb-11">
-              {/* Brand */}
+      {/* Burgundy wave header — scrolls away with the page, only the tab strip sticks */}
+      <div className="relative bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-3 pb-10 pt-3.5 sm:pb-11 sm:pt-4">
+            {/* Brand */}
+            <Link
+              href="/dashboard"
+              className="flex min-w-0 items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+              <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-burgundy-logo ring-1 ring-white/25 sm:h-11 sm:w-11">
+                <Image
+                  src="/brand/logo.png"
+                  alt="അഴിമതി മയം"
+                  width={44}
+                  height={44}
+                  className="h-full w-full object-cover"
+                  priority
+                />
+              </span>
+              <span className="min-w-0 leading-tight">
+                <span className="block truncate font-logo text-xl font-bold tracking-tight text-white sm:text-[22px]">
+                  അഴിമതി മയം
+                </span>
+                <span className="mt-0.5 block truncate text-[11px] font-medium tracking-wide text-white/60">
+                  {contextLine || 'Notes, syllabus & question papers'}
+                </span>
+              </span>
+            </Link>
+
+            <div className="flex shrink-0 items-center gap-2">
+              {/* Notifications */}
               <Link
-                href="/dashboard"
-                className="flex min-w-0 items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                href="/dashboard/notifications"
+                aria-label="Notifications"
+                className={cn(
+                  'relative inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors',
+                  pathname === '/dashboard/notifications'
+                    ? 'bg-white text-burgundy ring-white'
+                    : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
+                )}
               >
-                <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-burgundy-logo ring-1 ring-white/25 sm:h-12 sm:w-12">
-                  <Image
-                    src="/brand/logo.png"
-                    alt="അഴിമതി മയം"
-                    width={48}
-                    height={48}
-                    className="h-full w-full object-cover"
-                    priority
-                  />
-                </span>
-                <span className="min-w-0 leading-tight">
-                  <span className="block truncate font-logo text-[21px] font-bold tracking-tight text-white sm:text-2xl">
-                    അഴിമതി മയം
+                <Bell className="h-[18px] w-[18px]" />
+                {unreadNotifications > 0 ? (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#E5484D] px-1 text-[10px] font-bold text-white ring-2 ring-burgundy-dark">
+                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
                   </span>
-                  <span className="mt-0.5 block truncate text-[11px] font-medium tracking-wide text-white/65 sm:text-xs">
-                    {contextLine || 'Notes, syllabus & question papers'}
-                  </span>
-                </span>
+                ) : null}
               </Link>
 
-              {/* Desktop primary nav */}
-              <nav aria-label="Primary student navigation" className="hidden lg:flex items-center gap-1">
-                {TOP_NAV.map((item) => {
-                  const active = isActive(item.href, item.exact);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors',
-                        active
-                          ? 'bg-white text-burgundy font-semibold shadow-sm'
-                          : 'text-white/80 hover:bg-white/10 hover:text-white'
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </nav>
+              {/* Profile chip (desktop) */}
+              <Link
+                href="/dashboard/profile"
+                className={cn(
+                  'hidden items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-xs font-medium ring-1 transition-colors md:inline-flex',
+                  pathname === '/dashboard/profile'
+                    ? 'bg-white text-burgundy ring-white'
+                    : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
+                )}
+              >
+                {profile.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile.full_name}
+                    className="h-7 w-7 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[10px] font-bold text-burgundy">
+                    {getInitials(profile.full_name)}
+                  </span>
+                )}
+                <span className="max-w-[130px] truncate">{profile.full_name}</span>
+              </Link>
 
-              <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
-                {/* Notifications */}
-                <Link
-                  href="/dashboard/notifications"
-                  aria-label="Notifications"
-                  className={cn(
-                    'relative inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors',
-                    pathname === '/dashboard/notifications'
-                      ? 'bg-white text-burgundy ring-white'
-                      : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
-                  )}
-                >
-                  <Bell className="h-[18px] w-[18px]" />
-                  {unreadNotifications > 0 ? (
-                    <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#E5484D] px-1 text-[10px] font-bold text-white ring-2 ring-burgundy-dark">
-                      {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                    </span>
-                  ) : null}
-                </Link>
+              {/* Logout (desktop) */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                aria-label="Logout"
+                title="Logout"
+                className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer disabled:opacity-50 md:inline-flex"
+              >
+                <LogOut className="h-[18px] w-[18px]" />
+              </button>
 
-                {/* Profile chip (desktop) */}
-                <Link
-                  href="/dashboard/profile"
-                  className={cn(
-                    'hidden md:inline-flex items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-xs font-medium ring-1 transition-colors',
-                    pathname === '/dashboard/profile'
-                      ? 'bg-white text-burgundy ring-white'
-                      : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
-                  )}
-                >
-                  {profile.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={profile.avatar_url}
-                      alt={profile.full_name}
-                      className="h-7 w-7 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[10px] font-bold text-burgundy">
-                      {getInitials(profile.full_name)}
-                    </span>
-                  )}
-                  <span className="max-w-[130px] truncate">{profile.full_name}</span>
-                </Link>
-
-                {/* Logout (desktop) */}
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  disabled={loggingOut}
-                  aria-label="Logout"
-                  title="Logout"
-                  className="hidden md:inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer disabled:opacity-50"
-                >
-                  <LogOut className="h-[18px] w-[18px]" />
-                </button>
-
-                {/* Mobile drawer trigger */}
-                <button
-                  type="button"
-                  onClick={() => setMobileOpen((prev) => !prev)}
-                  aria-label="Toggle navigation menu"
-                  aria-expanded={mobileOpen}
-                  className="inline-flex lg:hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer"
-                >
-                  {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </button>
-              </div>
+              {/* Mobile menu trigger */}
+              <button
+                type="button"
+                onClick={() => setMobileOpen((prev) => !prev)}
+                aria-label="Toggle navigation menu"
+                aria-expanded={mobileOpen}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer lg:hidden"
+              >
+                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
             </div>
           </div>
-
-          {/* Wave edge */}
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 1440 90"
-            preserveAspectRatio="none"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-[26px] w-full text-canvas sm:h-[34px]"
-          >
-            <path
-              d="M0 90 L0 52 C 300 84, 860 92, 1440 10 L1440 90 Z"
-              fill="currentColor"
-            />
-          </svg>
         </div>
 
-        {/* Mobile drawer */}
+        {/* Wave edge */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 1440 90"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[20px] w-full text-canvas sm:h-[26px]"
+        >
+          <path d="M0 90 L0 52 C 300 84, 860 92, 1440 10 L1440 90 Z" fill="currentColor" />
+        </svg>
+      </div>
+
+      {/* Sticky pill strip — the one slim bar that stays while scrolling */}
+      <div className="sticky top-0 z-40 border-b border-line/70 bg-canvas/90 backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <nav
+            aria-label="Student workspace sections"
+            className="no-scrollbar -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 py-2"
+          >
+            {STRIP_TABS.map((tab) => {
+              const Icon = tab.icon;
+              const active = isActive(tab.href, tab.exact);
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+                    active
+                      ? 'bg-burgundy font-semibold text-white'
+                      : 'text-charcoal/70 hover:bg-burgundy-tint hover:text-burgundy'
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{tab.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Mobile menu sheet — the full list of sections, one place */}
         {mobileOpen ? (
-          <div className="lg:hidden border-b border-line bg-canvas px-4 pb-5 pt-1 space-y-4 shadow-[0_18px_30px_-20px_rgba(36,7,7,0.4)]">
+          <div className="space-y-4 border-t border-line bg-canvas px-4 pb-5 pt-4 lg:hidden">
             <div className="flex items-center justify-between gap-3 rounded-2xl bg-burgundy-tint px-4 py-3">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-charcoal">{profile.full_name}</p>
@@ -251,7 +263,7 @@ export function StudentShell({
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              {WORKSPACE_TABS.map((item) => {
+              {ALL_SECTIONS.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href, item.exact);
                 return (
@@ -262,12 +274,22 @@ export function StudentShell({
                     className={cn(
                       'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium',
                       active
-                        ? 'border-burgundy bg-burgundy text-white font-semibold'
+                        ? 'border-burgundy bg-burgundy font-semibold text-white'
                         : 'border-line bg-canvas text-charcoal hover:bg-neutral-soft'
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     <span className="truncate">{item.label}</span>
+                    {item.href === '/dashboard/notifications' && unreadNotifications > 0 ? (
+                      <span
+                        className={cn(
+                          'ml-auto rounded-full px-1.5 py-px text-[10px] font-bold',
+                          active ? 'bg-white text-burgundy' : 'bg-burgundy text-white'
+                        )}
+                      >
+                        {unreadNotifications}
+                      </span>
+                    ) : null}
                   </Link>
                 );
               })}
@@ -284,51 +306,10 @@ export function StudentShell({
             </button>
           </div>
         ) : null}
-
-        {/* Workspace pill tabs */}
-        <div className="bg-canvas/95 backdrop-blur-sm">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <nav
-              aria-label="Student workspace sections"
-              className="no-scrollbar -mx-1 flex items-center gap-2 overflow-x-auto px-1 py-2.5"
-            >
-              {WORKSPACE_TABS.map((tab) => {
-                const Icon = tab.icon;
-                const active = isActive(tab.href, tab.exact);
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium transition-colors',
-                      active
-                        ? 'bg-burgundy text-white font-semibold shadow-[0_8px_16px_-8px_rgba(121,0,0,0.7)]'
-                        : 'bg-neutral-soft text-charcoal/75 ring-1 ring-line hover:bg-burgundy-tint hover:text-burgundy'
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span>{tab.label}</span>
-                    {tab.href === '/dashboard/notifications' && unreadNotifications > 0 ? (
-                      <span
-                        className={cn(
-                          'ml-0.5 rounded-full px-1.5 py-px text-[10px] font-bold',
-                          active ? 'bg-white text-burgundy' : 'bg-burgundy text-white'
-                        )}
-                      >
-                        {unreadNotifications}
-                      </span>
-                    ) : null}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-      </header>
+      </div>
 
       {/* Main Content */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-32 sm:px-6 lg:px-8 lg:pb-10">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-8 lg:pb-10">
         {children}
       </main>
 
@@ -363,7 +344,7 @@ export function StudentShell({
       </nav>
 
       {/* Footer */}
-      <footer className="mt-4 border-t border-line bg-neutral-soft/60">
+      <footer className="mt-6 border-t border-line bg-neutral-soft/60">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row sm:px-6 lg:px-8">
           <div className="flex items-center gap-2.5">
             <span className="font-logo text-base font-bold text-burgundy">അഴിമതി മയം</span>
