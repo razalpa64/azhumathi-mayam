@@ -90,6 +90,20 @@ async function main() {
     );
     await pg.query(subjectsMeSql);
 
+    console.log('3e. Applying 0009_subjects_calicut_fyugp_bsc.sql (Calicut FYUGP B.Sc subjects)...');
+    const subjectsCuSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0009_subjects_calicut_fyugp_bsc.sql'),
+      'utf8'
+    );
+    await pg.query(subjectsCuSql);
+
+    console.log('3f. Applying 0010_subjects_calicut_fyugp_bsc_2.sql (Calicut FYUGP B.Sc subjects, tranche 2)...');
+    const subjectsCu2Sql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0010_subjects_calicut_fyugp_bsc_2.sql'),
+      'utf8'
+    );
+    await pg.query(subjectsCu2Sql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
