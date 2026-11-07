@@ -51,13 +51,12 @@ const ALL_SECTIONS = [
 ];
 
 /**
- * The pill strip keeps the everyday destinations, with Group Chat up
- * front (#2) so nobody misses it. Everything else lives one tap away
- * (bottom nav, bell, avatar, menu), so the strip stays short and quiet.
+ * The pill strip keeps the everyday study destinations. Everything else
+ * (Group Chat, Saved, History, Help...) lives one tap away in the bottom
+ * nav or the menu sheet, so the strip stays short and quiet.
  */
 const STRIP_TABS = [
   { href: '/dashboard', label: 'Overview', icon: Home, exact: true },
-  { href: '/dashboard/chat', label: 'Group Chat', icon: MessagesSquare },
   { href: '/dashboard/semester', label: 'My Semester', icon: Layers },
   { href: '/dashboard/courses', label: 'My Courses', icon: GraduationCap },
   { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },

@@ -13,7 +13,6 @@ import {
   Inbox,
   Layers,
   LifeBuoy,
-  MessagesSquare,
   NotebookPen,
   TrendingUp,
   Zap,
@@ -29,7 +28,6 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { Notice, Resource, Subject } from '@/types/database';
 import { getGreetingByHour } from '@/lib/utils';
-import { getIstDayStartIso } from '@/lib/chat';
 
 const RESOURCE_JOIN = `
   *,
@@ -237,12 +235,6 @@ export default async function StudentDashboardPage() {
       ? new Intl.DateTimeFormat('en-IN', { month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso))
       : null;
 
-  // Group chat teaser: how busy today's room is (table may not exist yet)
-  const { count: chatTodayCount } = await supabase
-    .from('chat_messages')
-    .select('id', { count: 'exact', head: true })
-    .gte('created_at', getIstDayStartIso());
-
   const contextBits = [
     profile.university?.short_name,
     profile.programme?.name,
@@ -323,39 +315,6 @@ export default async function StudentDashboardPage() {
       <div className="anim-rise" style={{ animationDelay: '60ms' }}>
         <GlobalSearchBar />
       </div>
-
-      {/* Group chat banner — front and centre, it's the community room */}
-      <Link
-        href="/dashboard/chat"
-        style={{ animationDelay: '120ms' }}
-        className="anim-rise group relative flex items-center gap-4 overflow-hidden rounded-[24px] bg-gradient-to-r from-burgundy-logo via-burgundy to-burgundy-dark px-5 py-4 text-white shadow-[0_16px_30px_-16px_rgba(83,0,0,0.65)] transition-transform active:scale-[0.99]"
-      >
-        <MessagesSquare
-          aria-hidden="true"
-          strokeWidth={1}
-          className="pointer-events-none absolute -right-3 -top-4 h-24 w-24 rotate-[-10deg] text-white/10"
-        />
-        <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/25">
-          <MessagesSquare className="h-5 w-5" strokeWidth={1.9} />
-        </span>
-        <span className="relative min-w-0 flex-1">
-          <span className="flex items-center gap-2 text-[15px] font-bold leading-tight">
-            Student group chat
-            <span className="flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white/85">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-              Live
-            </span>
-          </span>
-          <span className="mt-1 block truncate text-[13px] text-white/70">
-            {chatTodayCount
-              ? `${chatTodayCount} message${chatTodayCount === 1 ? '' : 's'} today — see what everyone's saying`
-              : 'Chat with every student — doubts, notes, company. Clears at midnight.'}
-          </span>
-        </span>
-        <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-burgundy transition-transform group-hover:translate-x-0.5">
-          <ArrowRight className="h-4 w-4" />
-        </span>
-      </Link>
 
       {/* Quick actions */}
       <div className="anim-rise grid grid-cols-2 gap-3 lg:grid-cols-4" style={{ animationDelay: '170ms' }}>
