@@ -250,6 +250,19 @@ export type ResourceRequestType =
 
 export type ResourceRequestStatus = 'pending' | 'in_progress' | 'fulfilled' | 'rejected';
 
+export interface ChatMessage {
+  id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+  sender?: {
+    id: string;
+    full_name: string;
+    avatar_url: string | null;
+    programme?: { name: string } | null;
+  } | null;
+}
+
 export interface ResourceRequest {
   id: string;
   student_id: string;

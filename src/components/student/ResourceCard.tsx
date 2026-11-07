@@ -19,12 +19,15 @@ interface ResourceCardProps {
   resource: Resource;
   initialBookmarked?: boolean;
   onBookmarkToggle?: (resourceId: string, bookmarked: boolean) => void;
+  /** Position in a grid — only used to stagger the entrance animation. */
+  index?: number;
 }
 
 export function ResourceCard({
   resource,
   initialBookmarked = false,
   onBookmarkToggle,
+  index = 0,
 }: ResourceCardProps) {
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
   const [bookmarking, setBookmarking] = useState(false);
@@ -81,7 +84,10 @@ export function ResourceCard({
   }
 
   return (
-    <article className="group flex flex-col justify-between rounded-[22px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border">
+    <article
+      style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
+      className="anim-rise group flex flex-col justify-between rounded-[22px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border"
+    >
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-wrap items-center gap-1.5">

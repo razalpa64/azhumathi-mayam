@@ -51,6 +51,13 @@ async function main() {
     );
     await pg.query(shortNoteHubSql);
 
+    console.log('2d. Applying 0004_group_chat.sql...');
+    const groupChatSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0004_group_chat.sql'),
+      'utf8'
+    );
+    await pg.query(groupChatSql);
+
     console.log('3. Applying seed.sql (authentic Kerala taxonomy, zero fake data)...');
     const seedSql = fs.readFileSync(path.resolve(process.cwd(), 'supabase/seed.sql'), 'utf8');
     await pg.query(seedSql);
