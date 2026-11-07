@@ -21,8 +21,13 @@ export default async function CoursesPage() {
     ? taxonomy.semesters.filter((s) => s.programme_id === enrolledProgramme.id)
     : [];
 
+  // Cross-programme browsing only offers programmes that actually
+  // have subjects — an unseeded programme can only show empty lists.
+  const seededProgrammeIds = new Set(taxonomy.subjects.map((s) => s.programme_id));
   const otherProgrammes = settings.allow_cross_programme_browsing
-    ? taxonomy.programmes.filter((p) => p.id !== profile.programme_id)
+    ? taxonomy.programmes.filter(
+        (p) => p.id !== profile.programme_id && seededProgrammeIds.has(p.id)
+      )
     : [];
 
   return (

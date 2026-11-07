@@ -56,6 +56,14 @@ export function ProfileEditorClient({
     [programmeId, semesters]
   );
 
+  const availableRegulations = useMemo(
+    () =>
+      universityId
+        ? regulations.filter((r) => !r.university_id || r.university_id === universityId)
+        : regulations,
+    [regulations, universityId]
+  );
+
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -328,7 +336,7 @@ export function ProfileEditorClient({
               className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5"
             >
               <option value="">Select Regulation / Scheme (Optional)</option>
-              {regulations.map((r) => (
+              {availableRegulations.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.name} {r.batch_range ? `(${r.batch_range})` : ''}
                 </option>

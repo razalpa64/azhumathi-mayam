@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 import { BookOpen, FileText, GraduationCap, Layers } from 'lucide-react';
 import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { fetchAllRows } from '@/lib/supabase/fetch-all';
+import { filterTaxonomyToSeeded } from '@/lib/seeded-taxonomy';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { RegisterForm } from './RegisterForm';
 import type {
@@ -62,6 +64,7 @@ export default async function RegisterPage() {
     { data: specializations },
     { data: regulations },
     { data: semesters },
+    subjectScopeRows,
   ] = await Promise.all([
     adminClient
       .from('universities')
@@ -92,7 +95,30 @@ export default async function RegisterPage() {
       .select('*')
       .eq('is_active', true)
       .order('semester_number'),
+    // Which programmes/branches actually have subjects (paginated —
+    // subjects outgrow the 1,000-row response cap).
+    fetchAllRows(async (from, to) =>
+      adminClient
+        .from('subjects')
+        .select('programme_id, specialization_id')
+        .eq('publication_status', 'published')
+        .order('id')
+        .range(from, to)
+    ),
   ]);
+
+  // New students are only offered programmes and branches that have
+  // subjects behind them — picking an unseeded branch would strand
+  // them on an empty dashboard. Options appear automatically once
+  // subjects are seeded.
+  const studentTaxonomy = filterTaxonomyToSeeded(
+    {
+      universities: (universities || []) as University[],
+      programmes: (programmes || []) as Programme[],
+      specializations: (specializations || []) as Specialization[],
+    },
+    subjectScopeRows
+  );
 
   return (
     <div className="min-h-screen grid lg:grid-cols-12 bg-canvas">
@@ -190,9 +216,9 @@ export default async function RegisterPage() {
             }
           >
             <RegisterForm
-              universities={(universities || []) as University[]}
-              programmes={(programmes || []) as Programme[]}
-              specializations={(specializations || []) as Specialization[]}
+              universities={studentTaxonomy.universities}
+              programmes={studentTaxonomy.programmes}
+              specializations={studentTaxonomy.specializations}
               regulations={(regulations || []) as AcademicRegulation[]}
               semesters={(semesters || []) as Semester[]}
             />

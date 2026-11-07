@@ -1,5 +1,6 @@
 import { requireStudentAppUser } from '@/lib/auth/session';
 import { getPublishedTaxonomyBundle } from '@/lib/taxonomy';
+import { filterTaxonomyToSeeded } from '@/lib/seeded-taxonomy';
 import { ProfileEditorClient } from '@/components/student/ProfileEditorClient';
 
 export const metadata = {
@@ -12,6 +13,32 @@ export default async function StudentProfilePage() {
     getPublishedTaxonomyBundle(),
   ]);
 
+  // Only offer programmes/branches that have subjects behind them —
+  // picking an unseeded one strands the student on empty lists. A
+  // student already registered under an unseeded programme/branch
+  // keeps their own current values as options, so their form is
+  // never left blank or silently changed.
+  const seeded = filterTaxonomyToSeeded(taxonomy, taxonomy.subjects);
+  const programmes =
+    !profile.programme_id || seeded.programmes.some((p) => p.id === profile.programme_id)
+      ? seeded.programmes
+      : profile.programme
+        ? [...seeded.programmes, profile.programme]
+        : seeded.programmes;
+  const specializations =
+    !profile.specialization_id ||
+    seeded.specializations.some((s) => s.id === profile.specialization_id)
+      ? seeded.specializations
+      : profile.specialization
+        ? [...seeded.specializations, profile.specialization]
+        : seeded.specializations;
+  const universities =
+    !profile.university_id || seeded.universities.some((u) => u.id === profile.university_id)
+      ? seeded.universities
+      : profile.university
+        ? [...seeded.universities, profile.university]
+        : seeded.universities;
+
   return (
     <div className="space-y-6">
       <div>
@@ -23,9 +50,9 @@ export default async function StudentProfilePage() {
 
       <ProfileEditorClient
         profile={profile}
-        universities={taxonomy.universities}
-        programmes={taxonomy.programmes}
-        specializations={taxonomy.specializations}
+        universities={universities}
+        programmes={programmes}
+        specializations={specializations}
         regulations={taxonomy.regulations}
         semesters={taxonomy.semesters}
       />
