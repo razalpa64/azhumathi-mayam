@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import '@fontsource-variable/plus-jakarta-sans';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/noto-sans-malayalam';
 import '@fontsource-variable/baloo-chettan-2';
 import './globals.css';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
+import { getWebsiteSettings } from '@/lib/auth/session';
+import { resolveAdsenseClientId } from '@/lib/adsense';
 
 export const metadata: Metadata = {
   title: {
@@ -39,16 +42,35 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // The AdSense library is loaded on every page (this is also what
+  // verifies the site with Google). Individual ad UNITS only render
+  // where an enabled placement exists and ads are switched on in
+  // Admin → Settings, so students never see a unit this doesn't gate.
+  let adsenseClientId = resolveAdsenseClientId(null);
+  try {
+    const settings = await getWebsiteSettings();
+    adsenseClientId = resolveAdsenseClientId(settings.adsense_publisher_id);
+  } catch {
+    // Settings unreachable (e.g. during a build) — the built-in
+    // publisher account still applies.
+  }
+
   return (
     <html lang="en">
       <body className="min-h-screen bg-canvas text-charcoal antialiased">
         {children}
         <ServiceWorkerRegister />
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

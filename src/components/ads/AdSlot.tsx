@@ -14,8 +14,28 @@ interface AdSlotProps {
 
 const CONSENT_STORAGE_KEY = 'azm_ad_consent_v1';
 
+declare global {
+  interface Window {
+    adsbygoogle?: Record<string, unknown>[];
+  }
+}
+
 export function AdSlot({ ad, adsEnabled, requireConsent = false, className }: AdSlotProps) {
   const [consented, setConsented] = useState(!requireConsent);
+
+  // Ask the AdSense library (loaded in the root layout) to fill this
+  // unit. Runs once per mounted slot; needs the consent gate open first.
+  useEffect(() => {
+    if (ad?.provider_type !== 'adsense_slot' || !ad.adsense_client_id || !ad.adsense_slot_id) {
+      return;
+    }
+    if (requireConsent && !consented) return;
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch {
+      // Library blocked (ad blocker) — the labelled frame simply stays.
+    }
+  }, [ad?.id, ad?.provider_type, ad?.adsense_client_id, ad?.adsense_slot_id, requireConsent, consented]);
 
   useEffect(() => {
     if (!requireConsent) {
