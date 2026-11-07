@@ -40,14 +40,14 @@ export default async function HelpPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">Help</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-charcoal lg:text-[28px]">Help</h1>
         <p className="mt-1 text-sm text-muted">
           Stuck with something? Try the quick fixes — or just talk to a human.
         </p>
       </div>
 
       {/* Talk to a human */}
-      <section className="rounded-xl border border-burgundy-border bg-burgundy-tint/50 p-5 sm:p-6">
+      <section className="rounded-xl border border-burgundy-border bg-burgundy-tint/50 p-5 sm:p-6 lg:rounded-[26px] lg:p-7">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-burgundy text-canvas">
             <LifeBuoy className="h-4.5 w-4.5" />
@@ -61,7 +61,7 @@ export default async function HelpPage() {
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <a
             href={`tel:${SUPPORT_PHONE_TEL}`}
-            className="flex items-center gap-3 rounded-lg border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border"
+            className="flex items-center gap-3 rounded-lg border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border lg:rounded-2xl lg:px-5 lg:py-4"
           >
             <Phone className="h-5 w-5 shrink-0 text-burgundy" />
             <span>
@@ -73,7 +73,7 @@ export default async function HelpPage() {
             href={SUPPORT_WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 rounded-lg border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border"
+            className="flex items-center gap-3 rounded-lg border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border lg:rounded-2xl lg:px-5 lg:py-4"
           >
             <MessageCircle className="h-5 w-5 shrink-0 text-burgundy" />
             <span>
@@ -83,7 +83,7 @@ export default async function HelpPage() {
           </a>
           <a
             href={`mailto:${email}`}
-            className="flex items-center gap-3 rounded-lg border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border"
+            className="flex items-center gap-3 rounded-lg border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border lg:rounded-2xl lg:px-5 lg:py-4"
           >
             <Mail className="h-5 w-5 shrink-0 text-burgundy" />
             <span className="min-w-0">
@@ -101,7 +101,7 @@ export default async function HelpPage() {
           {QUICK_FIXES.map((item) => (
             <div
               key={item.q}
-              className="flex flex-col justify-between rounded-xl border border-line bg-canvas p-5"
+              className="flex flex-col justify-between rounded-xl border border-line bg-canvas p-5 lg:rounded-[22px] lg:p-6"
             >
               <div>
                 <h3 className="text-sm font-semibold text-charcoal">{item.q}</h3>

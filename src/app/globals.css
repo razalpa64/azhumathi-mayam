@@ -153,3 +153,22 @@ body {
     animation: none;
   }
 }
+
+/*
+  Desktop ambience — wide screens only (min-width: 1024px), so the
+  phone layout is pixel-for-pixel untouched. On a big monitor the plain
+  cream canvas reads as empty; two very soft burgundy washes give the
+  page a gentle sense of place without any visible "decoration":
+  one drifting from the top edge (it sits under the wave header and
+  fades into the first screenful of content), one warming the lower
+  corners. Both stay far below the contrast of any real surface.
+*/
+@media (min-width: 1024px) {
+  .desktop-ambient {
+    background-image:
+      radial-gradient(1100px 480px at 50% -180px, rgba(121, 0, 0, 0.055), rgba(121, 0, 0, 0) 70%),
+      radial-gradient(900px 620px at 108% 112%, rgba(121, 0, 0, 0.04), rgba(121, 0, 0, 0) 65%),
+      radial-gradient(760px 560px at -8% 108%, rgba(179, 120, 96, 0.05), rgba(179, 120, 96, 0) 65%);
+    background-attachment: fixed;
+  }
+}

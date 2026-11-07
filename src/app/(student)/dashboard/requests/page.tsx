@@ -21,7 +21,7 @@ export default async function RequestsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">Requests</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-charcoal lg:text-[28px]">Requests</h1>
         <p className="mt-1 text-sm text-muted">
           Can’t find a note or a paper? Ask here — we’ll try to get it for you.
         </p>

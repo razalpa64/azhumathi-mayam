@@ -260,7 +260,7 @@ export default async function StudentDashboardPage() {
   const hasAcademicSetup = Boolean(profile.programme_id && profile.semester_id);
 
   return (
-    <div className="space-y-10 sm:space-y-12">
+    <div className="space-y-10 sm:space-y-12 lg:space-y-14">
       {/* Temporary Password Security Banner */}
       {profile.must_change_password ? (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-burgundy-border bg-burgundy-tint px-4 py-3.5 text-xs">
@@ -279,11 +279,11 @@ export default async function StudentDashboardPage() {
       ) : null}
 
       {/* Greeting hero — deep burgundy card with cap watermark */}
-      <section className="anim-rise relative overflow-hidden rounded-[32px] bg-gradient-to-br from-burgundy via-burgundy-dark to-burgundy-deep p-6 text-canvas shadow-[0_20px_38px_-18px_rgba(36,7,7,0.6)] sm:p-8">
+      <section className="anim-rise relative overflow-hidden rounded-[32px] bg-gradient-to-br from-burgundy via-burgundy-dark to-burgundy-deep p-6 text-canvas shadow-[0_20px_38px_-18px_rgba(36,7,7,0.6)] sm:p-8 lg:rounded-[36px] lg:p-10 xl:p-12">
         <GraduationCap
           aria-hidden="true"
           strokeWidth={1}
-          className="pointer-events-none absolute -top-6 right-3 h-36 w-36 rotate-[-10deg] text-white/10 sm:right-10 sm:h-48 sm:w-48"
+          className="pointer-events-none absolute -top-6 right-3 h-36 w-36 rotate-[-10deg] text-white/10 sm:right-10 sm:h-48 sm:w-48 lg:-top-8 lg:right-14 lg:h-56 lg:w-56"
         />
         <div
           aria-hidden="true"
@@ -301,10 +301,10 @@ export default async function StudentDashboardPage() {
             ) : null}
           </div>
 
-          <h1 className="mt-3.5 text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px]">
+          <h1 className="mt-3.5 text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px] lg:mt-4 lg:text-[42px] lg:leading-[1.08]">
             {greeting}, {profile.full_name.split(' ')[0]}
           </h1>
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-canvas/75">
+          <p className="mt-2 max-w-md text-sm leading-relaxed text-canvas/75 lg:mt-3 lg:max-w-xl lg:text-[15px]">
             {hasAcademicSetup
               ? `Notes and question papers for ${profile.programme?.name}${profile.specialization ? ` (${profile.specialization.name})` : ''} — ${profile.semester?.label}.`
               : 'Add your course and semester to your profile, and your subjects and notes will show up here.'}
@@ -312,7 +312,7 @@ export default async function StudentDashboardPage() {
 
           <Link
             href="/dashboard/profile"
-            className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02]"
+            className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02] lg:mt-7 lg:py-3 lg:pl-5 lg:pr-4"
           >
             <ArrowLeftRight className="h-4 w-4" />
             <span>{hasAcademicSetup ? 'Change course / semester' : 'Set course & semester'}</span>
@@ -333,9 +333,9 @@ export default async function StudentDashboardPage() {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="min-w-[106px] rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/15"
+                  className="min-w-[106px] rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/15 lg:min-w-[124px] lg:px-5 lg:py-4"
                 >
-                  <p className="text-[26px] font-extrabold leading-none text-white">
+                  <p className="text-[26px] font-extrabold leading-none text-white lg:text-[30px]">
                     {stat.value}
                   </p>
                   <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/60">
@@ -349,7 +349,7 @@ export default async function StudentDashboardPage() {
       </section>
 
       {/* Search */}
-      <div className="anim-rise" style={{ animationDelay: '60ms' }}>
+      <div className="anim-rise lg:max-w-2xl" style={{ animationDelay: '60ms' }}>
         <GlobalSearchBar />
       </div>
 
@@ -366,10 +366,10 @@ export default async function StudentDashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="group flex items-center gap-3 rounded-[20px] border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border sm:px-5"
+              className="group flex items-center gap-3 rounded-[20px] border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border sm:px-5 lg:rounded-[24px] lg:px-6 lg:py-5 lg:transition-all lg:hover:-translate-y-0.5 lg:hover:shadow-[0_16px_28px_-20px_rgba(36,7,7,0.4)]"
             >
-              <Icon className="h-6 w-6 shrink-0 text-burgundy" strokeWidth={1.8} />
-              <span className="truncate text-sm font-semibold text-charcoal group-hover:text-burgundy sm:text-[15px]">
+              <Icon className="h-6 w-6 shrink-0 text-burgundy lg:h-7 lg:w-7" strokeWidth={1.8} />
+              <span className="truncate text-sm font-semibold text-charcoal group-hover:text-burgundy sm:text-[15px] lg:text-base">
                 {item.label}
               </span>
               <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-burgundy" />
@@ -392,7 +392,7 @@ export default async function StudentDashboardPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-charcoal">
+            <h2 className="text-xl font-bold tracking-tight text-charcoal lg:text-[22px]">
               {profile.semester ? `${profile.semester.label} subjects` : 'Your subjects'}
             </h2>
             <p className="mt-0.5 text-[13px] text-muted">
@@ -437,7 +437,7 @@ export default async function StudentDashboardPage() {
                 <Link
                   key={subj.id}
                   href={`/dashboard/materials?subjectId=${subj.id}&programmeId=${subj.programme_id}&semesterId=${subj.semester_id}`}
-                  className="group relative flex flex-col overflow-hidden rounded-[24px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border"
+                  className="group relative flex flex-col overflow-hidden rounded-[24px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border lg:p-6"
                 >
                   <span
                     aria-hidden="true"
@@ -488,7 +488,7 @@ export default async function StudentDashboardPage() {
               <Zap className="h-4 w-4" />
             </span>
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-charcoal">Short notes &amp; exam special</h2>
+              <h2 className="text-xl font-bold tracking-tight text-charcoal lg:text-[22px]">Short notes &amp; exam special</h2>
               <p className="mt-0.5 text-[13px] text-muted">The night-before-the-exam stuff.</p>
             </div>
           </div>
@@ -536,7 +536,7 @@ export default async function StudentDashboardPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-charcoal">
+            <h2 className="text-xl font-bold tracking-tight text-charcoal lg:text-[22px]">
               {profile.semester ? `New in ${profile.semester.label}` : 'Recently added'}
             </h2>
             <p className="mt-0.5 text-[13px] text-muted">
@@ -587,7 +587,7 @@ export default async function StudentDashboardPage() {
       </section>
 
       {/* Request banner */}
-      <section className="flex flex-col gap-3 rounded-[22px] bg-burgundy-tint/70 px-5 py-4 sm:flex-row sm:items-center">
+      <section className="flex flex-col gap-3 rounded-[22px] bg-burgundy-tint/70 px-5 py-4 sm:flex-row sm:items-center lg:rounded-[26px] lg:px-7 lg:py-6">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-burgundy text-canvas">
           <Inbox className="h-5 w-5" strokeWidth={1.9} />
         </span>
@@ -631,12 +631,12 @@ export default async function StudentDashboardPage() {
               description="Previous years’ papers for your semester will be listed here."
             />
           ) : (
-            <div className="divide-y divide-line border-y border-line">
+            <div className="divide-y divide-line border-y border-line lg:overflow-hidden lg:rounded-[22px] lg:border lg:bg-canvas lg:px-5">
               {(questionPapers as unknown as Resource[]).map((qp) => (
                 <Link
                   key={qp.id}
                   href={`/resources/${qp.id}`}
-                  className="flex items-center justify-between gap-4 py-3.5 transition-colors hover:bg-burgundy-tint/50"
+                  className="flex items-center justify-between gap-4 py-3.5 transition-colors hover:bg-burgundy-tint/50 lg:py-4"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -682,12 +682,12 @@ export default async function StudentDashboardPage() {
               description="What students in your programme download most will appear here."
             />
           ) : (
-            <div className="divide-y divide-line border-y border-line">
+            <div className="divide-y divide-line border-y border-line lg:overflow-hidden lg:rounded-[22px] lg:border lg:bg-canvas lg:px-5">
               {(popularResources as unknown as Resource[]).map((item) => (
                 <Link
                   key={item.id}
                   href={`/resources/${item.id}`}
-                  className="flex items-center justify-between gap-4 py-3.5 transition-colors hover:bg-burgundy-tint/50"
+                  className="flex items-center justify-between gap-4 py-3.5 transition-colors hover:bg-burgundy-tint/50 lg:py-4"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">

@@ -123,7 +123,7 @@ export function ProfileEditorClient({
     <div className="grid gap-8 lg:grid-cols-12">
       {/* Summary Card */}
       <aside className="lg:col-span-4 space-y-4">
-        <div className="rounded-xl border border-line bg-canvas p-6 space-y-5">
+        <div className="rounded-xl border border-line bg-canvas p-6 space-y-5 lg:rounded-[26px] lg:p-7">
           <div className="flex items-center gap-4">
             <div className="relative">
               {avatarUrl ? (
@@ -188,7 +188,7 @@ export function ProfileEditorClient({
       {/* Editable Form */}
       <form
         onSubmit={handleSubmit}
-        className="lg:col-span-8 rounded-xl border border-line bg-canvas p-6 sm:p-8 space-y-6"
+        className="lg:col-span-8 rounded-xl border border-line bg-canvas p-6 sm:p-8 space-y-6 lg:rounded-[26px]"
       >
         <div>
           <h2 className="text-lg font-semibold text-charcoal">About you</h2>
@@ -222,7 +222,7 @@ export function ProfileEditorClient({
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5"
             />
           </div>
 
@@ -234,7 +234,7 @@ export function ProfileEditorClient({
               id="university"
               value={universityId}
               onChange={(e) => setUniversityId(e.target.value)}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5"
             >
               <option value="">Select University</option>
               {universities.map((u) => (
@@ -259,7 +259,7 @@ export function ProfileEditorClient({
                 const firstSem = semesters.find((s) => s.programme_id === nextProg);
                 setSemesterId(firstSem?.id || '');
               }}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5"
             >
               <option value="">Select Programme</option>
               {programmes.map((p) => (
@@ -282,7 +282,7 @@ export function ProfileEditorClient({
               value={specializationId}
               disabled={!programmeId || availableSpecializations.length === 0}
               onChange={(e) => setSpecializationId(e.target.value)}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5 disabled:opacity-55"
             >
               <option value="">
                 {availableSpecializations.length === 0
@@ -306,7 +306,7 @@ export function ProfileEditorClient({
               value={semesterId}
               disabled={!programmeId}
               onChange={(e) => setSemesterId(e.target.value)}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5 disabled:opacity-55"
             >
               <option value="">Select Semester</option>
               {availableSemesters.map((s) => (
@@ -325,7 +325,7 @@ export function ProfileEditorClient({
               id="regulation"
               value={regulationId}
               onChange={(e) => setRegulationId(e.target.value)}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5"
             >
               <option value="">Select Regulation / Scheme (Optional)</option>
               {regulations.map((r) => (
