@@ -118,6 +118,13 @@ async function main() {
     );
     await pg.query(subAdminsSql);
 
+    console.log('3i. Applying 0013_resource_audience_from_course.sql (align material branch tags with courses)...');
+    const resourceAudienceSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0013_resource_audience_from_course.sql'),
+      'utf8'
+    );
+    await pg.query(resourceAudienceSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
