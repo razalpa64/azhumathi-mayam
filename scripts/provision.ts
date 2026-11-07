@@ -90,6 +90,13 @@ async function main() {
     );
     await pg.query(subjectsMeSql);
 
+    console.log('3e. Applying 0009_subjects_calicut_fyugp_bsc.sql (Calicut FYUGP B.Sc subjects)...');
+    const subjectsCuSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0009_subjects_calicut_fyugp_bsc.sql'),
+      'utf8'
+    );
+    await pg.query(subjectsCuSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
