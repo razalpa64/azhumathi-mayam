@@ -132,6 +132,27 @@ async function main() {
     );
     await pg.query(resourceTaxonomySql);
 
+    console.log('3k. Applying 0015_subjects_calicut_fyugp_bba.sql (Calicut FYUGP BBA subjects)...');
+    const cuBbaSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0015_subjects_calicut_fyugp_bba.sql'),
+      'utf8'
+    );
+    await pg.query(cuBbaSql);
+
+    console.log('3l. Applying 0016_subjects_calicut_fyugp_bca.sql (Calicut FYUGP BCA subjects)...');
+    const cuBcaSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0016_subjects_calicut_fyugp_bca.sql'),
+      'utf8'
+    );
+    await pg.query(cuBcaSql);
+
+    console.log('3m. Applying 0017_subjects_calicut_fyugp_bcom.sql (Calicut FYUGP B.Com subjects)...');
+    const cuBcomSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0017_subjects_calicut_fyugp_bcom.sql'),
+      'utf8'
+    );
+    await pg.query(cuBcomSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
