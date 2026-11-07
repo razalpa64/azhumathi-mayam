@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
+    // Client router cache: revisiting a page (Home <-> Materials...) within
+    // 30s renders instantly instead of re-running every Supabase query.
+    staleTimes: { dynamic: 30, static: 120 },
     cpus: 1,
     webpackMemoryOptimizations: true,
     optimizePackageImports: ['lucide-react'],
