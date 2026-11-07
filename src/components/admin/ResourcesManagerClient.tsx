@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { StorageLinkValidationResult } from '@/lib/storage/provider';
+import { buildSubjectOptions } from '@/lib/subject-options';
 import type {
   Programme,
   Resource,
@@ -128,12 +129,15 @@ export function ResourcesManagerClient({
 
   const editSubjects = useMemo(
     () =>
-      subjects.filter(
-        (s) =>
-          s.programme_id === editProgrammeId &&
-          (!editSemesterId || s.semester_id === editSemesterId)
-      ),
-    [editProgrammeId, editSemesterId, subjects]
+      buildSubjectOptions(subjects, {
+        programmeId: editProgrammeId,
+        semesterId: editSemesterId,
+        specializationId: editSpecId,
+        preferSpecializationId: editSpecId,
+        pinnedSubjectId: editSubjectId,
+        collapseAcrossSemesters: !editSemesterId,
+      }),
+    [editProgrammeId, editSemesterId, editSpecId, editSubjectId, subjects]
   );
 
   function openEditModal(resource: Resource) {

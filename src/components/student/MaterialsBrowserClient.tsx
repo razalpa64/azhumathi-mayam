@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
 import { ResourceCard } from '@/components/student/ResourceCard';
+import { buildSubjectOptions } from '@/lib/subject-options';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -180,19 +181,37 @@ export function MaterialsBrowserClient({
   );
 
   const filteredSubjects = useMemo(() => {
-    return taxonomy.subjects.filter((s) => {
-      if (programmeId && s.programme_id !== programmeId) return false;
-      if (semesterId && s.semester_id !== semesterId) return false;
-      if (
-        specializationId &&
-        s.specialization_id &&
-        s.specialization_id !== specializationId
-      ) {
-        return false;
-      }
-      return true;
+    // While browsing your own programme, your own scheme/university is
+    // the context: a KTU-2024 student must never see KTU-2019 subjects
+    // (or another university's) mixed into this list. Explicit filter
+    // choices always win over the profile defaults.
+    const ownProgramme =
+      Boolean(profile.programme_id) && programmeId === profile.programme_id;
+    return buildSubjectOptions(taxonomy.subjects, {
+      programmeId,
+      semesterId,
+      specializationId,
+      regulationId:
+        regulationId || (ownProgramme ? profile.regulation_id || '' : ''),
+      universityId:
+        universityId || (ownProgramme ? profile.university_id || '' : ''),
+      preferSpecializationId: specializationId || profile.specialization_id || '',
+      pinnedSubjectId: subjectId || '',
+      collapseAcrossSemesters: !semesterId,
     });
-  }, [programmeId, semesterId, specializationId, taxonomy.subjects]);
+  }, [
+    programmeId,
+    semesterId,
+    specializationId,
+    regulationId,
+    universityId,
+    subjectId,
+    profile.programme_id,
+    profile.regulation_id,
+    profile.university_id,
+    profile.specialization_id,
+    taxonomy.subjects,
+  ]);
 
   const shortNotesOnly = collection === 'short-notes';
   const SHORT_NOTE_SLUGS = ['short-notes', 'cheat-sheets'];

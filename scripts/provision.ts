@@ -104,6 +104,13 @@ async function main() {
     );
     await pg.query(subjectsCu2Sql);
 
+    console.log('3g. Applying 0011_dedupe_subjects.sql (collapse programme-wide duplicate subjects)...');
+    const dedupeSubjectsSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0011_dedupe_subjects.sql'),
+      'utf8'
+    );
+    await pg.query(dedupeSubjectsSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
