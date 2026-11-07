@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import type { Profile } from '@/types/database';
 import { InstallAppButton } from '@/components/pwa/InstallAppButton';
+import { InstallPromptCard } from '@/components/pwa/InstallPromptCard';
 import { cn, getInitials } from '@/lib/utils';
 
 interface StudentShellProps {
@@ -396,6 +397,9 @@ export function StudentShell({
           </div>
         </div>
       </footer>
+
+      {/* Friendly one-time install invitation — Home screen only */}
+      {pathname === '/dashboard' ? <InstallPromptCard /> : null}
     </div>
   );
 }
