@@ -576,7 +576,7 @@ export function MaterialsBrowserClient({
 
       {/* Results Grid */}
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 6 }).map((_, idx) => (
             <div
               key={idx}
@@ -599,7 +599,7 @@ export function MaterialsBrowserClient({
         />
       ) : (
         <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {items.slice(0, 6).map((res) => (
               <ResourceCard
                 key={res.id}
@@ -619,7 +619,7 @@ export function MaterialsBrowserClient({
           ) : null}
 
           {items.length > 6 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.slice(6).map((res) => (
                 <ResourceCard
                   key={res.id}

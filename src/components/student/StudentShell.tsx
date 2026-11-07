@@ -116,7 +116,7 @@ export function StudentShell({
     <div className="min-h-screen flex flex-col bg-canvas">
       {/* Burgundy wave header — scrolls away with the page, only the tab strip sticks */}
       <div className="relative bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-3 pb-10 pt-3.5 sm:pb-11 sm:pt-4">
             {/* Brand */}
             <Link
@@ -227,7 +227,7 @@ export function StudentShell({
 
       {/* Sticky pill strip — the one slim bar that stays while scrolling */}
       <div className="sticky top-0 z-40 border-b border-line/70 bg-canvas/90 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <nav
             aria-label="Student workspace sections"
             className="no-scrollbar -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 py-2"
@@ -252,6 +252,13 @@ export function StudentShell({
                 </Link>
               );
             })}
+            {contextLine ? (
+              <span className="ml-auto hidden shrink-0 items-center gap-1.5 pl-4 text-xs font-medium text-muted lg:inline-flex">
+                <GraduationCap className="h-3.5 w-3.5 text-burgundy/70" />
+                {contextLine}
+                {profile.semester ? ` · ${profile.semester.label}` : ''}
+              </span>
+            ) : null}
           </nav>
         </div>
 
@@ -325,7 +332,7 @@ export function StudentShell({
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-8 lg:pb-10">
+      <main className="mx-auto w-full max-w-7xl 2xl:max-w-[1440px] flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-8 lg:pb-10">
         <div key={pathname} className="anim-page">
           {children}
         </div>
@@ -363,7 +370,7 @@ export function StudentShell({
 
       {/* Footer */}
       <footer className="mt-6 border-t border-line bg-neutral-soft/60">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl 2xl:max-w-[1440px] flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row sm:px-6 lg:px-8">
           <div className="flex items-center gap-2.5">
             <span className="font-logo text-base font-bold text-burgundy">അഴിമതി മയം</span>
             <span aria-hidden="true">•</span>
