@@ -94,16 +94,19 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
+    // Staff = super admin + sub-admins; both belong in the console.
+    const isStaff = profile.role === 'admin' || profile.role === 'sub_admin';
+
     // Redirect authenticated users away from /, /login, or /register to their role home
     if (isRootPage || isAuthPage) {
       const dest = request.nextUrl.clone();
-      dest.pathname = profile.role === 'admin' ? '/admin' : '/dashboard';
+      dest.pathname = isStaff ? '/admin' : '/dashboard';
       dest.search = '';
       return NextResponse.redirect(dest);
     }
 
     // Strictly block students from /admin/*
-    if (isAdminRoute && profile.role !== 'admin') {
+    if (isAdminRoute && !isStaff) {
       const dest = request.nextUrl.clone();
       dest.pathname = '/dashboard';
       dest.search = '';
