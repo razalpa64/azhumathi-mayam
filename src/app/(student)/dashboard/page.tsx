@@ -316,8 +316,8 @@ export default async function StudentDashboardPage() {
           <h1 className="mt-3.5 text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px] lg:mt-3 lg:text-[28px] lg:leading-[1.12] xl:text-[30px]">
             {greeting}, {profile.full_name.split(' ')[0]}
           </h1>
-          <div className="lg:mt-2.5 lg:flex lg:items-center lg:gap-5">
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-canvas/75 lg:mt-0 lg:max-w-none lg:flex-1 lg:text-sm">
+          <div>
+          <p className="mt-2 max-w-md text-sm leading-relaxed text-canvas/75 lg:mt-2 lg:max-w-xl lg:text-sm">
             {hasAcademicSetup
               ? `Notes and question papers for ${profile.programme?.name}${profile.specialization ? ` (${profile.specialization.name})` : ''} — ${profile.semester?.label}.`
               : 'Add your course and semester to your profile, and your subjects and notes will show up here.'}
@@ -325,7 +325,7 @@ export default async function StudentDashboardPage() {
 
           <Link
             href="/dashboard/profile"
-            className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02] lg:mt-0 lg:shrink-0 lg:bg-white/10 lg:py-2 lg:pl-3.5 lg:pr-3 lg:text-white lg:shadow-none lg:ring-1 lg:ring-white/30"
+            className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02] lg:mt-4 lg:bg-white/10 lg:py-2 lg:pl-3.5 lg:pr-3 lg:text-white lg:shadow-none lg:ring-1 lg:ring-white/30"
           >
             <ArrowLeftRight className="h-4 w-4" />
             <span>{hasAcademicSetup ? 'Change course / semester' : 'Set course & semester'}</span>
