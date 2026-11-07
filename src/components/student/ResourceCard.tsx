@@ -86,7 +86,7 @@ export function ResourceCard({
   return (
     <article
       style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
-      className="anim-rise group flex flex-col justify-between rounded-[22px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border lg:rounded-[26px] lg:p-6"
+      className="anim-rise group flex flex-col justify-between rounded-[22px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border lg:rounded-[24px] lg:p-5"
     >
       <div>
         <div className="flex items-start justify-between gap-3">
@@ -129,7 +129,7 @@ export function ResourceCard({
           href={`/resources/${resource.id}`}
           className="mt-3 block focus:outline-none focus-visible:underline"
         >
-          <h3 className="text-base font-bold text-charcoal group-hover:text-burgundy transition-colors leading-snug lg:text-[17px]">
+          <h3 className="text-base font-bold text-charcoal group-hover:text-burgundy transition-colors leading-snug lg:text-base">
             {resource.title}
           </h3>
         </Link>
@@ -150,7 +150,7 @@ export function ResourceCard({
         ) : null}
       </div>
 
-      <div className="mt-4 pt-3.5 border-t border-line space-y-3 lg:mt-5 lg:pt-4">
+      <div className="mt-4 pt-3.5 border-t border-line space-y-3 lg:mt-4 lg:pt-3.5">
         <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted">
           <div className="flex flex-wrap items-center gap-1.5">
             {resource.programme ? (

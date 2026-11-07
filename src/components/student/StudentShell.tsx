@@ -117,13 +117,13 @@ export function StudentShell({
       {/* Burgundy wave header — scrolls away with the page, only the tab strip sticks */}
       <div className="relative bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10">
-          <div className="flex items-center justify-between gap-3 pb-10 pt-3.5 sm:pb-11 sm:pt-4 lg:pb-14 lg:pt-5">
+          <div className="flex items-center justify-between gap-3 pb-10 pt-3.5 sm:pb-11 sm:pt-4 lg:pb-10 lg:pt-4">
             {/* Brand */}
             <Link
               href="/dashboard"
               className="flex min-w-0 items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
-              <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-burgundy-logo ring-1 ring-white/25 sm:h-11 sm:w-11 lg:h-12 lg:w-12 lg:rounded-2xl">
+              <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-burgundy-logo ring-1 ring-white/25 sm:h-11 sm:w-11 lg:h-11 lg:w-11 lg:rounded-xl">
                 <Image
                   src="/brand/logo.png"
                   alt="അഴിമതി മയം"
@@ -134,7 +134,7 @@ export function StudentShell({
                 />
               </span>
               <span className="min-w-0 leading-tight">
-                <span className="block truncate font-logo text-xl font-bold tracking-tight text-white sm:text-[22px] lg:text-2xl">
+                <span className="block truncate font-logo text-xl font-bold tracking-tight text-white sm:text-[22px] lg:text-[22px]">
                   അഴിമതി മയം
                 </span>
                 <span className="mt-0.5 block truncate text-[11px] font-medium tracking-wide text-white/60 lg:text-xs">
@@ -149,7 +149,7 @@ export function StudentShell({
                 href="/dashboard/notifications"
                 aria-label="Notifications"
                 className={cn(
-                  'relative inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors lg:h-11 lg:w-11',
+                  'relative inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors lg:h-10 lg:w-10',
                   pathname === '/dashboard/notifications'
                     ? 'bg-white text-burgundy ring-white'
                     : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
@@ -167,7 +167,7 @@ export function StudentShell({
               <Link
                 href="/dashboard/profile"
                 className={cn(
-                  'hidden items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-xs font-medium ring-1 transition-colors md:inline-flex lg:py-2 lg:pl-2 lg:pr-4 lg:text-[13px]',
+                  'hidden items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-xs font-medium ring-1 transition-colors md:inline-flex lg:py-1.5 lg:pl-1.5 lg:pr-3.5 lg:text-[13px]',
                   pathname === '/dashboard/profile'
                     ? 'bg-white text-burgundy ring-white'
                     : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
@@ -195,7 +195,7 @@ export function StudentShell({
                 disabled={loggingOut}
                 aria-label="Logout"
                 title="Logout"
-                className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer disabled:opacity-50 md:inline-flex lg:h-11 lg:w-11"
+                className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer disabled:opacity-50 md:inline-flex lg:h-10 lg:w-10"
               >
                 <LogOut className="h-[18px] w-[18px]" />
               </button>
@@ -230,7 +230,7 @@ export function StudentShell({
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10">
           <nav
             aria-label="Student workspace sections"
-            className="no-scrollbar -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 py-2 lg:gap-2 lg:py-2.5"
+            className="no-scrollbar -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 py-2 lg:gap-2 lg:py-2"
           >
             {STRIP_TABS.map((tab) => {
               const Icon = tab.icon;
@@ -241,7 +241,7 @@ export function StudentShell({
                   href={tab.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 lg:gap-2 lg:px-4 lg:py-2 lg:text-[13px]',
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 lg:gap-2 lg:px-3.5 lg:py-1.5 lg:text-[13px]',
                     active
                       ? 'bg-burgundy font-semibold text-white'
                       : 'text-charcoal/70 hover:bg-burgundy-tint hover:text-burgundy'
@@ -332,7 +332,7 @@ export function StudentShell({
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto w-full max-w-7xl xl:max-w-[1440px] flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-8">
+      <main className="mx-auto w-full max-w-7xl xl:max-w-[1440px] flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-6">
         <div key={pathname} className="anim-page">
           {children}
         </div>
@@ -370,7 +370,7 @@ export function StudentShell({
 
       {/* Footer */}
       <footer className="mt-6 border-t border-line bg-neutral-soft/60">
-        <div className="mx-auto flex max-w-7xl xl:max-w-[1440px] flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row lg:py-9 lg:text-[13px] sm:px-6 lg:px-10">
+        <div className="mx-auto flex max-w-7xl xl:max-w-[1440px] flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row lg:py-7 lg:text-[13px] sm:px-6 lg:px-10">
           <div className="flex items-center gap-2.5">
             <span className="font-logo text-base font-bold text-burgundy">അഴിമതി മയം</span>
             <span aria-hidden="true">•</span>
