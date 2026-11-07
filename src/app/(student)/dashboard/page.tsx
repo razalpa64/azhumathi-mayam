@@ -325,7 +325,7 @@ export default async function StudentDashboardPage() {
 
           <Link
             href="/dashboard/profile"
-            className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02] lg:mt-4 lg:bg-white/10 lg:py-2 lg:pl-3.5 lg:pr-3 lg:text-white lg:shadow-none lg:ring-1 lg:ring-white/30"
+            className={`mt-5 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02] lg:mt-4 lg:bg-white/10 lg:py-2 lg:pl-3.5 lg:pr-3 lg:text-white lg:shadow-none lg:ring-1 lg:ring-white/30 ${hasAcademicSetup ? 'lg:hidden' : ''}`}
           >
             <ArrowLeftRight className="h-4 w-4" />
             <span>{hasAcademicSetup ? 'Change course / semester' : 'Set course & semester'}</span>
@@ -342,10 +342,11 @@ export default async function StudentDashboardPage() {
               </p>
               <div className="grid grid-cols-3 gap-3">
               {[
-                { value: String(semesterSubjects.length), label: 'Subjects', icon: BookOpen },
-                { value: String(bookmarkSet.size), label: 'Saved', icon: Bookmark },
+                { value: String(semesterSubjects.length), prefix: '', label: 'Subjects', icon: BookOpen },
+                { value: String(bookmarkSet.size), prefix: '', label: 'Saved', icon: Bookmark },
                 {
-                  value: profile.semester ? `S${profile.semester.semester_number}` : '—',
+                  value: profile.semester ? String(profile.semester.semester_number) : '—',
+                  prefix: profile.semester ? 'S' : '',
                   label: 'Semester',
                   icon: GraduationCap,
                 },
@@ -355,6 +356,11 @@ export default async function StudentDashboardPage() {
                   className="min-w-[106px] rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/15 lg:min-w-[98px] lg:px-3.5 lg:py-2.5"
                 >
                   <p className="text-[26px] font-extrabold leading-none text-white lg:text-[22px]">
+                    {stat.prefix ? (
+                      <span className="mr-0.5 text-[15px] font-bold text-white/70 lg:text-[13px]">
+                        {stat.prefix}
+                      </span>
+                    ) : null}
                     {stat.value}
                   </p>
                   <p className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/60">
@@ -363,6 +369,16 @@ export default async function StudentDashboardPage() {
                   </p>
                 </div>
               ))}
+              </div>
+              <div className="mt-3 text-right">
+                <Link
+                  href="/dashboard/profile"
+                  className="inline-flex items-center gap-2 rounded-full bg-white/10 py-2 pl-3.5 pr-3 text-[13px] font-semibold text-white ring-1 ring-white/30 transition-transform hover:scale-[1.02]"
+                >
+                  <ArrowLeftRight className="h-4 w-4" />
+                  <span>Change course / semester</span>
+                  <ChevronRight className="h-4 w-4 opacity-60" />
+                </Link>
               </div>
             </div>
           ) : null}
