@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { friendlyDbError } from '@/lib/db-errors';
 import { requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { getSubjectGroupIds } from '@/lib/subject-siblings';
 
 const RESOURCE_SELECT = `
   *,
@@ -78,6 +79,10 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  // A course may be stored once per branch; a subject filter must
+  // match materials attached to ANY copy of that course.
+  const subjectGroupIds = subjectId ? await getSubjectGroupIds(supabase, subjectId) : null;
+
   let query = supabase
     .from('resources')
     .select(RESOURCE_SELECT, { count: 'exact' })
@@ -88,7 +93,7 @@ export async function GET(request: NextRequest) {
   if (specializationId) query = query.eq('specialization_id', specializationId);
   if (regulationId) query = query.eq('regulation_id', regulationId);
   if (semesterId) query = query.eq('semester_id', semesterId);
-  if (subjectId) query = query.eq('subject_id', subjectId);
+  if (subjectGroupIds) query = query.in('subject_id', subjectGroupIds);
   if (categoryId) query = query.eq('category_id', categoryId);
 
   if (onlyQuestionPapers) {

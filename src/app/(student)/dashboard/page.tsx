@@ -192,7 +192,7 @@ export default async function StudentDashboardPage() {
   // 5c. Per-subject material counts (for the subject cards)
   let subjectCountQuery = supabase
     .from('resources')
-    .select('subject_id, created_at, category:resource_categories(is_question_paper)')
+    .select('subject_id, created_at, category:resource_categories(is_question_paper), subject:subjects(subject_code, regulation_id)')
     .eq('publication_status', 'published')
     .limit(1000);
   if (profile.programme_id) subjectCountQuery = subjectCountQuery.eq('programme_id', profile.programme_id);
@@ -227,17 +227,24 @@ export default async function StudentDashboardPage() {
   ]);
 
   // Aggregate counts per subject
+  // Counts are aggregated per COURSE (subject_code + scheme), not per
+  // subject row: a course shared by several branches is stored once per
+  // branch, and a note uploaded against any branch's copy must count on
+  // every branch's card for that course.
   const subjectStats = new Map<string, { notes: number; qps: number; updated: string | null }>();
   for (const row of (subjectCountRows || []) as unknown as {
     subject_id: string;
     created_at: string;
     category: { is_question_paper: boolean } | null;
+    subject: { subject_code: string; regulation_id: string | null } | null;
   }[]) {
-    const entry = subjectStats.get(row.subject_id) || { notes: 0, qps: 0, updated: null };
+    if (!row.subject) continue;
+    const key = `${row.subject.subject_code}|${row.subject.regulation_id ?? ''}`;
+    const entry = subjectStats.get(key) || { notes: 0, qps: 0, updated: null };
     if (row.category?.is_question_paper) entry.qps += 1;
     else entry.notes += 1;
     if (!entry.updated || row.created_at > entry.updated) entry.updated = row.created_at;
-    subjectStats.set(row.subject_id, entry);
+    subjectStats.set(key, entry);
   }
   const monthLabel = (iso: string | null) =>
     iso
@@ -476,7 +483,12 @@ export default async function StudentDashboardPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {semesterSubjects.map((subj) => {
-              const stats = subjectStats.get(subj.id) || { notes: 0, qps: 0, updated: null };
+              const stats =
+                subjectStats.get(`${subj.subject_code}|${subj.regulation_id ?? ''}`) || {
+                  notes: 0,
+                  qps: 0,
+                  updated: null,
+                };
               const updatedLabel = monthLabel(stats.updated);
               return (
                 <Link
