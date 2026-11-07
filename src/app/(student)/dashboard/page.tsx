@@ -5,20 +5,15 @@ import {
   Bookmark,
   BookOpen,
   Calendar,
+  ChevronRight,
   Clock,
-  Code2,
-  Cpu,
-  Database,
   FileQuestion,
   FileText,
-  FlaskConical,
   GraduationCap,
   Inbox,
   Layers,
   LifeBuoy,
-  Network,
   NotebookPen,
-  Sigma,
   TrendingUp,
   Zap,
 } from 'lucide-react';
@@ -242,8 +237,6 @@ export default async function StudentDashboardPage() {
     profile.semester?.label,
   ].filter(Boolean) as string[];
 
-  const SUBJECT_ICONS = [Layers, Cpu, Sigma, BookOpen, Code2, Database, FlaskConical, Network];
-
   const bookmarkSet = new Set((userBookmarks || []).map((b) => b.resource_id));
   const recentlyViewed = (recentRows || [])
     .map((r) => r.resource as unknown as Resource | null)
@@ -262,7 +255,7 @@ export default async function StudentDashboardPage() {
     <div className="space-y-9">
       {/* Temporary Password Security Banner */}
       {profile.must_change_password ? (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-burgundy-border bg-burgundy-tint px-4 py-3.5 text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-burgundy-border bg-burgundy-tint px-4 py-3.5 text-xs">
           <div className="text-charcoal">
             <span className="font-semibold text-burgundy">One small thing:</span> you’re signed in
             with a temporary password from your administrator. Set your own in Settings.
@@ -277,22 +270,26 @@ export default async function StudentDashboardPage() {
         </div>
       ) : null}
 
-      {/* Greeting hero — burgundy card, like the brand mock */}
-      <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep p-6 text-canvas shadow-[0_18px_36px_-18px_rgba(36,7,7,0.55)] sm:p-8">
-        {/* faint target rings, right side */}
-        <svg aria-hidden="true" viewBox="0 0 200 200" className="pointer-events-none absolute -right-10 -top-14 h-64 w-64 text-white/15">
-          <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="4 6" />
-          <circle cx="100" cy="100" r="66" fill="none" stroke="currentColor" strokeWidth="1" />
-          <circle cx="100" cy="100" r="38" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="4 6" />
-          <line x1="100" y1="0" x2="100" y2="200" stroke="currentColor" strokeWidth="0.75" />
-          <line x1="0" y1="100" x2="200" y2="100" stroke="currentColor" strokeWidth="0.75" />
-          <circle cx="100" cy="100" r="5" fill="currentColor" opacity="0.6" />
-        </svg>
+      {/* Greeting hero — deep burgundy card with cap watermark */}
+      <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-burgundy via-burgundy-dark to-burgundy-deep p-6 text-canvas shadow-[0_20px_38px_-18px_rgba(36,7,7,0.6)] sm:p-9">
+        <GraduationCap
+          aria-hidden="true"
+          strokeWidth={1}
+          className="pointer-events-none absolute -top-6 right-3 h-36 w-36 rotate-[-10deg] text-white/10 sm:right-10 sm:h-48 sm:w-48"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-white/[0.06]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-24 -right-16 h-56 w-56 rounded-full border border-white/10"
+        />
 
         <div className="relative">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {contextBits.length > 0 ? (
-              <span className="inline-flex items-center gap-2 rounded-full bg-black/25 px-3 py-1 text-[11px] font-semibold text-canvas ring-1 ring-white/15">
+              <span className="inline-flex items-center gap-2 rounded-full bg-black/30 px-3.5 py-1.5 text-[11px] font-semibold text-canvas ring-1 ring-white/15">
                 <span className="h-1.5 w-1.5 rounded-full bg-rose-300" />
                 {contextBits.join(' • ')}
               </span>
@@ -300,10 +297,10 @@ export default async function StudentDashboardPage() {
             <span className="text-xs font-medium text-canvas/60">{todayLabel}</span>
           </div>
 
-          <h1 className="font-login-display mt-4 text-[28px] font-semibold leading-tight sm:text-4xl">
-            {greeting}, {profile.full_name.split(' ')[0]} <span aria-hidden="true">👋</span>
+          <h1 className="mt-4 text-[30px] font-extrabold leading-[1.12] tracking-tight text-white sm:text-4xl">
+            {greeting}, {profile.full_name.split(' ')[0]}
           </h1>
-          <p className="mt-2 max-w-lg text-sm leading-relaxed text-canvas/75">
+          <p className="mt-2.5 max-w-lg text-sm leading-relaxed text-canvas/75 sm:text-[15px]">
             {hasAcademicSetup
               ? `Notes and question papers for ${profile.programme?.name}${profile.specialization ? ` (${profile.specialization.name})` : ''} — ${profile.semester?.label}.`
               : 'Add your course and semester to your profile, and your subjects and notes will show up here.'}
@@ -311,21 +308,20 @@ export default async function StudentDashboardPage() {
 
           <Link
             href="/dashboard/profile"
-            className="mt-5 inline-flex h-9.5 items-center gap-2 rounded-full bg-white/10 px-4 text-xs font-semibold text-canvas ring-1 ring-white/25 transition-colors hover:bg-white/20"
+            className="mt-6 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02]"
           >
-            <ArrowLeftRight className="h-3.5 w-3.5" />
+            <ArrowLeftRight className="h-4 w-4" />
             <span>{hasAcademicSetup ? 'Change course / semester' : 'Set course & semester'}</span>
+            <ChevronRight className="h-4 w-4 opacity-60" />
           </Link>
         </div>
       </section>
 
       {/* Search */}
-      <div className="mt-5">
-        <GlobalSearchBar />
-      </div>
+      <GlobalSearchBar />
 
       {/* Quick actions */}
-      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           { href: '/dashboard/semester', label: 'My subjects', icon: Layers },
           { href: '/dashboard/question-papers', label: 'Question papers', icon: FileQuestion },
@@ -337,15 +333,13 @@ export default async function StudentDashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="group flex items-center gap-3 rounded-2xl border border-line bg-canvas p-4 transition-colors hover:border-burgundy-border"
+              className="group flex items-center gap-3 rounded-[22px] border border-line bg-canvas px-4 py-4 shadow-[0_10px_20px_-14px_rgba(36,7,7,0.22)] transition-all hover:-translate-y-0.5 hover:border-burgundy-border hover:shadow-[0_16px_26px_-14px_rgba(36,7,7,0.35)] sm:px-5"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-burgundy-tint text-burgundy">
-                <Icon className="h-5 w-5" strokeWidth={1.9} />
-              </span>
-              <span className="truncate text-sm font-semibold text-charcoal group-hover:text-burgundy">
+              <Icon className="h-6 w-6 shrink-0 text-burgundy" strokeWidth={1.8} />
+              <span className="truncate text-sm font-semibold text-charcoal group-hover:text-burgundy sm:text-[15px]">
                 {item.label}
               </span>
-              <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-muted/60 transition-transform group-hover:translate-x-0.5" />
+              <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-burgundy" />
             </Link>
           );
         })}
@@ -365,10 +359,10 @@ export default async function StudentDashboardPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-charcoal">
+            <h2 className="text-xl font-bold tracking-tight text-charcoal">
               {profile.semester ? `${profile.semester.label} subjects` : 'Your subjects'}
             </h2>
-            <p className="text-xs text-muted">
+            <p className="mt-0.5 text-[13px] text-muted">
               Pick a subject to see its notes and papers.
             </p>
           </div>
@@ -403,52 +397,53 @@ export default async function StudentDashboardPage() {
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {semesterSubjects.map((subj, idx) => {
+            {semesterSubjects.map((subj) => {
               const stats = subjectStats.get(subj.id) || { notes: 0, qps: 0, updated: null };
-              const Icon = SUBJECT_ICONS[idx % SUBJECT_ICONS.length];
               const updatedLabel = monthLabel(stats.updated);
               return (
                 <Link
                   key={subj.id}
                   href={`/dashboard/materials?subjectId=${subj.id}&programmeId=${subj.programme_id}&semesterId=${subj.semester_id}`}
-                  className="group flex flex-col rounded-[24px] border border-line bg-canvas p-5 transition-all hover:-translate-y-0.5 hover:border-burgundy-border hover:shadow-[0_14px_28px_-18px_rgba(36,7,7,0.35)]"
+                  className="group relative flex flex-col overflow-hidden rounded-[26px] border border-line bg-canvas p-5 transition-all hover:-translate-y-0.5 hover:border-burgundy-border hover:shadow-[0_18px_30px_-16px_rgba(36,7,7,0.35)]"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="inline-block rounded-full bg-burgundy-tint px-2.5 py-1 font-mono text-[11px] font-bold tracking-wide text-burgundy">
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -bottom-16 -right-16 h-44 w-44 rounded-full bg-burgundy-tint transition-transform duration-300 group-hover:scale-110"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -bottom-10 -right-10 h-28 w-28 rounded-full bg-[#F6DEDC]/80"
+                  />
+                  <div className="relative">
+                    <span className="inline-block rounded-full bg-[#F8E7E5] px-3 py-1 text-[11px] font-bold tracking-wide text-burgundy">
                       {subj.subject_code}
                     </span>
-                    <span
-                      className={
-                        idx % 2 === 0
-                          ? 'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-burgundy text-canvas'
-                          : 'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-soft text-burgundy'
-                      }
-                    >
-                      <Icon className="h-5 w-5" strokeWidth={1.8} />
-                    </span>
+                    <h3 className="mt-3.5 line-clamp-2 text-lg font-bold leading-snug text-charcoal transition-colors group-hover:text-burgundy">
+                      {subj.name}
+                    </h3>
+                    {subj.description ? (
+                      <p className="mt-1.5 line-clamp-2 pr-8 text-[13px] leading-relaxed text-muted">
+                        {subj.description}
+                      </p>
+                    ) : null}
+                    <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 pr-12 text-xs text-muted">
+                      <span className="inline-flex items-center gap-1.5">
+                        <FileText className="h-3.5 w-3.5 text-burgundy/70" />
+                        {stats.notes} notes
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <FileQuestion className="h-3.5 w-3.5 text-burgundy/70" />
+                        {stats.qps} QP{stats.qps === 1 ? '' : 's'}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {updatedLabel ? `Updated ${updatedLabel}` : 'No files yet'}
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="font-login-display mt-3 text-xl font-semibold leading-snug text-charcoal group-hover:text-burgundy">
-                    {subj.name}
-                  </h3>
-                  {subj.description ? (
-                    <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted">
-                      {subj.description}
-                    </p>
-                  ) : null}
-                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-line pt-3 text-xs text-muted">
-                    <span className="inline-flex items-center gap-1.5">
-                      <FileText className="h-3.5 w-3.5 text-burgundy/70" />
-                      {stats.notes} notes
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <FileQuestion className="h-3.5 w-3.5 text-burgundy/70" />
-                      {stats.qps} QP{stats.qps === 1 ? '' : 's'}
-                    </span>
-                    <span className="ml-auto inline-flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {updatedLabel ? `Updated: ${updatedLabel}` : 'No files yet'}
-                    </span>
-                  </div>
+                  <span className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-burgundy text-canvas shadow-[0_10px_18px_-8px_rgba(121,0,0,0.8)] transition-transform group-hover:translate-x-0.5">
+                    <ArrowRight className="h-5 w-5" />
+                  </span>
                 </Link>
               );
             })}
@@ -460,12 +455,12 @@ export default async function StudentDashboardPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-burgundy text-canvas">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-burgundy text-canvas">
               <Zap className="h-4 w-4" />
             </span>
             <div>
-              <h2 className="text-base font-semibold text-charcoal">Short notes &amp; exam special</h2>
-              <p className="text-xs text-muted">The night-before-the-exam stuff.</p>
+              <h2 className="text-xl font-bold tracking-tight text-charcoal">Short notes &amp; exam special</h2>
+              <p className="mt-0.5 text-[13px] text-muted">The night-before-the-exam stuff.</p>
             </div>
           </div>
           <Link
@@ -511,10 +506,10 @@ export default async function StudentDashboardPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold text-charcoal">
+            <h2 className="text-xl font-bold tracking-tight text-charcoal">
               {profile.semester ? `New in ${profile.semester.label}` : 'Recently added'}
             </h2>
-            <p className="text-xs text-muted">
+            <p className="mt-0.5 text-[13px] text-muted">
               The newest notes and documents for your semester.
             </p>
           </div>
@@ -610,7 +605,7 @@ export default async function StudentDashboardPage() {
                 <Link
                   key={qp.id}
                   href={`/resources/${qp.id}`}
-                  className="flex items-center justify-between gap-4 rounded-lg border border-line bg-canvas p-4 hover:border-burgundy-border transition-colors"
+                  className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-canvas p-4 shadow-[0_8px_16px_-12px_rgba(36,7,7,0.2)] hover:border-burgundy-border transition-colors"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -661,7 +656,7 @@ export default async function StudentDashboardPage() {
                 <Link
                   key={item.id}
                   href={`/resources/${item.id}`}
-                  className="flex items-center justify-between gap-4 rounded-lg border border-line bg-canvas p-4 hover:border-burgundy-border transition-colors"
+                  className="flex items-center justify-between gap-4 rounded-2xl border border-line bg-canvas p-4 shadow-[0_8px_16px_-12px_rgba(36,7,7,0.2)] hover:border-burgundy-border transition-colors"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
