@@ -14,6 +14,7 @@ import {
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
 import { ResourceCard } from '@/components/student/ResourceCard';
 import { buildSubjectOptions } from '@/lib/subject-options';
+import { seededIdSets } from '@/lib/seeded-taxonomy';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -186,6 +187,28 @@ export function MaterialsBrowserClient({
         : taxonomy.specializations,
     [programmeId, taxonomy.specializations]
   );
+
+  // Only offer programmes/branches that actually have subjects —
+  // an unseeded branch can only ever produce an empty list. A
+  // selection already in force (e.g. from a dashboard link) stays.
+  const seeded = useMemo(() => seededIdSets(taxonomy.subjects), [taxonomy.subjects]);
+  const programmeOptions = useMemo(() => {
+    const list = taxonomy.programmes.filter((pr) => seeded.programmeIds.has(pr.id));
+    return programmeId && !list.some((pr) => pr.id === programmeId)
+      ? [...list, ...taxonomy.programmes.filter((pr) => pr.id === programmeId)]
+      : list;
+  }, [taxonomy.programmes, seeded, programmeId]);
+  const specializationOptions = useMemo(() => {
+    const list = filteredSpecializations.filter((sp) =>
+      seeded.specializationIds.has(sp.id)
+    );
+    return specializationId && !list.some((sp) => sp.id === specializationId)
+      ? [
+          ...list,
+          ...filteredSpecializations.filter((sp) => sp.id === specializationId),
+        ]
+      : list;
+  }, [filteredSpecializations, seeded, specializationId]);
 
   const filteredSemesters = useMemo(
     () =>
@@ -486,7 +509,7 @@ export function MaterialsBrowserClient({
                     className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px] disabled:opacity-60"
                   >
                     <option value="">Any programme</option>
-                    {taxonomy.programmes.map((pr) => (
+                    {programmeOptions.map((pr) => (
                       <option key={pr.id} value={pr.id}>
                         {pr.name} {pr.full_title ? `— ${pr.full_title}` : ''}
                       </option>
@@ -502,7 +525,7 @@ export function MaterialsBrowserClient({
                     className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">Any specialization</option>
-                    {filteredSpecializations.map((sp) => (
+                    {specializationOptions.map((sp) => (
                       <option key={sp.id} value={sp.id}>
                         {sp.code} — {sp.name}
                       </option>

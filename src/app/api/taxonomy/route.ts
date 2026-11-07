@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { isStaffRole, requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/fetch-all';
+import { filterTaxonomyToSeeded } from '@/lib/seeded-taxonomy';
 
 export async function GET() {
   const auth = await requireApiAuth();
@@ -68,10 +69,27 @@ export async function GET() {
     fetchAllRows(async (from, to) => buildSubjectQuery().range(from, to)),
   ]);
 
+  // Students are only offered programmes/branches that have
+  // subjects behind them; staff keep the full taxonomy.
+  const visible = isAdmin
+    ? {
+        universities: universities || [],
+        programmes: programmes || [],
+        specializations: specializations || [],
+      }
+    : filterTaxonomyToSeeded(
+        {
+          universities: universities || [],
+          programmes: programmes || [],
+          specializations: specializations || [],
+        },
+        subjects || []
+      );
+
   return NextResponse.json({
-    universities: universities || [],
-    programmes: programmes || [],
-    specializations: specializations || [],
+    universities: visible.universities,
+    programmes: visible.programmes,
+    specializations: visible.specializations,
     regulations: regulations || [],
     semesters: semesters || [],
     subjects: subjects || [],
