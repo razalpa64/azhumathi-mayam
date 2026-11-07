@@ -13,6 +13,7 @@ import {
   Inbox,
   Layers,
   LifeBuoy,
+  MessagesSquare,
   NotebookPen,
   TrendingUp,
   Zap,
@@ -28,6 +29,7 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { Notice, Resource, Subject } from '@/types/database';
 import { getGreetingByHour } from '@/lib/utils';
+import { getIstDayStartIso } from '@/lib/chat';
 
 const RESOURCE_JOIN = `
   *,
@@ -230,6 +232,12 @@ export default async function StudentDashboardPage() {
       ? new Intl.DateTimeFormat('en-IN', { month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso))
       : null;
 
+  // Group chat teaser: how busy today's room is (table may not exist yet)
+  const { count: chatTodayCount } = await supabase
+    .from('chat_messages')
+    .select('id', { count: 'exact', head: true })
+    .gte('created_at', getIstDayStartIso());
+
   const contextBits = [
     profile.university?.short_name,
     profile.programme?.name,
@@ -265,7 +273,7 @@ export default async function StudentDashboardPage() {
       ) : null}
 
       {/* Greeting hero — deep burgundy card with cap watermark */}
-      <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-burgundy via-burgundy-dark to-burgundy-deep p-6 text-canvas shadow-[0_20px_38px_-18px_rgba(36,7,7,0.6)] sm:p-8">
+      <section className="anim-rise relative overflow-hidden rounded-[32px] bg-gradient-to-br from-burgundy via-burgundy-dark to-burgundy-deep p-6 text-canvas shadow-[0_20px_38px_-18px_rgba(36,7,7,0.6)] sm:p-8">
         <GraduationCap
           aria-hidden="true"
           strokeWidth={1}
@@ -307,10 +315,12 @@ export default async function StudentDashboardPage() {
       </section>
 
       {/* Search */}
-      <GlobalSearchBar />
+      <div className="anim-rise" style={{ animationDelay: '60ms' }}>
+        <GlobalSearchBar />
+      </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="anim-rise grid grid-cols-2 gap-3 lg:grid-cols-4" style={{ animationDelay: '110ms' }}>
         {[
           { href: '/dashboard/semester', label: 'My subjects', icon: Layers },
           { href: '/dashboard/question-papers', label: 'Question papers', icon: FileQuestion },
@@ -333,6 +343,28 @@ export default async function StudentDashboardPage() {
           );
         })}
       </div>
+
+      {/* Group chat entry */}
+      <Link
+        href="/dashboard/chat"
+        style={{ animationDelay: '150ms' }}
+        className="anim-rise group flex items-center gap-3.5 rounded-[20px] border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border sm:px-5"
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-burgundy-tint text-burgundy">
+          <MessagesSquare className="h-5 w-5" strokeWidth={1.9} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-charcoal group-hover:text-burgundy sm:text-[15px]">
+            Student group chat
+          </span>
+          <span className="mt-0.5 block truncate text-xs text-muted">
+            {chatTodayCount
+              ? `${chatTodayCount} message${chatTodayCount === 1 ? '' : 's'} today — jump in`
+              : 'Say hi to everyone — the room clears at midnight'}
+          </span>
+        </span>
+        <ChevronRight className="h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-burgundy" />
+      </Link>
 
       {/* Dynamic Notice / Announcement Section (Hidden automatically when disabled or empty) */}
       <NoticeBoard notices={notices} noticesEnabled={settings.notices_enabled} />
@@ -476,11 +508,12 @@ export default async function StudentDashboardPage() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {(shortNoteResources as unknown as Resource[]).map((res) => (
+            {(shortNoteResources as unknown as Resource[]).map((res, i) => (
               <ResourceCard
                 key={res.id}
                 resource={res}
                 initialBookmarked={bookmarkSet.has(res.id)}
+                index={i}
               />
             ))}
           </div>
@@ -529,11 +562,12 @@ export default async function StudentDashboardPage() {
           />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {(latestResources as unknown as Resource[]).map((res) => (
+            {(latestResources as unknown as Resource[]).map((res, i) => (
               <ResourceCard
                 key={res.id}
                 resource={res}
                 initialBookmarked={bookmarkSet.has(res.id)}
+                index={i}
               />
             ))}
           </div>
@@ -682,11 +716,12 @@ export default async function StudentDashboardPage() {
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {recentlyViewed.map((res) => (
+            {recentlyViewed.map((res, i) => (
               <ResourceCard
                 key={res.id}
                 resource={res}
                 initialBookmarked={bookmarkSet.has(res.id)}
+                index={i}
               />
             ))}
           </div>

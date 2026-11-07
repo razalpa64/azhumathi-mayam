@@ -17,6 +17,7 @@ import {
   LifeBuoy,
   LogOut,
   Menu,
+  MessagesSquare,
   NotebookPen,
   Settings,
   User,
@@ -39,6 +40,7 @@ const ALL_SECTIONS = [
   { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },
   { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
   { href: '/dashboard/short-notes', label: 'Short Notes & Exam Special', icon: NotebookPen },
+  { href: '/dashboard/chat', label: 'Group Chat', icon: MessagesSquare },
   { href: '/dashboard/requests', label: 'Requests', icon: Inbox },
   { href: '/dashboard/bookmarks', label: 'Saved Materials', icon: Bookmark },
   { href: '/dashboard/history', label: 'Recently Viewed', icon: Clock },
@@ -60,6 +62,7 @@ const STRIP_TABS = [
   { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },
   { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
   { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
+  { href: '/dashboard/chat', label: 'Group Chat', icon: MessagesSquare },
 ];
 
 const BOTTOM_NAV = [
@@ -232,7 +235,7 @@ export function StudentShell({
                   href={tab.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200',
                     active
                       ? 'bg-burgundy font-semibold text-white'
                       : 'text-charcoal/70 hover:bg-burgundy-tint hover:text-burgundy'
@@ -310,7 +313,9 @@ export function StudentShell({
 
       {/* Main Content */}
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-8 lg:pb-10">
-        {children}
+        <div key={pathname} className="anim-page">
+          {children}
+        </div>
       </main>
 
       {/* Floating mobile bottom navigation */}
@@ -325,7 +330,7 @@ export function StudentShell({
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[10px] font-medium transition-colors',
+                  'flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[10px] font-medium transition-all active:scale-95',
                   active ? 'text-burgundy' : 'text-muted hover:text-charcoal'
                 )}
               >
