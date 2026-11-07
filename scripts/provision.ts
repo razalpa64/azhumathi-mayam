@@ -153,6 +153,27 @@ async function main() {
     );
     await pg.query(cuBcomSql);
 
+    console.log('3n. Applying 0018_subjects_calicut_fyugp_ba_1.sql (Calicut FYUGP B.A. English/Malayalam subjects)...');
+    const cuBa1Sql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0018_subjects_calicut_fyugp_ba_1.sql'),
+      'utf8'
+    );
+    await pg.query(cuBa1Sql);
+
+    console.log('3o. Applying 0019_subjects_calicut_fyugp_ba_2.sql (Calicut FYUGP B.A. Economics/History subjects)...');
+    const cuBa2Sql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0019_subjects_calicut_fyugp_ba_2.sql'),
+      'utf8'
+    );
+    await pg.query(cuBa2Sql);
+
+    console.log('3p. Applying 0020_subjects_calicut_fyugp_ba_3.sql (Calicut FYUGP B.A. Political Science subjects)...');
+    const cuBa3Sql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0020_subjects_calicut_fyugp_ba_3.sql'),
+      'utf8'
+    );
+    await pg.query(cuBa3Sql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
