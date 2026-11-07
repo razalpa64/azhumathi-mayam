@@ -69,6 +69,13 @@ async function main() {
     const seedSql = fs.readFileSync(path.resolve(process.cwd(), 'supabase/seed.sql'), 'utf8');
     await pg.query(seedSql);
 
+    console.log('3b. Applying 0006_subjects_ktu_btech_2019.sql (after seed - needs taxonomy rows)...');
+    const subjectsSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0006_subjects_ktu_btech_2019.sql'),
+      'utf8'
+    );
+    await pg.query(subjectsSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
