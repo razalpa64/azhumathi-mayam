@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { isStaffRole, requireAuthenticatedUser } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { getSubjectGroupIds } from '@/lib/subject-siblings';
 import { getActiveAdvertisementsByPlacement } from '@/lib/ads';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
 import { StudentShell } from '@/components/student/StudentShell';
@@ -75,6 +76,8 @@ export default async function ResourceDetailPage({
     notFound();
   }
 
+  const relatedSubjectIds = await getSubjectGroupIds(supabase, resource.subject_id);
+
   const [bookmarkRes, relatedRes, unreadRes, adConfig] = await Promise.all([
     supabase
       .from('bookmarks')
@@ -86,7 +89,7 @@ export default async function ResourceDetailPage({
       .from('resources')
       .select(RESOURCE_JOIN)
       .eq('publication_status', 'published')
-      .eq('subject_id', resource.subject_id)
+      .in('subject_id', relatedSubjectIds)
       .neq('id', resource.id)
       .order('download_count', { ascending: false })
       .limit(3),
