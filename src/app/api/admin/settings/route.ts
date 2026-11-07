@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, getWebsiteSettings, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -48,7 +49,7 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: friendlyDbError(error, 'Saving settings failed. Please try again.', 'admin') }, { status: 400 });
   }
 
   await logAdminActivity({

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -91,7 +92,7 @@ export async function DELETE(
 
   const { error } = await adminClient.from('notices').delete().eq('id', id);
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: friendlyDbError(error, 'That notice operation failed. Please try again.', 'admin') }, { status: 400 });
   }
 
   await logAdminActivity({

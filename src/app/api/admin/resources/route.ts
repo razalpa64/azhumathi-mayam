@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
   const { data: items, count, error } = await query.range(from, to);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: friendlyDbError(error, 'That resource operation failed. Please try again.', 'admin') }, { status: 400 });
   }
 
   const total = count || 0;
@@ -216,7 +217,7 @@ export async function PATCH(request: NextRequest) {
 
   if (action === 'delete') {
     const { error } = await adminClient.from('resources').delete().in('id', ids);
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) return NextResponse.json({ error: friendlyDbError(error, 'That resource operation failed. Please try again.', 'admin') }, { status: 400 });
 
     await logAdminActivity({
       adminId: auth.profile.id,
@@ -234,7 +235,7 @@ export async function PATCH(request: NextRequest) {
     .update({ publication_status: nextStatus })
     .in('id', ids);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'That resource operation failed. Please try again.', 'admin') }, { status: 400 });
 
   await logAdminActivity({
     adminId: auth.profile.id,

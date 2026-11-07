@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -71,7 +72,7 @@ export async function PATCH(request: NextRequest) {
     .eq('id', auth.profile.id);
 
   if (error) {
-    return NextResponse.json({ error: error.message || 'Failed to update profile.' }, { status: 400 });
+    return NextResponse.json({ error: friendlyDbError(error, 'Could not save your profile. Please try again.', 'student') || 'Failed to update profile.' }, { status: 400 });
   }
 
   return NextResponse.json({ ok: true, message: 'Profile updated.' });

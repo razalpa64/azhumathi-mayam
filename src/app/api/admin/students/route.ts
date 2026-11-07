@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
   const { data: items, count, error } = await query.range(from, to);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: friendlyDbError(error, 'That student operation failed. Please try again.', 'admin') }, { status: 400 });
   }
 
   const total = count || 0;

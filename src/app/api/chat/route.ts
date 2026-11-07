@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
   if (since) query = query.gt('created_at', since);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'Something went wrong. Please try again.', 'student') }, { status: 400 });
 
   // Latest-window fetch comes back newest-first; clients render oldest-first
   return NextResponse.json({ messages: (data || []).reverse() });
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
     .select(CHAT_SELECT)
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'Something went wrong. Please try again.', 'student') }, { status: 400 });
 
   void cleanupExpired();
   return NextResponse.json({ message: data }, { status: 201 });
@@ -112,6 +113,6 @@ export async function DELETE(request: NextRequest) {
     .eq('id', id)
     .eq('user_id', auth.profile.id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'Something went wrong. Please try again.', 'student') }, { status: 400 });
   return NextResponse.json({ ok: true });
 }

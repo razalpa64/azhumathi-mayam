@@ -1,5 +1,6 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { getIstDayStartIso } from '@/lib/chat';
 
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
       .delete({ count: 'exact' })
       .lt('created_at', getIstDayStartIso());
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) return NextResponse.json({ error: friendlyDbError(error, 'Cleanup failed.', 'admin') }, { status: 400 });
     return NextResponse.json({ ok: true, deleted: count || 0 });
   } catch (err) {
     return NextResponse.json(

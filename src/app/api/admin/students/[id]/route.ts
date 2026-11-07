@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -129,7 +130,7 @@ export async function PATCH(
   if (Object.keys(profileUpdates).length > 0) {
     const { error } = await adminClient.from('profiles').update(profileUpdates).eq('id', id);
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: friendlyDbError(error, 'That student operation failed. Please try again.', 'admin') }, { status: 400 });
     }
 
     const statusChanged =
