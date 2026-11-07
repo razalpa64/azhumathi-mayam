@@ -24,15 +24,8 @@ export default async function GroupChatPage() {
   ) as unknown as ChatMessage[];
 
   return (
-    <div className="anim-rise mx-auto w-full max-w-3xl space-y-4">
-      <div>
-        <h1 className="text-[22px] font-bold tracking-tight text-charcoal">Group chat</h1>
-        <p className="mt-1 text-sm leading-relaxed text-muted">
-          One room for every student — ask a doubt, share a note, find who else is awake
-          before the exam. It starts fresh every morning.
-        </p>
-      </div>
-
+    <div className="anim-rise mx-auto w-full max-w-3xl">
+      <h1 className="sr-only">Group chat</h1>
       <ChatClient
         initialMessages={initialMessages}
         currentUserId={profile.id}

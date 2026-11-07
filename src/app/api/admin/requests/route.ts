@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
   if (status) query = query.eq('status', status);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'That request operation failed. Please try again.', 'admin') }, { status: 400 });
 
   const { count: pendingCount } = await adminClient
     .from('resource_requests')
@@ -71,7 +72,7 @@ export async function PATCH(request: NextRequest) {
     .eq('id', parsed.data.id)
     .select('*, student:profiles!student_id(id, full_name, username)')
     .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'That request operation failed. Please try again.', 'admin') }, { status: 400 });
 
   // Tell the student their request moved
   if (before.status !== parsed.data.status) {
@@ -107,6 +108,6 @@ export async function DELETE(request: NextRequest) {
 
   const adminClient = createSupabaseAdminClient();
   const { error } = await adminClient.from('resource_requests').delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'That request operation failed. Please try again.', 'admin') }, { status: 400 });
   return NextResponse.json({ ok: true });
 }

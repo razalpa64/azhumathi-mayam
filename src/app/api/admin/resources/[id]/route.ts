@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -98,7 +99,7 @@ export async function PATCH(
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: friendlyDbError(error, 'That resource operation failed. Please try again.', 'admin') }, { status: 400 });
   }
 
   await logAdminActivity({
@@ -142,7 +143,7 @@ export async function DELETE(
   // Deletes database record only; original Google Drive document remains intact
   const { error } = await adminClient.from('resources').delete().eq('id', id);
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: friendlyDbError(error, 'That resource operation failed. Please try again.', 'admin') }, { status: 400 });
   }
 
   await logAdminActivity({

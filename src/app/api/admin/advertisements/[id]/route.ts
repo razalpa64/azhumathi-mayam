@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
@@ -92,7 +93,7 @@ export async function DELETE(
   const { id } = await context.params;
   const adminClient = createSupabaseAdminClient();
   const { error } = await adminClient.from('advertisements').delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'That advertisement operation failed. Please try again.', 'admin') }, { status: 400 });
 
   await logAdminActivity({
     adminId: auth.profile.id,

@@ -8,7 +8,7 @@ export const metadata = {
 
 export default async function AdminRequestsPage() {
   const adminClient = createSupabaseAdminClient();
-  const { data } = await adminClient
+  const { data, error } = await adminClient
     .from('resource_requests')
     .select('*, student:profiles!student_id(id, full_name, username)')
     .order('created_at', { ascending: false })
@@ -35,6 +35,17 @@ export default async function AdminRequestsPage() {
           )}
         </p>
       </div>
+
+      {error ? (
+        <div className="rounded-2xl border border-burgundy-border bg-burgundy-tint px-5 py-4 text-sm text-charcoal">
+          <span className="font-semibold text-burgundy">Requests are not switched on yet.</span>{' '}
+          The <span className="font-mono text-[13px]">resource_requests</span> table was not
+          found — apply the pending migrations (run{' '}
+          <span className="font-mono text-[13px]">npm run db:provision</span>, or paste{' '}
+          <span className="font-mono text-[13px]">supabase/migrations/0002_requests_and_short_notes.sql</span>{' '}
+          into the Supabase SQL editor), then reload this page.
+        </div>
+      ) : null}
 
       <RequestsManagerClient initialItems={items} />
     </div>

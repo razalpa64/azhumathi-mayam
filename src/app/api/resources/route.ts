@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
@@ -171,7 +172,7 @@ export async function GET(request: NextRequest) {
   const { data: items, count, error } = await query.range(from, to);
 
   if (error) {
-    return NextResponse.json({ error: error.message || 'Search query failed.' }, { status: 400 });
+    return NextResponse.json({ error: friendlyDbError(error, 'Search failed. Please try again.', 'student') || 'Search query failed.' }, { status: 400 });
   }
 
   // Fetch user's bookmark IDs for these items

@@ -6,6 +6,7 @@ import {
   Clock,
   Loader2,
   MessagesSquare,
+  RotateCcw,
   Send,
   Trash2,
 } from 'lucide-react';
@@ -20,6 +21,12 @@ interface ChatClientProps {
   /** True when the chat table isn't reachable yet (migration pending). */
   unavailable?: boolean;
 }
+
+const STARTERS = [
+  'Anyone has short notes for Module 3?',
+  'When is the next series test?',
+  'Can someone share today’s class notes?',
+];
 
 export function ChatClient({ initialMessages, currentUserId, unavailable }: ChatClientProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
@@ -162,6 +169,14 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
     }
   }
 
+  function applyStarter(text: string) {
+    setDraft(text);
+    requestAnimationFrame(() => {
+      autoGrow();
+      textareaRef.current?.focus();
+    });
+  }
+
   if (unavailable) {
     return (
       <section className="rounded-[24px] border border-dashed border-line-strong bg-neutral-soft/40 px-6 py-14 text-center">
@@ -180,20 +195,24 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
   }
 
   return (
-    <section className="relative flex flex-col overflow-hidden rounded-[24px] border border-line bg-canvas">
+    <section className="relative flex h-[calc(100dvh-168px)] min-h-[430px] flex-col overflow-hidden rounded-[24px] border border-line bg-canvas lg:h-[calc(100dvh-142px)]">
       {/* Room header */}
-      <div className="flex items-center gap-3 border-b border-line px-4 py-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-burgundy-tint text-burgundy">
+      <div className="flex items-center gap-3 border-b border-line bg-canvas px-4 py-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-burgundy text-white">
           <MessagesSquare className="h-5 w-5" strokeWidth={1.9} />
         </span>
         <div className="min-w-0 flex-1 leading-tight">
           <p className="truncate text-[15px] font-semibold text-charcoal">Student group chat</p>
-          <p className="mt-0.5 text-xs text-muted">
+          <p className="mt-0.5 truncate text-xs text-muted">
             {participantCount > 1
               ? `${participantCount} students have chatted today`
               : 'Everyone at Azhimathi Mayam, in one room'}
           </p>
         </div>
+        <span className="hidden shrink-0 items-center gap-1.5 rounded-full bg-burgundy-tint px-2.5 py-1 text-[11px] font-medium text-burgundy sm:flex">
+          <RotateCcw className="h-3 w-3" />
+          Clears at midnight
+        </span>
         <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-muted">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           Live
@@ -204,14 +223,14 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="h-[52vh] overflow-y-auto bg-neutral-soft/50 px-3.5 py-4 sm:h-[56vh] sm:px-5"
+        className="flex-1 overflow-y-auto bg-[#FAF3F1] px-3.5 py-4 sm:px-5"
       >
-        <div className="mb-1 flex items-center gap-3 px-1">
-          <span className="h-px flex-1 bg-line" />
-          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-muted ring-1 ring-line">
+        <div className="mb-1.5 flex items-center gap-3 px-1">
+          <span className="h-px flex-1 bg-burgundy/10" />
+          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-muted shadow-sm ring-1 ring-line">
             Today
           </span>
-          <span className="h-px flex-1 bg-line" />
+          <span className="h-px flex-1 bg-burgundy/10" />
         </div>
         <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted">
           <Clock className="h-3 w-3" />
@@ -219,12 +238,27 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
         </p>
 
         {messages.length === 0 ? (
-          <div className="px-4 py-10 text-center">
-            <p className="text-sm font-medium text-charcoal">Quiet in here, for now</p>
+          <div className="px-4 py-8 text-center">
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-burgundy shadow-sm ring-1 ring-line">
+              <MessagesSquare className="h-6 w-6" strokeWidth={1.7} />
+            </span>
+            <p className="mt-4 text-sm font-semibold text-charcoal">Quiet in here, for now</p>
             <p className="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-muted">
               Be the first to say hi today — ask a doubt, share a note, or just find out
               who else is studying.
             </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              {STARTERS.map((text) => (
+                <button
+                  key={text}
+                  type="button"
+                  onClick={() => applyStarter(text)}
+                  className="rounded-full border border-burgundy-border bg-white px-3.5 py-2 text-xs font-medium text-burgundy shadow-sm transition-all hover:bg-burgundy-tint active:scale-95 cursor-pointer"
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex flex-col">
@@ -245,10 +279,10 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
                         <img
                           src={msg.sender.avatar_url}
                           alt={name}
-                          className="mr-2 mt-0.5 h-8 w-8 shrink-0 rounded-full object-cover"
+                          className="mr-2 mt-0.5 h-8 w-8 shrink-0 rounded-full object-cover shadow-sm"
                         />
                       ) : (
-                        <span className="mr-2 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-burgundy-tint text-[10px] font-bold text-burgundy">
+                        <span className="mr-2 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-burgundy text-[10px] font-bold text-white shadow-sm">
                           {getInitials(name)}
                         </span>
                       )
@@ -260,10 +294,10 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
                   <div className={cn('group flex max-w-[80%] items-center gap-1.5 sm:max-w-[65%]', own && 'flex-row-reverse')}>
                     <div
                       className={cn(
-                        'px-3.5 py-2.5',
+                        'px-3.5 py-2.5 shadow-[0_1px_2px_rgba(36,7,7,0.10)]',
                         own
                           ? 'rounded-2xl rounded-br-md bg-burgundy text-white'
-                          : 'rounded-2xl rounded-bl-md border border-line bg-white text-charcoal'
+                          : 'rounded-2xl rounded-bl-md bg-white text-charcoal'
                       )}
                     >
                       {showName ? (
@@ -293,7 +327,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
                         onClick={() => void handleDelete(msg.id)}
                         aria-label="Delete message"
                         title="Delete message"
-                        className="shrink-0 rounded-full p-1.5 text-muted opacity-0 transition-opacity hover:bg-burgundy-tint hover:text-burgundy focus:opacity-100 group-hover:opacity-100 cursor-pointer"
+                        className="shrink-0 rounded-full bg-white p-1.5 text-muted opacity-0 shadow-sm ring-1 ring-line transition-opacity hover:text-burgundy focus:opacity-100 group-hover:opacity-100 cursor-pointer"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -316,20 +350,20 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
             setHasNew(false);
             scrollToBottom(true);
           }}
-          className="absolute bottom-[84px] left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-charcoal px-3.5 py-2 text-xs font-semibold text-canvas shadow-lg transition-transform active:scale-95 cursor-pointer"
+          className="absolute bottom-[92px] left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-charcoal px-3.5 py-2 text-xs font-semibold text-canvas shadow-lg transition-transform active:scale-95 cursor-pointer"
         >
           <ArrowDown className="h-3.5 w-3.5" />
           New messages
         </button>
       ) : null}
 
-      {/* Composer */}
-      <div className="border-t border-line bg-canvas px-3.5 py-3">
+      {/* Composer — sits on the same warm ground as the messages */}
+      <div className="bg-[#FAF3F1] px-3 pb-3 pt-1.5 sm:px-4 sm:pb-4">
         {error ? (
           <p className="mb-2 px-1 text-[11px] font-medium text-[#C62F34]">{error}</p>
         ) : null}
         <div className="flex items-end gap-2">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 rounded-[26px] border border-line bg-white px-4 py-2 shadow-[0_2px_10px_-4px_rgba(36,7,7,0.18)] focus-within:border-burgundy-border">
             <textarea
               ref={textareaRef}
               value={draft}
@@ -347,10 +381,10 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
               }}
               placeholder="Message everyone…"
               aria-label="Message everyone"
-              className="max-h-[110px] w-full resize-none rounded-[22px] border border-line bg-neutral-soft/60 px-4 py-2.5 text-sm leading-relaxed text-charcoal placeholder:text-muted/80 focus:border-burgundy-border focus:bg-canvas focus:outline-none"
+              className="max-h-[110px] w-full resize-none bg-transparent py-1 text-sm leading-relaxed text-charcoal placeholder:text-muted/80 focus:outline-none"
             />
             {draft.length > CHAT_MESSAGE_MAX - 100 ? (
-              <p className="mt-1 pr-2 text-right text-[10px] text-muted">
+              <p className="pr-1 text-right text-[10px] leading-none text-muted">
                 {draft.length}/{CHAT_MESSAGE_MAX}
               </p>
             ) : null}
@@ -360,12 +394,12 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
             onClick={() => void handleSend()}
             disabled={sending || draft.trim().length === 0}
             aria-label="Send message"
-            className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-burgundy text-white transition-all hover:bg-burgundy-dark active:scale-95 disabled:opacity-40 cursor-pointer"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-burgundy text-white shadow-[0_8px_16px_-8px_rgba(121,0,0,0.8)] transition-all hover:bg-burgundy-dark active:scale-95 disabled:opacity-40 cursor-pointer"
           >
             {sending ? (
-              <Loader2 className="h-[18px] w-[18px] animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Send className="h-[18px] w-[18px]" />
+              <Send className="h-5 w-5" />
             )}
           </button>
         </div>

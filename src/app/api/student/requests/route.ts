@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -24,7 +25,7 @@ export async function GET() {
     .order('created_at', { ascending: false })
     .limit(50);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'That did not go through. Please try again.', 'student') }, { status: 400 });
   return NextResponse.json({ items: data || [] });
 }
 
@@ -71,6 +72,6 @@ export async function POST(request: NextRequest) {
     .select('*')
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: friendlyDbError(error, 'That did not go through. Please try again.', 'student') }, { status: 400 });
   return NextResponse.json({ ok: true, item: data }, { status: 201 });
 }

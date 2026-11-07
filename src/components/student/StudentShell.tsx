@@ -51,25 +51,31 @@ const ALL_SECTIONS = [
 ];
 
 /**
- * The pill strip keeps only the everyday study destinations.
- * Everything else lives one tap away (bottom nav, bell, avatar, menu),
- * so the strip itself can stay short and quiet.
+ * The pill strip keeps the everyday destinations, with Group Chat up
+ * front (#2) so nobody misses it. Everything else lives one tap away
+ * (bottom nav, bell, avatar, menu), so the strip stays short and quiet.
  */
 const STRIP_TABS = [
   { href: '/dashboard', label: 'Overview', icon: Home, exact: true },
+  { href: '/dashboard/chat', label: 'Group Chat', icon: MessagesSquare },
   { href: '/dashboard/semester', label: 'My Semester', icon: Layers },
   { href: '/dashboard/courses', label: 'My Courses', icon: GraduationCap },
   { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },
   { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
   { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
-  { href: '/dashboard/chat', label: 'Group Chat', icon: MessagesSquare },
+  { href: '/dashboard/requests', label: 'Requests', icon: Inbox },
 ];
 
+/**
+ * Five slots; Group Chat takes the raised centre one so it's the first
+ * thing a thumb finds. Requests stays in the pill strip, the dashboard
+ * banner and the menu sheet.
+ */
 const BOTTOM_NAV = [
   { href: '/dashboard', label: 'Home', icon: Home, exact: true },
   { href: '/dashboard/materials', label: 'Materials', icon: BookOpen },
+  { href: '/dashboard/chat', label: 'Chat', icon: MessagesSquare, center: true },
   { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
-  { href: '/dashboard/requests', label: 'Requests', icon: Inbox },
   { href: '/dashboard/profile', label: 'Profile', icon: User },
 ];
 
@@ -324,6 +330,30 @@ export function StudentShell({
           {BOTTOM_NAV.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href, item.exact);
+            if ('center' in item && item.center) {
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? 'page' : undefined}
+                  className="flex flex-col items-center gap-1 py-1 text-[10px] font-medium transition-transform active:scale-95"
+                >
+                  <span
+                    className={cn(
+                      '-mt-[22px] flex h-12 w-12 items-center justify-center rounded-full text-white ring-4 ring-canvas transition-colors',
+                      active
+                        ? 'bg-burgundy-dark shadow-[0_12px_22px_-8px_rgba(83,0,0,0.8)]'
+                        : 'bg-burgundy shadow-[0_12px_22px_-8px_rgba(121,0,0,0.75)]'
+                    )}
+                  >
+                    <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
+                  </span>
+                  <span className={cn('leading-none', active ? 'font-bold text-burgundy' : 'text-muted')}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            }
             return (
               <Link
                 key={item.href}

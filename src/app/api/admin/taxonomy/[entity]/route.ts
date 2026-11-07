@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { friendlyDbError } from '@/lib/db-errors';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
@@ -309,7 +310,7 @@ export async function DELETE(
         error:
           error.code === '23503'
             ? 'Cannot delete this category while study materials are still linked to it. Reassign or remove dependent resources first.'
-            : error.message,
+            : friendlyDbError(error, 'That update failed. Please try again.', 'admin'),
       },
       { status: 400 }
     );
