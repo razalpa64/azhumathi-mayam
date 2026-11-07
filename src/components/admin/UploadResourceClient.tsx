@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import type { StorageLinkValidationResult } from '@/lib/storage/provider';
+import { buildSubjectOptions } from '@/lib/subject-options';
 import type {
   AcademicRegulation,
   Programme,
@@ -95,20 +96,20 @@ export function UploadResourceClient({
     [programmeId, semesters]
   );
 
-  const filteredSubjects = useMemo(() => {
-    return subjects.filter((s) => {
-      if (programmeId && s.programme_id !== programmeId) return false;
-      if (semesterId && s.semester_id !== semesterId) return false;
-      if (
-        specializationId &&
-        s.specialization_id &&
-        s.specialization_id !== specializationId
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [programmeId, semesterId, specializationId, subjects]);
+  const filteredSubjects = useMemo(
+    () =>
+      buildSubjectOptions(subjects, {
+        programmeId,
+        semesterId,
+        specializationId,
+        regulationId,
+        universityId,
+        preferSpecializationId: specializationId,
+        pinnedSubjectId: subjectId,
+        collapseAcrossSemesters: !semesterId,
+      }),
+    [programmeId, semesterId, specializationId, regulationId, universityId, subjectId, subjects]
+  );
 
   async function handleValidateLink() {
     setFormError(null);

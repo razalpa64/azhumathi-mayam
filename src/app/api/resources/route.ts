@@ -52,7 +52,8 @@ export async function GET(request: NextRequest) {
         .select('id, subject_code, name, programme_id, semester_id, programme:programmes(name), semester:semesters(label)')
         .eq('publication_status', 'published')
         .or(`name.ilike.%${q}%,subject_code.ilike.%${q}%`)
-        .limit(5),
+        .order('subject_code')
+        .limit(12),
       supabase
         .from('resources')
         .select('id, title, file_type, subject:subjects(subject_code, name), category:resource_categories(name)')
@@ -62,8 +63,17 @@ export async function GET(request: NextRequest) {
         .limit(6),
     ]);
 
+    // The same course can be stored once per branch; suggest it once.
+    const seenCodes = new Set<string>();
+    const subjectSuggestions = (subjects || []).filter((s) => {
+      const key = `${s.subject_code}|${s.semester_id}`;
+      if (seenCodes.has(key)) return false;
+      seenCodes.add(key);
+      return true;
+    });
+
     return NextResponse.json({
-      subjects: subjects || [],
+      subjects: subjectSuggestions.slice(0, 5),
       resources: resources || [],
     });
   }
