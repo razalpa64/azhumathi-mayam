@@ -296,7 +296,7 @@ export function MaterialsBrowserClient({
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+            <h1 className="text-2xl font-semibold tracking-tight text-charcoal lg:text-[28px]">
               {shortNotesOnly
                 ? 'Short Notes & Exam Special'
                 : onlyQuestionPapers
@@ -418,15 +418,15 @@ export function MaterialsBrowserClient({
           <div className="overflow-hidden">
             <section
               aria-label="Resource filters"
-              className="rounded-[20px] border border-line bg-neutral-soft/65 p-4"
+              className="rounded-[20px] border border-line bg-neutral-soft/65 p-4 lg:rounded-[26px] lg:p-6"
             >
-              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 lg:gap-4">
                 <div>
                   <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">University</label>
                   <select
                     value={universityId}
                     onChange={(e) => { setUniversityId(e.target.value); setPage(1); }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">Any university</option>
                     {taxonomy.universities.map((u) => (
@@ -449,7 +449,7 @@ export function MaterialsBrowserClient({
                       setSubjectId('');
                       setPage(1);
                     }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-60"
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px] disabled:opacity-60"
                   >
                     <option value="">Any programme</option>
                     {taxonomy.programmes.map((pr) => (
@@ -465,7 +465,7 @@ export function MaterialsBrowserClient({
                   <select
                     value={specializationId}
                     onChange={(e) => { setSpecializationId(e.target.value); setSubjectId(''); setPage(1); }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">Any specialization</option>
                     {filteredSpecializations.map((sp) => (
@@ -481,7 +481,7 @@ export function MaterialsBrowserClient({
                   <select
                     value={semesterId}
                     onChange={(e) => { setSemesterId(e.target.value); setSubjectId(''); setPage(1); }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">Any semester</option>
                     {filteredSemesters.map((sem) => (
@@ -497,7 +497,7 @@ export function MaterialsBrowserClient({
                   <select
                     value={subjectId}
                     onChange={(e) => { setSubjectId(e.target.value); setPage(1); }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">Any subject</option>
                     {filteredSubjects.map((sub) => (
@@ -513,7 +513,7 @@ export function MaterialsBrowserClient({
                   <select
                     value={categoryId}
                     onChange={(e) => { setCategoryId(e.target.value); setPage(1); }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">Any type</option>
                     {visibleCategories.map((cat) => (
@@ -529,7 +529,7 @@ export function MaterialsBrowserClient({
                   <select
                     value={regulationId}
                     onChange={(e) => { setRegulationId(e.target.value); setPage(1); }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">All Regulations</option>
                     {taxonomy.regulations.map((reg) => (
@@ -545,7 +545,7 @@ export function MaterialsBrowserClient({
                   <select
                     value={sort}
                     onChange={(e) => { setSort(e.target.value); setPage(1); }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="latest">Newest first</option>
                     <option value="popular">Most downloaded</option>
@@ -580,7 +580,7 @@ export function MaterialsBrowserClient({
           {Array.from({ length: 6 }).map((_, idx) => (
             <div
               key={idx}
-              className="h-52 animate-pulse rounded-lg border border-line bg-neutral-soft"
+              className="h-52 animate-pulse rounded-lg border border-line bg-neutral-soft lg:rounded-[26px]"
             />
           ))}
         </div>

@@ -15,7 +15,7 @@ export default async function StudentProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">Profile</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-charcoal lg:text-[28px]">Profile</h1>
         <p className="mt-1 text-sm text-muted">
           Your details, photo, and course.
         </p>

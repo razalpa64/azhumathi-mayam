@@ -86,7 +86,7 @@ export function ResourceCard({
   return (
     <article
       style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
-      className="anim-rise group flex flex-col justify-between rounded-[22px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border"
+      className="anim-rise group flex flex-col justify-between rounded-[22px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border lg:rounded-[26px] lg:p-6"
     >
       <div>
         <div className="flex items-start justify-between gap-3">
@@ -129,7 +129,7 @@ export function ResourceCard({
           href={`/resources/${resource.id}`}
           className="mt-3 block focus:outline-none focus-visible:underline"
         >
-          <h3 className="text-base font-bold text-charcoal group-hover:text-burgundy transition-colors leading-snug">
+          <h3 className="text-base font-bold text-charcoal group-hover:text-burgundy transition-colors leading-snug lg:text-[17px]">
             {resource.title}
           </h3>
         </Link>
@@ -150,7 +150,7 @@ export function ResourceCard({
         ) : null}
       </div>
 
-      <div className="mt-4 pt-3.5 border-t border-line space-y-3">
+      <div className="mt-4 pt-3.5 border-t border-line space-y-3 lg:mt-5 lg:pt-4">
         <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted">
           <div className="flex flex-wrap items-center gap-1.5">
             {resource.programme ? (
@@ -185,7 +185,7 @@ export function ResourceCard({
         <div className="flex items-center gap-2">
           <Link
             href={`/resources/${resource.id}`}
-            className="inline-flex flex-1 h-9 items-center justify-center gap-1.5 rounded-full bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors"
+            className="inline-flex flex-1 h-9 items-center justify-center gap-1.5 rounded-full bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors lg:h-10 lg:text-[13px]"
           >
             {resource.file_type === 'PDF' ? (
               <>
@@ -204,7 +204,7 @@ export function ResourceCard({
             type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft transition-colors cursor-pointer disabled:opacity-50"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft transition-colors cursor-pointer disabled:opacity-50 lg:h-10 lg:text-[13px]"
           >
             {downloading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

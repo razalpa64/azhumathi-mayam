@@ -59,7 +59,7 @@ export function PasswordChangeForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-line bg-canvas p-6 sm:p-8 space-y-5 max-w-xl"
+      className="rounded-xl border border-line bg-canvas p-6 sm:p-8 space-y-5 max-w-xl lg:rounded-[26px]"
     >
       <div className="flex items-start justify-between gap-4">
         <div>

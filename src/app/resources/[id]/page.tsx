@@ -124,7 +124,7 @@ export default async function ResourceDetailPage({
     return (
       <div className="min-h-screen bg-canvas">
         <header className="border-b border-line bg-burgundy-deep text-canvas">
-          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10 lg:h-[72px] xl:max-w-[1440px]">
             <BrandLogo href="/admin" size="sm" theme="dark" subtitle="Administrator Preview" />
             <Link
               href="/admin/resources"
@@ -135,7 +135,7 @@ export default async function ResourceDetailPage({
             </Link>
           </div>
         </header>
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{viewerContent}</main>
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10 xl:max-w-[1440px]">{viewerContent}</main>
       </div>
     );
   }

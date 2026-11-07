@@ -86,7 +86,7 @@ export function RequestsClient({ initialItems }: { initialItems: ResourceRequest
       {/* Ask for something */}
       <form
         onSubmit={handleSubmit}
-        className="h-fit space-y-4 rounded-xl border border-line bg-canvas p-5 sm:p-6 lg:col-span-5"
+        className="h-fit space-y-4 rounded-xl border border-line bg-canvas p-5 sm:p-6 lg:col-span-5 lg:rounded-[26px] lg:p-7"
       >
         <div>
           <h2 className="text-base font-semibold text-charcoal">Ask for something</h2>
@@ -206,7 +206,7 @@ export function RequestsClient({ initialItems }: { initialItems: ResourceRequest
             {items.map((item) => {
               const st = STATUS_META[item.status];
               return (
-                <li key={item.id} className="rounded-xl border border-line bg-canvas p-4.5 sm:p-5">
+                <li key={item.id} className="rounded-xl border border-line bg-canvas p-4.5 sm:p-5 lg:rounded-[22px] lg:p-6">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="text-[11px] font-medium text-muted">

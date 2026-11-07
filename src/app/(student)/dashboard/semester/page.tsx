@@ -123,7 +123,7 @@ export default async function MySemesterPage() {
             ) : null}
             <Badge variant="solid">{profile.semester?.label}</Badge>
           </div>
-          <h1 className="mt-2.5 text-2xl font-semibold tracking-tight text-charcoal">
+          <h1 className="mt-2.5 text-2xl font-semibold tracking-tight text-charcoal lg:text-[28px]">
             {profile.semester?.label}
           </h1>
           <p className="mt-1 text-sm text-muted">
@@ -136,7 +136,7 @@ export default async function MySemesterPage() {
 
       {/* Subjects Grid */}
       <section className="space-y-4">
-        <h2 className="text-base font-semibold text-charcoal">
+        <h2 className="text-base font-semibold text-charcoal lg:text-lg">
           Subjects ({semSubjects.length})
         </h2>
 
@@ -151,7 +151,7 @@ export default async function MySemesterPage() {
             {semSubjects.map((subj) => (
               <div
                 key={subj.id}
-                className="flex flex-col justify-between rounded-lg border border-line bg-canvas p-5"
+                className="flex flex-col justify-between rounded-lg border border-line bg-canvas p-5 lg:rounded-[24px] lg:p-6"
               >
                 <div>
                   <span className="inline-block rounded border border-burgundy-border bg-burgundy-tint px-2 py-0.5 font-mono text-xs font-semibold text-burgundy">
@@ -170,14 +170,14 @@ export default async function MySemesterPage() {
                 <div className="mt-5 flex items-center gap-2 border-t border-line pt-3.5">
                   <Link
                     href={`/dashboard/materials?subjectId=${subj.id}&programmeId=${subj.programme_id}&semesterId=${subj.semester_id}`}
-                    className="inline-flex flex-1 h-8 items-center justify-center gap-1 rounded bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark"
+                    className="inline-flex flex-1 h-8 items-center justify-center gap-1 rounded bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark lg:h-9 lg:rounded-full"
                   >
                     <span>Notes</span>
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                   <Link
                     href={`/dashboard/question-papers?subjectId=${subj.id}&programmeId=${subj.programme_id}&semesterId=${subj.semester_id}`}
-                    className="inline-flex h-8 items-center justify-center gap-1 rounded border border-line-strong bg-canvas px-3 text-xs font-semibold text-charcoal hover:bg-neutral-soft"
+                    className="inline-flex h-8 items-center justify-center gap-1 rounded border border-line-strong bg-canvas px-3 text-xs font-semibold text-charcoal hover:bg-neutral-soft lg:h-9 lg:rounded-full"
                   >
                     <FileQuestion className="h-3.5 w-3.5 text-burgundy" />
                     <span>Papers</span>
@@ -192,7 +192,7 @@ export default async function MySemesterPage() {
       {/* Semester Resources */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-charcoal">
+          <h2 className="text-base font-semibold text-charcoal lg:text-lg">
             Materials in {profile.semester?.label}
           </h2>
           <Link

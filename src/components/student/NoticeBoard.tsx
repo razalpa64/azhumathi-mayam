@@ -34,14 +34,14 @@ export function NoticeBoard({ notices, noticesEnabled }: NoticeBoardProps) {
         <span className="text-xs text-muted">{notices.length} new</span>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 lg:gap-4">
         {notices.map((notice) => {
           const isHighPriority = notice.priority === 'urgent' || notice.priority === 'important';
           return (
             <article
               key={notice.id}
               className={cn(
-                'rounded-lg border p-4 transition-colors',
+                'rounded-lg border p-4 transition-colors lg:rounded-[22px] lg:p-5',
                 isHighPriority
                   ? 'border-burgundy-border bg-burgundy-tint/65'
                   : 'border-line bg-canvas'

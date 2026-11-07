@@ -195,7 +195,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
   }
 
   return (
-    <section className="relative flex h-[calc(100dvh-168px)] min-h-[430px] flex-col overflow-hidden rounded-[24px] border border-line bg-canvas lg:h-[calc(100dvh-142px)]">
+    <section className="relative flex h-[calc(100dvh-168px)] min-h-[430px] flex-col overflow-hidden rounded-[24px] border border-line bg-canvas lg:h-[calc(100dvh-142px)] lg:rounded-[28px]">
       {/* Room header */}
       <div className="flex items-center gap-3 border-b border-line bg-canvas px-4 py-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-burgundy text-white">
@@ -223,7 +223,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto bg-[#FAF3F1] px-3.5 py-4 sm:px-5"
+        className="flex-1 overflow-y-auto bg-[#FAF3F1] px-3.5 py-4 sm:px-5 lg:px-8 lg:py-6"
       >
         <div className="mb-1.5 flex items-center gap-3 px-1">
           <span className="h-px flex-1 bg-burgundy/10" />
@@ -291,7 +291,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
                     )
                   ) : null}
 
-                  <div className={cn('group flex max-w-[80%] items-center gap-1.5 sm:max-w-[65%]', own && 'flex-row-reverse')}>
+                  <div className={cn('group flex max-w-[80%] items-center gap-1.5 sm:max-w-[65%] lg:max-w-[58%]', own && 'flex-row-reverse')}>
                     <div
                       className={cn(
                         'px-3.5 py-2.5 shadow-[0_1px_2px_rgba(36,7,7,0.10)]',

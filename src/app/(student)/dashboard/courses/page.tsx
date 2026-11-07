@@ -29,7 +29,7 @@ export default async function CoursesPage() {
     <div className="space-y-9">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+          <h1 className="text-2xl font-semibold tracking-tight text-charcoal lg:text-[28px]">
             Courses
           </h1>
           <p className="mt-1 text-sm text-muted">
@@ -46,7 +46,7 @@ export default async function CoursesPage() {
 
       {/* Primary Enrolled Programme Card */}
       {enrolledProgramme ? (
-        <section className="rounded-xl border border-burgundy-border bg-burgundy-tint/45 p-6 space-y-5">
+        <section className="rounded-xl border border-burgundy-border bg-burgundy-tint/45 p-6 space-y-5 lg:rounded-[28px] lg:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -102,7 +102,7 @@ export default async function CoursesPage() {
                   href={`/dashboard/materials?programmeId=${enrolledProgramme.id}&semesterId=${sem.id}${
                     profile.specialization_id ? `&specializationId=${profile.specialization_id}` : ''
                   }`}
-                  className={`flex flex-col justify-between rounded-lg border p-4 transition-colors ${
+                  className={`flex flex-col justify-between rounded-lg border p-4 transition-colors lg:rounded-2xl lg:p-5 ${
                     isCurrent
                       ? 'border-burgundy bg-canvas ring-1 ring-burgundy/20'
                       : 'border-line bg-canvas hover:border-burgundy-border'
@@ -153,7 +153,7 @@ export default async function CoursesPage() {
               return (
                 <div
                   key={prog.id}
-                  className="flex flex-col justify-between rounded-lg border border-line bg-canvas p-5"
+                  className="flex flex-col justify-between rounded-lg border border-line bg-canvas p-5 lg:rounded-[24px] lg:p-6"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2">

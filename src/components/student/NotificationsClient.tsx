@@ -51,10 +51,10 @@ export function NotificationsClient({ initialItems }: NotificationsClientProps) 
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-3xl space-y-6 lg:max-w-4xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+          <h1 className="text-2xl font-semibold tracking-tight text-charcoal lg:text-[28px]">
             Notifications
           </h1>
           <p className="mt-1 text-sm text-muted">
@@ -77,7 +77,7 @@ export function NotificationsClient({ initialItems }: NotificationsClientProps) 
           description="When something new arrives for your semester, it will show up here."
         />
       ) : (
-        <div className="divide-y divide-line rounded-lg border border-line bg-canvas overflow-hidden">
+        <div className="divide-y divide-line rounded-lg border border-line bg-canvas overflow-hidden lg:rounded-[24px]">
           {items.map((item) => (
             <div
               key={item.id}

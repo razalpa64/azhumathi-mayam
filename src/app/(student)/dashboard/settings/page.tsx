@@ -13,7 +13,7 @@ export default async function StudentSettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-charcoal">
+        <h1 className="text-2xl font-semibold tracking-tight text-charcoal lg:text-[28px]">
           Settings
         </h1>
         <p className="mt-1 text-sm text-muted">
@@ -27,7 +27,7 @@ export default async function StudentSettingsPage() {
         </div>
 
         <aside className="lg:col-span-5 space-y-4">
-          <div className="rounded-xl border border-line bg-neutral-soft/65 p-6 space-y-4">
+          <div className="rounded-xl border border-line bg-neutral-soft/65 p-6 space-y-4 lg:rounded-[26px] lg:p-7">
             <div className="flex items-center gap-2.5">
               <ShieldCheck className="h-5 w-5 text-burgundy" />
               <h2 className="text-sm font-semibold text-charcoal">Your sign-in</h2>

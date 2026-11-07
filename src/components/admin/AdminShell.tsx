@@ -188,7 +188,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           </Link>
         </header>
 
-        <main className="flex-1 p-5 sm:p-7 lg:p-9 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-5 sm:p-7 lg:p-9 max-w-7xl w-full mx-auto 2xl:max-w-[1560px]">
           {children}
         </main>
       </div>
