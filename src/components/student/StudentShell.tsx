@@ -24,6 +24,7 @@ import {
   X,
 } from 'lucide-react';
 import type { Profile } from '@/types/database';
+import { InstallAppButton } from '@/components/pwa/InstallAppButton';
 import { cn, getInitials } from '@/lib/utils';
 
 interface StudentShellProps {
@@ -302,6 +303,13 @@ export function StudentShell({
               })}
             </div>
 
+            <div className="empty:hidden">
+              <InstallAppButton className="flex w-full justify-center" />
+              <p className="mt-1.5 text-center text-[11px] text-muted">
+                Put അഴിമതി മയം on your home screen — opens full-screen, like a real app.
+              </p>
+            </div>
+
             <button
               type="button"
               onClick={handleLogout}
@@ -382,6 +390,9 @@ export function StudentShell({
             <Link href="/dashboard/settings" className="hover:text-charcoal">
               Security
             </Link>
+            <span className="empty:hidden">
+              <InstallAppButton className="h-8 px-3 text-xs shadow-none" />
+            </span>
           </div>
         </div>
       </footer>
