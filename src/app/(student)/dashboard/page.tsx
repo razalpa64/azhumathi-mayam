@@ -257,10 +257,16 @@ export default async function StudentDashboardPage() {
     .filter((r): r is Resource => Boolean(r && r.publication_status === 'published'));
 
   const greeting = getGreetingByHour();
+  const dateLabel = new Intl.DateTimeFormat('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'Asia/Kolkata',
+  }).format(new Date());
   const hasAcademicSetup = Boolean(profile.programme_id && profile.semester_id);
 
   return (
-    <div className="space-y-10 sm:space-y-12 lg:space-y-9">
+    <div className="space-y-10 sm:space-y-12 lg:space-y-7">
       {/* Temporary Password Security Banner */}
       {profile.must_change_password ? (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-burgundy-border bg-burgundy-tint px-4 py-3.5 text-xs">
@@ -279,7 +285,12 @@ export default async function StudentDashboardPage() {
       ) : null}
 
       {/* Greeting hero — deep burgundy card with cap watermark */}
-      <section className="anim-rise relative overflow-hidden rounded-[32px] bg-gradient-to-br from-burgundy via-burgundy-dark to-burgundy-deep p-6 text-canvas shadow-[0_20px_38px_-18px_rgba(36,7,7,0.6)] sm:p-8 lg:rounded-[28px] lg:px-8 lg:py-7 xl:px-10 xl:py-8">
+      <section className="anim-rise relative overflow-hidden rounded-[32px] bg-gradient-to-br from-burgundy via-burgundy-dark to-burgundy-deep p-6 text-canvas shadow-[0_20px_38px_-18px_rgba(36,7,7,0.6)] sm:p-8 lg:overflow-visible lg:rounded-[28px] lg:px-8 lg:py-6 xl:px-10">
+        {/* Decorations live in a clipped layer of their own, so the hero
+            itself can stay open on desktop for the search dropdown */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+          <div className="absolute inset-y-0 right-0 hidden w-1/2 lg:block [background-image:radial-gradient(rgba(255,255,255,0.08)_1px,transparent_1.4px)] [background-size:22px_22px] [mask-image:linear-gradient(to_left,black,transparent)]" />
+          <div className="absolute -top-32 right-48 hidden h-64 w-64 rounded-full bg-white/[0.07] blur-2xl lg:block" />
         <GraduationCap
           aria-hidden="true"
           strokeWidth={1}
@@ -289,8 +300,9 @@ export default async function StudentDashboardPage() {
           aria-hidden="true"
           className="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-white/[0.06] lg:h-64 lg:w-64"
         />
+        </div>
 
-        <div className="relative lg:flex lg:items-center lg:justify-between lg:gap-8">
+        <div className="relative lg:flex lg:items-start lg:justify-between lg:gap-8">
           <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {contextBits.length > 0 ? (
@@ -301,10 +313,11 @@ export default async function StudentDashboardPage() {
             ) : null}
           </div>
 
-          <h1 className="mt-3.5 text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px] lg:mt-3 lg:text-[30px] lg:leading-[1.12] xl:text-[33px]">
+          <h1 className="mt-3.5 text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px] lg:mt-3 lg:text-[28px] lg:leading-[1.12] xl:text-[30px]">
             {greeting}, {profile.full_name.split(' ')[0]}
           </h1>
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-canvas/75 lg:mt-2 lg:max-w-lg lg:text-sm">
+          <div className="lg:mt-2.5 lg:flex lg:items-center lg:gap-5">
+          <p className="mt-2 max-w-md text-sm leading-relaxed text-canvas/75 lg:mt-0 lg:max-w-none lg:flex-1 lg:text-sm">
             {hasAcademicSetup
               ? `Notes and question papers for ${profile.programme?.name}${profile.specialization ? ` (${profile.specialization.name})` : ''} — ${profile.semester?.label}.`
               : 'Add your course and semester to your profile, and your subjects and notes will show up here.'}
@@ -312,44 +325,58 @@ export default async function StudentDashboardPage() {
 
           <Link
             href="/dashboard/profile"
-            className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02] lg:mt-5 lg:py-2.5 lg:pl-4 lg:pr-3.5"
+            className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-white py-2.5 pl-4 pr-3 text-sm font-semibold text-burgundy shadow-[0_14px_24px_-12px_rgba(0,0,0,0.55)] transition-transform hover:scale-[1.02] lg:mt-0 lg:shrink-0 lg:bg-white/10 lg:py-2 lg:pl-3.5 lg:pr-3 lg:text-white lg:shadow-none lg:ring-1 lg:ring-white/30"
           >
             <ArrowLeftRight className="h-4 w-4" />
             <span>{hasAcademicSetup ? 'Change course / semester' : 'Set course & semester'}</span>
             <ChevronRight className="h-4 w-4 opacity-60" />
           </Link>
           </div>
+          </div>
 
-          {/* At a glance — fills the hero's empty right half on desktop */}
+          {/* At a glance — date and quick counts, top-right on desktop */}
           {hasAcademicSetup ? (
-            <div className="hidden shrink-0 grid-cols-3 gap-3 lg:grid">
+            <div className="hidden shrink-0 lg:block">
+              <p className="mb-3 text-right text-xs font-medium tracking-wide text-white/55">
+                {dateLabel}
+              </p>
+              <div className="grid grid-cols-3 gap-3">
               {[
-                { value: String(semesterSubjects.length), label: 'Subjects' },
-                { value: String(bookmarkSet.size), label: 'Saved' },
+                { value: String(semesterSubjects.length), label: 'Subjects', icon: BookOpen },
+                { value: String(bookmarkSet.size), label: 'Saved', icon: Bookmark },
                 {
                   value: profile.semester ? `S${profile.semester.semester_number}` : '—',
                   label: 'Semester',
+                  icon: GraduationCap,
                 },
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="min-w-[106px] rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/15 lg:min-w-[100px] lg:px-4 lg:py-3"
+                  className="min-w-[106px] rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/15 lg:min-w-[98px] lg:px-3.5 lg:py-2.5"
                 >
-                  <p className="text-[26px] font-extrabold leading-none text-white lg:text-[24px]">
+                  <p className="text-[26px] font-extrabold leading-none text-white lg:text-[22px]">
                     {stat.value}
                   </p>
-                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/60">
+                  <p className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/60">
+                    <stat.icon className="h-3 w-3" aria-hidden="true" />
                     {stat.label}
                   </p>
                 </div>
               ))}
+              </div>
             </div>
           ) : null}
         </div>
+
+        {/* On desktop the search lives inside the hero — one working band
+            instead of a billboard hero plus a separate search row */}
+        <div className="relative z-20 mt-6 hidden lg:block">
+          <GlobalSearchBar />
+        </div>
       </section>
 
-      {/* Search */}
-      <div className="anim-rise" style={{ animationDelay: '60ms' }}>
+      {/* Search row — phones and tablets; on desktop it sits in the hero */}
+      <div className="anim-rise lg:hidden" style={{ animationDelay: '60ms' }}>
         <GlobalSearchBar />
       </div>
 
@@ -368,7 +395,9 @@ export default async function StudentDashboardPage() {
               href={item.href}
               className="group flex items-center gap-3 rounded-[20px] border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border sm:px-5 lg:rounded-[20px] lg:px-5 lg:py-3.5 lg:transition-all lg:hover:-translate-y-0.5 lg:hover:shadow-[0_16px_28px_-20px_rgba(36,7,7,0.4)]"
             >
-              <Icon className="h-6 w-6 shrink-0 text-burgundy lg:h-6 lg:w-6" strokeWidth={1.8} />
+              <span className="lg:flex lg:h-9 lg:w-9 lg:shrink-0 lg:items-center lg:justify-center lg:rounded-xl lg:bg-burgundy-tint">
+                <Icon className="h-6 w-6 shrink-0 text-burgundy lg:h-5 lg:w-5" strokeWidth={1.8} />
+              </span>
               <span className="truncate text-sm font-semibold text-charcoal group-hover:text-burgundy sm:text-[15px] lg:text-[15px]">
                 {item.label}
               </span>
