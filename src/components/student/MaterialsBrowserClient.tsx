@@ -4,16 +4,19 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   BookOpen,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Filter,
   RotateCcw,
+  X,
 } from 'lucide-react';
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
 import { ResourceCard } from '@/components/student/ResourceCard';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 import type {
   AcademicRegulation,
   Advertisement,
@@ -98,6 +101,67 @@ export function MaterialsBrowserClient({
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Filters the student picked on top of their own course defaults
+  // (those defaults are the baseline, not "filters").
+  const activeFilters: { key: string; label: string; clear: () => void }[] = [];
+  if (universityId) {
+    const u = taxonomy.universities.find((x) => x.id === universityId);
+    activeFilters.push({
+      key: 'university',
+      label: u?.short_name || 'University',
+      clear: () => { setUniversityId(''); setPage(1); },
+    });
+  }
+  if (programmeId && programmeId !== (profile.programme_id || '')) {
+    const pr = taxonomy.programmes.find((x) => x.id === programmeId);
+    activeFilters.push({
+      key: 'programme',
+      label: pr?.name || 'Programme',
+      clear: () => { setProgrammeId(profile.programme_id || ''); setSpecializationId(''); setSemesterId(profile.semester_id || ''); setSubjectId(''); setPage(1); },
+    });
+  }
+  if (specializationId && specializationId !== (profile.specialization_id || '')) {
+    const sp = taxonomy.specializations.find((x) => x.id === specializationId);
+    activeFilters.push({
+      key: 'specialization',
+      label: sp?.code || 'Specialization',
+      clear: () => { setSpecializationId(profile.specialization_id || ''); setSubjectId(''); setPage(1); },
+    });
+  }
+  if (semesterId && semesterId !== (profile.semester_id || '')) {
+    const sem = taxonomy.semesters.find((x) => x.id === semesterId);
+    activeFilters.push({
+      key: 'semester',
+      label: sem?.label || 'Semester',
+      clear: () => { setSemesterId(profile.semester_id || ''); setSubjectId(''); setPage(1); },
+    });
+  }
+  if (subjectId) {
+    const sub = taxonomy.subjects.find((x) => x.id === subjectId);
+    activeFilters.push({
+      key: 'subject',
+      label: sub?.subject_code || 'Subject',
+      clear: () => { setSubjectId(''); setPage(1); },
+    });
+  }
+  if (categoryId) {
+    const cat = taxonomy.categories.find((x) => x.id === categoryId);
+    activeFilters.push({
+      key: 'type',
+      label: cat?.name || 'Type',
+      clear: () => { setCategoryId(''); setPage(1); },
+    });
+  }
+  if (regulationId) {
+    const reg = taxonomy.regulations.find((x) => x.id === regulationId);
+    activeFilters.push({
+      key: 'regulation',
+      label: reg?.name || 'Regulation',
+      clear: () => { setRegulationId(''); setPage(1); },
+    });
+  }
 
   const filteredSpecializations = useMemo(
     () =>
@@ -276,180 +340,239 @@ export function MaterialsBrowserClient({
         />
       ) : null}
 
-      {/* Structured Filter Matrix */}
-      <section
-        aria-label="Resource filters"
-        className="rounded-lg border border-line bg-neutral-soft/65 p-4 space-y-3"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-charcoal">
-            <Filter className="h-3.5 w-3.5 text-burgundy" />
+      {/* Filter bar — the matrix stays shut until asked for */}
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            aria-controls="resource-filters-panel"
+            className={cn(
+              'inline-flex h-10 items-center gap-2 rounded-full border px-4 text-[13px] font-semibold transition-all active:scale-95 cursor-pointer',
+              filtersOpen || activeFilters.length > 0
+                ? 'border-burgundy bg-burgundy text-white shadow-[0_10px_18px_-10px_rgba(121,0,0,0.7)]'
+                : 'border-line-strong bg-canvas text-charcoal hover:border-burgundy-border hover:text-burgundy'
+            )}
+          >
+            <Filter className="h-4 w-4" />
             <span>Filters</span>
-          </div>
-          <span className="text-xs font-mono text-muted">
-            {loading ? 'Loading...' : `${total} found`}
+            {activeFilters.length > 0 ? (
+              <span
+                className={cn(
+                  'flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold',
+                  filtersOpen || activeFilters.length > 0
+                    ? 'bg-white text-burgundy'
+                    : 'bg-burgundy text-white'
+                )}
+              >
+                {activeFilters.length}
+              </span>
+            ) : null}
+            <ChevronDown
+              className={cn('h-4 w-4 transition-transform duration-300', filtersOpen && 'rotate-180')}
+            />
+          </button>
+
+          {activeFilters.map((f) => (
+            <span
+              key={f.key}
+              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-burgundy-tint py-1 pl-3 pr-1.5 text-xs font-medium text-burgundy ring-1 ring-burgundy-border"
+            >
+              {f.label}
+              <button
+                type="button"
+                onClick={f.clear}
+                aria-label={`Remove ${f.label} filter`}
+                className="flex h-5 w-5 items-center justify-center rounded-full transition-colors hover:bg-burgundy hover:text-white cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+
+          {activeFilters.length > 0 ? (
+            <button
+              type="button"
+              onClick={handleResetToMyCourse}
+              className="h-8 px-2 text-xs font-semibold text-muted underline decoration-line-strong underline-offset-2 transition-colors hover:text-burgundy cursor-pointer"
+            >
+              Clear all
+            </button>
+          ) : null}
+
+          <span className="ml-auto text-xs text-muted">
+            {loading ? 'Loading…' : `${total} found`}
           </span>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted">University</label>
-            <select
-              value={universityId}
-              onChange={(e) => {
-                setUniversityId(e.target.value);
-                setPage(1);
-              }}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+        {/* Collapsible filter matrix */}
+        <div
+          id="resource-filters-panel"
+          inert={!filtersOpen}
+          className={cn(
+            'grid transition-all duration-300 ease-out',
+            filtersOpen ? 'visible grid-rows-[1fr] opacity-100' : 'invisible grid-rows-[0fr] opacity-0'
+          )}
+        >
+          <div className="overflow-hidden">
+            <section
+              aria-label="Resource filters"
+              className="rounded-[20px] border border-line bg-neutral-soft/65 p-4"
             >
-              <option value="">Any university</option>
-              {taxonomy.universities.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.short_name} — {u.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+                <div>
+                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">University</label>
+                  <select
+                    value={universityId}
+                    onChange={(e) => { setUniversityId(e.target.value); setPage(1); }}
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                  >
+                    <option value="">Any university</option>
+                    {taxonomy.universities.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.short_name} — {u.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted">Programme</label>
-            <select
-              value={programmeId}
-              disabled={!allowCrossProgrammeBrowsing && Boolean(profile.programme_id)}
-              onChange={(e) => {
-                setProgrammeId(e.target.value);
-                setSpecializationId('');
-                setSemesterId('');
-                setSubjectId('');
-                setPage(1);
-              }}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-60"
-            >
-              <option value="">Any programme</option>
-              {taxonomy.programmes.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} {p.full_title ? `— ${p.full_title}` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div>
+                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Programme</label>
+                  <select
+                    value={programmeId}
+                    disabled={!allowCrossProgrammeBrowsing && Boolean(profile.programme_id)}
+                    onChange={(e) => {
+                      setProgrammeId(e.target.value);
+                      setSpecializationId('');
+                      setSemesterId('');
+                      setSubjectId('');
+                      setPage(1);
+                    }}
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-60"
+                  >
+                    <option value="">Any programme</option>
+                    {taxonomy.programmes.map((pr) => (
+                      <option key={pr.id} value={pr.id}>
+                        {pr.name} {pr.full_title ? `— ${pr.full_title}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted">Specialization</label>
-            <select
-              value={specializationId}
-              onChange={(e) => {
-                setSpecializationId(e.target.value);
-                setSubjectId('');
-                setPage(1);
-              }}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
-            >
-              <option value="">Any specialization</option>
-              {filteredSpecializations.map((sp) => (
-                <option key={sp.id} value={sp.id}>
-                  {sp.code} — {sp.name}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div>
+                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Specialization</label>
+                  <select
+                    value={specializationId}
+                    onChange={(e) => { setSpecializationId(e.target.value); setSubjectId(''); setPage(1); }}
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                  >
+                    <option value="">Any specialization</option>
+                    {filteredSpecializations.map((sp) => (
+                      <option key={sp.id} value={sp.id}>
+                        {sp.code} — {sp.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted">Semester</label>
-            <select
-              value={semesterId}
-              onChange={(e) => {
-                setSemesterId(e.target.value);
-                setSubjectId('');
-                setPage(1);
-              }}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
-            >
-              <option value="">Any semester</option>
-              {filteredSemesters.map((sem) => (
-                <option key={sem.id} value={sem.id}>
-                  {sem.label}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div>
+                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Semester</label>
+                  <select
+                    value={semesterId}
+                    onChange={(e) => { setSemesterId(e.target.value); setSubjectId(''); setPage(1); }}
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                  >
+                    <option value="">Any semester</option>
+                    {filteredSemesters.map((sem) => (
+                      <option key={sem.id} value={sem.id}>
+                        {sem.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted">Subject</label>
-            <select
-              value={subjectId}
-              onChange={(e) => {
-                setSubjectId(e.target.value);
-                setPage(1);
-              }}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
-            >
-              <option value="">Any subject</option>
-              {filteredSubjects.map((sub) => (
-                <option key={sub.id} value={sub.id}>
-                  {sub.subject_code} — {sub.name}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div>
+                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Subject</label>
+                  <select
+                    value={subjectId}
+                    onChange={(e) => { setSubjectId(e.target.value); setPage(1); }}
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                  >
+                    <option value="">Any subject</option>
+                    {filteredSubjects.map((sub) => (
+                      <option key={sub.id} value={sub.id}>
+                        {sub.subject_code} — {sub.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted">Type</label>
-            <select
-              value={categoryId}
-              onChange={(e) => {
-                setCategoryId(e.target.value);
-                setPage(1);
-              }}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
-            >
-              <option value="">
-                {onlyQuestionPapers ? 'Any type' : 'Any type'}
-              </option>
-              {visibleCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div>
+                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Type</label>
+                  <select
+                    value={categoryId}
+                    onChange={(e) => { setCategoryId(e.target.value); setPage(1); }}
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                  >
+                    <option value="">Any type</option>
+                    {visibleCategories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted">Regulation</label>
-            <select
-              value={regulationId}
-              onChange={(e) => {
-                setRegulationId(e.target.value);
-                setPage(1);
-              }}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
-            >
-              <option value="">All Regulations</option>
-              {taxonomy.regulations.map((reg) => (
-                <option key={reg.id} value={reg.id}>
-                  {reg.name}
-                </option>
-              ))}
-            </select>
-          </div>
+                <div>
+                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Regulation</label>
+                  <select
+                    value={regulationId}
+                    onChange={(e) => { setRegulationId(e.target.value); setPage(1); }}
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                  >
+                    <option value="">All Regulations</option>
+                    {taxonomy.regulations.map((reg) => (
+                      <option key={reg.id} value={reg.id}>
+                        {reg.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div>
-            <label className="mb-1 block text-[11px] font-medium text-muted">Sort</label>
-            <select
-              value={sort}
-              onChange={(e) => {
-                setSort(e.target.value);
-                setPage(1);
-              }}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
-            >
-              <option value="latest">Newest first</option>
-              <option value="popular">Most downloaded</option>
-              <option value="title">Title (A – Z)</option>
-            </select>
+                <div>
+                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Sort</label>
+                  <select
+                    value={sort}
+                    onChange={(e) => { setSort(e.target.value); setPage(1); }}
+                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none"
+                  >
+                    <option value="latest">Newest first</option>
+                    <option value="popular">Most downloaded</option>
+                    <option value="title">Title (A – Z)</option>
+                  </select>
+                </div>
+              </div>
+
+              <p className="mt-3.5 flex flex-wrap items-center gap-x-2 gap-y-1 pl-1 text-[11px] text-muted">
+                <span>
+                  Showing {loading ? '…' : total} result{total === 1 ? '' : 's'} — tap{' '}
+                  <span className="font-semibold text-charcoal">Filters</span> again to close this.
+                </span>
+                {activeFilters.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleResetToMyCourse}
+                    className="font-semibold text-burgundy underline decoration-burgundy-border underline-offset-2 cursor-pointer"
+                  >
+                    Reset to my course
+                  </button>
+                ) : null}
+              </p>
+            </section>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Results Grid */}
       {loading ? (
