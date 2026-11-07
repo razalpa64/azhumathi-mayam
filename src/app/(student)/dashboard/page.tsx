@@ -94,6 +94,15 @@ export default async function StudentDashboardPage() {
       sQuery = sQuery.or(`specialization_id.is.null,specialization_id.eq.${profile.specialization_id}`);
     }
 
+    // Never mix schemes or universities into a student's subject list;
+    // NULL regulation/university marks a shared subject that always shows.
+    if (profile.regulation_id) {
+      sQuery = sQuery.or(`regulation_id.is.null,regulation_id.eq.${profile.regulation_id}`);
+    }
+    if (profile.university_id) {
+      sQuery = sQuery.or(`university_id.is.null,university_id.eq.${profile.university_id}`);
+    }
+
     const { data } = await sQuery;
     return (data || []) as unknown as Subject[];
   })();

@@ -62,6 +62,20 @@ export default async function MySemesterPage() {
     );
   }
 
+  // Scheme-safe: a student on the 2024 scheme must never see 2019-scheme
+  // subjects (or another university's list) mixed into their semester.
+  // Subjects with NULL regulation/university are shared and always show.
+  if (profile.regulation_id) {
+    subjectsQuery = subjectsQuery.or(
+      `regulation_id.is.null,regulation_id.eq.${profile.regulation_id}`
+    );
+  }
+  if (profile.university_id) {
+    subjectsQuery = subjectsQuery.or(
+      `university_id.is.null,university_id.eq.${profile.university_id}`
+    );
+  }
+
   let resourcesQuery = supabase
     .from('resources')
     .select(RESOURCE_JOIN)
