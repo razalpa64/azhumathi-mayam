@@ -40,6 +40,50 @@ export async function getSubjectGroupIds(
   return ids.length > 0 ? ids : [subjectId];
 }
 
+export interface SubjectGroupRow {
+  id: string;
+  subject_code: string;
+  semester_id: string;
+  regulation_id: string | null;
+}
+
+/**
+ * Given every subject row in a scope (e.g. a programme + semester) and
+ * the subset of them a particular audience can see (their branch's
+ * rows plus shared rows), return the ids of ALL rows whose course is
+ * visible to that audience — their own copies plus every sibling copy
+ * of the same courses.
+ *
+ * This is the correct audience test for material lists. A course taken
+ * by a subset of branches stores its resources as "shared" (NULL
+ * branch), so a plain branch-or-shared filter leaks them to every
+ * other branch in the programme (an AIDS student seeing the CSE-family
+ * OOP course, which AIDS takes under a different code). Scoping by
+ * course group instead means students see exactly the subjects they
+ * have — in every scheme, since the group key includes the regulation.
+ */
+export function audienceSubjectIds(
+  subjects: SubjectGroupRow[],
+  visibleIds: ReadonlySet<string>
+): string[] {
+  const groups = new Map<string, { ids: string[]; visible: boolean }>();
+  for (const s of subjects) {
+    const key = `${s.semester_id}|${s.subject_code}|${s.regulation_id ?? ''}`;
+    let group = groups.get(key);
+    if (!group) {
+      group = { ids: [], visible: false };
+      groups.set(key, group);
+    }
+    group.ids.push(s.id);
+    if (visibleIds.has(s.id)) group.visible = true;
+  }
+  const result: string[] = [];
+  for (const group of groups.values()) {
+    if (group.visible) result.push(...group.ids);
+  }
+  return result;
+}
+
 /** Stable key identifying a course (not a row) within a scheme. */
 export function subjectGroupKey(subjectCode: string, regulationId: string | null): string {
   return `${subjectCode}|${regulationId ?? ''}`;

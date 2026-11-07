@@ -20,6 +20,7 @@ import {
 import { requireStudentAppUser, getWebsiteSettings } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/fetch-all';
+import { audienceSubjectIds, type SubjectGroupRow } from '@/lib/subject-siblings';
 import { getActiveAdvertisementsByPlacement } from '@/lib/ads';
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
 import { NoticeBoard } from '@/components/student/NoticeBoard';
@@ -108,6 +109,41 @@ export default async function StudentDashboardPage() {
     return (data || []) as unknown as Subject[];
   })();
 
+  // The student's material audience, by course group: every copy of
+  // the courses this branch actually takes this semester. A course
+  // shared by only some branches stores materials as branch-less, so
+  // branch-tag filters alone leak them to branches that take another
+  // course instead. Feeds below scope to this audience when known.
+  type SemesterSubjectRow = SubjectGroupRow & {
+    specialization_id: string | null;
+    university_id: string | null;
+  };
+  const allSemesterSubjects: SemesterSubjectRow[] =
+    profile.programme_id && profile.semester_id
+      ? (((await supabase
+          .from('subjects')
+          .select('id, subject_code, semester_id, regulation_id, specialization_id, university_id')
+          .eq('publication_status', 'published')
+          .eq('programme_id', profile.programme_id)
+          .eq('semester_id', profile.semester_id)
+        ).data || []) as SemesterSubjectRow[])
+      : [];
+  const feedSubjectIds = profile.specialization_id
+    ? audienceSubjectIds(
+        allSemesterSubjects,
+        new Set(
+          allSemesterSubjects
+            .filter(
+              (s) =>
+                (!s.specialization_id || s.specialization_id === profile.specialization_id) &&
+                (!profile.regulation_id || !s.regulation_id || s.regulation_id === profile.regulation_id) &&
+                (!profile.university_id || !s.university_id || s.university_id === profile.university_id)
+            )
+            .map((s) => s.id)
+        )
+      )
+    : [];
+
   // 3. Latest study materials for student's semester/course
   let latestQuery = supabase
     .from('resources')
@@ -126,6 +162,9 @@ export default async function StudentDashboardPage() {
     latestQuery = latestQuery.or(
       `specialization_id.is.null,specialization_id.eq.${profile.specialization_id}`
     );
+  }
+  if (feedSubjectIds.length > 0) {
+    latestQuery = latestQuery.in('subject_id', feedSubjectIds);
   }
 
   // 4. Popular resources for student's course
@@ -174,6 +213,9 @@ export default async function StudentDashboardPage() {
       `specialization_id.is.null,specialization_id.eq.${profile.specialization_id}`
     );
   }
+  if (feedSubjectIds.length > 0) {
+    qpQuery = qpQuery.in('subject_id', feedSubjectIds);
+  }
 
   // 5b. Short Notes & Exam Special (latest for this semester)
   const snByFlag = await supabase
@@ -203,6 +245,9 @@ export default async function StudentDashboardPage() {
     shortNotesQuery = shortNotesQuery.or(
       `specialization_id.is.null,specialization_id.eq.${profile.specialization_id}`
     );
+  }
+  if (feedSubjectIds.length > 0) {
+    shortNotesQuery = shortNotesQuery.in('subject_id', feedSubjectIds);
   }
 
   // 5c. Per-subject material counts (for the subject cards)

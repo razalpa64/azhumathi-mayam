@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, BookOpen, FileQuestion, GraduationCap } from 'lucide-react';
 import { requireStudentAppUser } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { audienceSubjectIds } from '@/lib/subject-siblings';
 import { SemesterSwitcher } from '@/components/student/SemesterSwitcher';
 import { ResourceCard } from '@/components/student/ResourceCard';
 import { Badge } from '@/components/ui/Badge';
@@ -76,6 +77,31 @@ export default async function MySemesterPage() {
     );
   }
 
+  // Materials audience by course group: a course shared by only some
+  // branches stores materials as branch-less, so the branch tag alone
+  // would show them to branches that take a different course instead.
+  const { data: allSubjects } = await supabase
+    .from('subjects')
+    .select('id, subject_code, semester_id, regulation_id, specialization_id, university_id')
+    .eq('publication_status', 'published')
+    .eq('programme_id', profile.programme_id)
+    .eq('semester_id', profile.semester_id);
+  const feedSubjectIds = profile.specialization_id
+    ? audienceSubjectIds(
+        allSubjects || [],
+        new Set(
+          (allSubjects || [])
+            .filter(
+              (s) =>
+                (!s.specialization_id || s.specialization_id === profile.specialization_id) &&
+                (!profile.regulation_id || !s.regulation_id || s.regulation_id === profile.regulation_id) &&
+                (!profile.university_id || !s.university_id || s.university_id === profile.university_id)
+            )
+            .map((s) => s.id as string)
+        )
+      )
+    : [];
+
   let resourcesQuery = supabase
     .from('resources')
     .select(RESOURCE_JOIN)
@@ -89,6 +115,9 @@ export default async function MySemesterPage() {
     resourcesQuery = resourcesQuery.or(
       `specialization_id.is.null,specialization_id.eq.${profile.specialization_id}`
     );
+  }
+  if (feedSubjectIds.length > 0) {
+    resourcesQuery = resourcesQuery.in('subject_id', feedSubjectIds);
   }
 
   const [
