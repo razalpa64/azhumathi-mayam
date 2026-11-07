@@ -7,6 +7,7 @@ import {
   getSubjectGroupIds,
   resolveCourseAudienceSpecialization,
 } from '@/lib/subject-siblings';
+import { fetchAllRows } from '@/lib/supabase/fetch-all';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
 
 const createResourceSchema = z.object({
@@ -128,8 +129,24 @@ export async function POST(request: NextRequest) {
     )
   );
 
-  // The course decides who the material is for — never the form's
-  // branch field, which admins mainly use to narrow the subject list.
+  // The course decides the resource's taxonomy — never the form's
+  // fields, which admins mainly use to narrow the subject list. A
+  // stored tag that contradicts the subject is exactly what used to
+  // hide uploads from their students, so programme / semester /
+  // scheme / university / branch are ALL derived from the subject row.
+  const { data: subject } = await adminClient
+    .from('subjects')
+    .select('id, programme_id, semester_id, regulation_id, university_id')
+    .eq('id', payload.subject_id)
+    .maybeSingle();
+
+  if (!subject) {
+    return NextResponse.json(
+      { error: 'Selected subject was not found. Please pick the subject again.' },
+      { status: 400 }
+    );
+  }
+
   const audienceSpecializationId = await resolveCourseAudienceSpecialization(
     adminClient,
     payload.subject_id
@@ -140,11 +157,11 @@ export async function POST(request: NextRequest) {
     .insert({
       title: payload.title,
       description: payload.description || null,
-      university_id: payload.university_id || null,
-      programme_id: payload.programme_id,
+      university_id: subject.university_id || null,
+      programme_id: subject.programme_id,
       specialization_id: audienceSpecializationId,
-      regulation_id: payload.regulation_id || null,
-      semester_id: payload.semester_id,
+      regulation_id: subject.regulation_id || null,
+      semester_id: subject.semester_id,
       subject_id: payload.subject_id,
       category_id: payload.category_id,
       academic_year: payload.academic_year || null,
@@ -168,23 +185,58 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Notify matching enrolled students when published
+  // Notify matching enrolled students when published. The audience
+  // mirrors who can actually see the material: the course's branches
+  // (a shared course notifies only the branches that take it, plus
+  // students with no branch on file), and the course's scheme.
   if (payload.publication_status === 'published') {
-    let studentQuery = adminClient
-      .from('profiles')
-      .select('id')
-      .eq('role', 'student')
-      .eq('is_active', true)
-      .eq('programme_id', payload.programme_id)
-      .eq('semester_id', payload.semester_id);
+    const groupIds = await getSubjectGroupIds(adminClient, payload.subject_id);
+    const { data: groupSubjects } = await adminClient
+      .from('subjects')
+      .select('specialization_id')
+      .in('id', groupIds);
+    const courseBranchIds = Array.from(
+      new Set(
+        (groupSubjects || [])
+          .map((g) => g.specialization_id as string | null)
+          .filter((id): id is string => Boolean(id))
+      )
+    );
 
-    if (audienceSpecializationId) {
-      studentQuery = studentQuery.eq('specialization_id', audienceSpecializationId);
-    }
+    const buildStudentQuery = () => {
+      let studentQuery = adminClient
+        .from('profiles')
+        .select('id')
+        .eq('role', 'student')
+        .eq('is_active', true)
+        .eq('programme_id', subject.programme_id)
+        .eq('semester_id', subject.semester_id)
+        .order('id');
 
-    const { data: targetStudents } = await studentQuery.limit(500);
-    if (targetStudents && targetStudents.length > 0) {
-      const notifications = targetStudents.map((s) => ({
+      if (audienceSpecializationId) {
+        studentQuery = studentQuery.eq('specialization_id', audienceSpecializationId);
+      } else if (courseBranchIds.length > 0) {
+        studentQuery = studentQuery.or(
+          `specialization_id.is.null,specialization_id.in.(${courseBranchIds.join(',')})`
+        );
+      }
+      if (subject.regulation_id) {
+        studentQuery = studentQuery.or(
+          `regulation_id.is.null,regulation_id.eq.${subject.regulation_id}`
+        );
+      }
+      return studentQuery;
+    };
+
+    // Page through every matching student — a flat .limit() here
+    // silently un-notified everyone past the cap.
+    const targetStudents = await fetchAllRows(
+      async (from, to) => buildStudentQuery().range(from, to),
+      500
+    );
+
+    for (let i = 0; i < targetStudents.length; i += 500) {
+      const notifications = targetStudents.slice(i, i + 500).map((s) => ({
         user_id: s.id,
         resource_id: created.id,
         title: 'New Study Material Published',

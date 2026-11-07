@@ -47,7 +47,7 @@ export async function PATCH(
   const adminClient = createSupabaseAdminClient();
   const { data: existing } = await adminClient
     .from('resources')
-    .select('id, title, google_drive_file_id, publication_status')
+    .select('id, title, google_drive_file_id, publication_status, subject_id')
     .eq('id', id)
     .maybeSingle();
 
@@ -55,8 +55,50 @@ export async function PATCH(
     return NextResponse.json({ error: 'Resource not found.' }, { status: 404 });
   }
 
-  const updates: Record<string, unknown> = {};
   const payload = parsed.data;
+
+  // The course is the source of truth for the resource's taxonomy.
+  // Whenever the resource has a subject, its programme / semester /
+  // scheme / university / branch are re-derived from that subject —
+  // form fields can narrow a subject picker, but they must never
+  // store a tag that contradicts the course (the mismatch that hid
+  // uploads from their students).
+  const effectiveSubjectId = payload.subject_id ?? existing.subject_id;
+  let derivedTaxonomy: {
+    programme_id: string;
+    semester_id: string;
+    regulation_id: string | null;
+    university_id: string | null;
+    specialization_id: string | null;
+  } | null = null;
+  if (effectiveSubjectId) {
+    const { data: subject } = await adminClient
+      .from('subjects')
+      .select('id, programme_id, semester_id, regulation_id, university_id')
+      .eq('id', effectiveSubjectId)
+      .maybeSingle();
+    if (!subject) {
+      if (payload.subject_id !== undefined) {
+        return NextResponse.json(
+          { error: 'Selected subject was not found. Please pick the subject again.' },
+          { status: 400 }
+        );
+      }
+    } else {
+      derivedTaxonomy = {
+        programme_id: subject.programme_id,
+        semester_id: subject.semester_id,
+        regulation_id: subject.regulation_id || null,
+        university_id: subject.university_id || null,
+        specialization_id: await resolveCourseAudienceSpecialization(
+          adminClient,
+          subject.id
+        ),
+      };
+    }
+  }
+
+  const updates: Record<string, unknown> = {};
 
   if (payload.title !== undefined) updates.title = payload.title;
   if (payload.description !== undefined) updates.description = payload.description || null;
@@ -66,12 +108,12 @@ export async function PATCH(
   if (payload.regulation_id !== undefined) updates.regulation_id = payload.regulation_id;
   if (payload.semester_id !== undefined) updates.semester_id = payload.semester_id;
   if (payload.subject_id !== undefined) updates.subject_id = payload.subject_id;
-  if (payload.subject_id !== undefined) {
-    // Keep the resource's branch in step with its (new) course.
-    updates.specialization_id = await resolveCourseAudienceSpecialization(
-      adminClient,
-      payload.subject_id
-    );
+  if (derivedTaxonomy) {
+    updates.programme_id = derivedTaxonomy.programme_id;
+    updates.semester_id = derivedTaxonomy.semester_id;
+    updates.regulation_id = derivedTaxonomy.regulation_id;
+    updates.university_id = derivedTaxonomy.university_id;
+    updates.specialization_id = derivedTaxonomy.specialization_id;
   }
   if (payload.category_id !== undefined) updates.category_id = payload.category_id;
   if (payload.academic_year !== undefined) updates.academic_year = payload.academic_year || null;

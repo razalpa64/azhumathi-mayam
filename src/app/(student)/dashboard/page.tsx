@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { requireStudentAppUser, getWebsiteSettings } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/fetch-all';
 import { getActiveAdvertisementsByPlacement } from '@/lib/ads';
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
 import { NoticeBoard } from '@/components/student/NoticeBoard';
@@ -139,6 +140,11 @@ export default async function StudentDashboardPage() {
   if (profile.programme_id) {
     popularQuery = popularQuery.eq('programme_id', profile.programme_id);
   }
+  if (profile.specialization_id) {
+    popularQuery = popularQuery.or(
+      `specialization_id.is.null,specialization_id.eq.${profile.specialization_id}`
+    );
+  }
 
   // 5. Question paper category IDs
   const { data: qpCats } = await supabase
@@ -162,6 +168,11 @@ export default async function StudentDashboardPage() {
   }
   if (profile.semester_id) {
     qpQuery = qpQuery.eq('semester_id', profile.semester_id);
+  }
+  if (profile.specialization_id) {
+    qpQuery = qpQuery.or(
+      `specialization_id.is.null,specialization_id.eq.${profile.specialization_id}`
+    );
   }
 
   // 5b. Short Notes & Exam Special (latest for this semester)
@@ -188,15 +199,28 @@ export default async function StudentDashboardPage() {
   if (snCatIds.length > 0) shortNotesQuery = shortNotesQuery.in('category_id', snCatIds);
   if (profile.programme_id) shortNotesQuery = shortNotesQuery.eq('programme_id', profile.programme_id);
   if (profile.semester_id) shortNotesQuery = shortNotesQuery.eq('semester_id', profile.semester_id);
+  if (profile.specialization_id) {
+    shortNotesQuery = shortNotesQuery.or(
+      `specialization_id.is.null,specialization_id.eq.${profile.specialization_id}`
+    );
+  }
 
   // 5c. Per-subject material counts (for the subject cards)
-  let subjectCountQuery = supabase
-    .from('resources')
-    .select('subject_id, created_at, category:resource_categories(is_question_paper), subject:subjects(subject_code, regulation_id)')
-    .eq('publication_status', 'published')
-    .limit(1000);
-  if (profile.programme_id) subjectCountQuery = subjectCountQuery.eq('programme_id', profile.programme_id);
-  if (profile.semester_id) subjectCountQuery = subjectCountQuery.eq('semester_id', profile.semester_id);
+  // Page past PostgREST's 1,000-row response cap — a busy semester can
+  // hold more materials than one response returns, and a flat limit
+  // would silently undercount every subject card.
+  const subjectCountPromise = fetchAllRows(async (from, to) => {
+    let countQuery = supabase
+      .from('resources')
+      .select('subject_id, created_at, category:resource_categories(is_question_paper), subject:subjects(subject_code, regulation_id)')
+      .eq('publication_status', 'published')
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to);
+    if (profile.programme_id) countQuery = countQuery.eq('programme_id', profile.programme_id);
+    if (profile.semester_id) countQuery = countQuery.eq('semester_id', profile.semester_id);
+    return countQuery;
+  }).then((rows) => ({ data: rows }));
 
   // 6. Recently viewed & Bookmarks
   const [
@@ -223,7 +247,7 @@ export default async function StudentDashboardPage() {
       .limit(3),
     supabase.from('bookmarks').select('resource_id').eq('user_id', profile.id),
     snCatIds.length > 0 ? shortNotesQuery : Promise.resolve({ data: [] }),
-    subjectCountQuery,
+    subjectCountPromise,
   ]);
 
   // Aggregate counts per subject

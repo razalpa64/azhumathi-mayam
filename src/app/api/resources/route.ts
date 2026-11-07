@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
         .select('id')
         .eq('publication_status', 'published')
         .or(`name.ilike.%${q}%,subject_code.ilike.%${q}%`)
-        .limit(30),
+        .limit(500),
       supabase
         .from('programmes')
         .select('id')

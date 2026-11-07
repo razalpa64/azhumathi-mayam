@@ -78,8 +78,23 @@ export function MaterialsBrowserClient({
     searchParams.get('programmeId') ||
       (!hasExplicitScopeAll && !hasExplicitQuery && profile.programme_id ? profile.programme_id : '')
   );
+  // Branch baseline: browsing your own programme means your branch
+  // (plus shared materials), exactly what "My semester" resets to.
+  // Without this, first load mixed every branch's materials into the
+  // list while the reset button quietly narrowed it — two different
+  // answers for the same view. Explicit cross-programme/subject links
+  // and browse-all/search keep the open scope.
+  const programmeParam = searchParams.get('programmeId');
+  const ownProgrammeContext =
+    !programmeParam || programmeParam === profile.programme_id;
   const [specializationId, setSpecializationId] = useState(
-    searchParams.get('specializationId') || ''
+    searchParams.get('specializationId') ||
+      (!hasExplicitScopeAll &&
+      !hasExplicitQuery &&
+      ownProgrammeContext &&
+      !searchParams.get('subjectId')
+        ? profile.specialization_id || ''
+        : '')
   );
   const [regulationId, setRegulationId] = useState(
     searchParams.get('regulationId') || ''
