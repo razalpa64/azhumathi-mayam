@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { friendlyDbError } from '@/lib/db-errors';
 import { requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { getSubjectGroupIds } from '@/lib/subject-siblings';
+import { audienceSubjectIds, getSubjectGroupIds } from '@/lib/subject-siblings';
 
 const RESOURCE_SELECT = `
   *,
@@ -83,6 +83,45 @@ export async function GET(request: NextRequest) {
   // match materials attached to ANY copy of that course.
   const subjectGroupIds = subjectId ? await getSubjectGroupIds(supabase, subjectId) : null;
 
+  // Branch browsing means "the subjects that branch actually has".
+  // A course taken by only some branches stores its materials as
+  // branch-less (shared), so a plain branch-or-shared filter leaks
+  // them to branches that take a different course instead (AIDS
+  // seeing the CSE-family OOP). Scope by course group instead: the
+  // audience is every copy of the courses this branch takes in this
+  // context. Falls back to the branch-or-shared rule when subject
+  // data is missing or the audience would be too large to send.
+  let branchAudienceIds: string[] | null = null;
+  if (specializationId && !subjectGroupIds) {
+    let scopeQuery = supabase
+      .from('subjects')
+      .select('id, subject_code, semester_id, regulation_id, specialization_id')
+      .eq('publication_status', 'published');
+    if (programmeId) scopeQuery = scopeQuery.eq('programme_id', programmeId);
+    if (semesterId) scopeQuery = scopeQuery.eq('semester_id', semesterId);
+    const { data: scopeSubjects } = await scopeQuery;
+    if (scopeSubjects && scopeSubjects.length > 0) {
+      const effectiveRegulationId =
+        regulationId ||
+        (programmeId && auth.profile.programme_id === programmeId
+          ? auth.profile.regulation_id
+          : null);
+      const visibleIds = new Set(
+        scopeSubjects
+          .filter(
+            (s) =>
+              (!s.specialization_id || s.specialization_id === specializationId) &&
+              (!effectiveRegulationId ||
+                !s.regulation_id ||
+                s.regulation_id === effectiveRegulationId)
+          )
+          .map((s) => s.id as string)
+      );
+      const ids = audienceSubjectIds(scopeSubjects, visibleIds);
+      if (ids.length > 0 && ids.length <= 150) branchAudienceIds = ids;
+    }
+  }
+
   let query = supabase
     .from('resources')
     .select(RESOURCE_SELECT, { count: 'exact' })
@@ -90,13 +129,18 @@ export async function GET(request: NextRequest) {
 
   if (universityId) query = query.eq('university_id', universityId);
   if (programmeId) query = query.eq('programme_id', programmeId);
-  // "My branch" always includes shared (NULL) materials — the same
-  // rule the dashboard feeds use. When a subject is picked, its course
-  // group already defines the audience, so the branch tag is skipped.
+  // "My branch" means the courses that branch takes (course-group
+  // audience above) whenever it could be computed; otherwise shared
+  // (NULL) materials plus the branch's own. When a subject is picked,
+  // its course group already defines the audience, so this is skipped.
   if (specializationId && !subjectGroupIds) {
-    query = query.or(
-      `specialization_id.is.null,specialization_id.eq.${specializationId}`
-    );
+    if (branchAudienceIds) {
+      query = query.in('subject_id', branchAudienceIds);
+    } else {
+      query = query.or(
+        `specialization_id.is.null,specialization_id.eq.${specializationId}`
+      );
+    }
   }
   if (regulationId) query = query.eq('regulation_id', regulationId);
   if (semesterId) query = query.eq('semester_id', semesterId);
