@@ -58,6 +58,13 @@ async function main() {
     );
     await pg.query(groupChatSql);
 
+    console.log('2e. Applying 0005_complete_specializations.sql...');
+    const specializationsSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0005_complete_specializations.sql'),
+      'utf8'
+    );
+    await pg.query(specializationsSql);
+
     console.log('3. Applying seed.sql (authentic Kerala taxonomy, zero fake data)...');
     const seedSql = fs.readFileSync(path.resolve(process.cwd(), 'supabase/seed.sql'), 'utf8');
     await pg.query(seedSql);
