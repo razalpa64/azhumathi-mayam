@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -13,7 +14,14 @@ const PROFILE_SELECT = `
   semester:semesters(id, programme_id, semester_number, label, is_active, created_at, updated_at)
 `;
 
-export async function getAuthenticatedProfile(): Promise<Profile | null> {
+/**
+ * Wrapped in React cache(): the student layout AND the page both ask for
+ * the profile during one navigation — without this, every click paid for
+ * two auth checks + two joined profile queries. Now it's one per request.
+ */
+export const getAuthenticatedProfile = cache(fetchAuthenticatedProfile);
+
+async function fetchAuthenticatedProfile(): Promise<Profile | null> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -112,7 +120,9 @@ export async function requireApiAdmin(): Promise<
   return { ok: true, profile };
 }
 
-export async function getWebsiteSettings(): Promise<WebsiteSettings> {
+export const getWebsiteSettings = cache(fetchWebsiteSettings);
+
+async function fetchWebsiteSettings(): Promise<WebsiteSettings> {
   const admin = createSupabaseAdminClient();
   const { data } = await admin
     .from('website_settings')

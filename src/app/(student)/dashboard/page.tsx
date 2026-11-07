@@ -56,9 +56,10 @@ export default async function StudentDashboardPage() {
 
   const nowIso = new Date().toISOString();
 
-  // 1. Active notices (global or targeted to student's programme)
-  let notices: Notice[] = [];
-  if (settings.notices_enabled) {
+  // 1. Active notices (global or targeted to student's programme).
+  //    Fired now and awaited in the batch below — no query queues behind another.
+  const noticesPromise: Promise<Notice[]> = (async () => {
+    if (!settings.notices_enabled) return [];
     let nQuery = supabase
       .from('notices')
       .select('*, target_programme:programmes(id, code, name)')
@@ -75,14 +76,14 @@ export default async function StudentDashboardPage() {
     }
 
     const { data: rawNotices } = await nQuery;
-    notices = ((rawNotices || []) as unknown as Notice[]).filter(
+    return ((rawNotices || []) as unknown as Notice[]).filter(
       (n) => !n.expiry_date || n.expiry_date > nowIso
     );
-  }
+  })();
 
-  // 2. Current semester subjects (strictly scoped to student's enrolled programme + semester)
-  let semesterSubjects: Subject[] = [];
-  if (profile.programme_id && profile.semester_id) {
+  // 2. Current semester subjects (strictly scoped to student's programme + semester)
+  const subjectsPromise: Promise<Subject[]> = (async () => {
+    if (!(profile.programme_id && profile.semester_id)) return [];
     let sQuery = supabase
       .from('subjects')
       .select('*, semester:semesters(id, semester_number, label), specialization:specializations(id, code, name)')
@@ -96,8 +97,8 @@ export default async function StudentDashboardPage() {
     }
 
     const { data } = await sQuery;
-    semesterSubjects = (data || []) as unknown as Subject[];
-  }
+    return (data || []) as unknown as Subject[];
+  })();
 
   // 3. Latest study materials for student's semester/course
   let latestQuery = supabase
@@ -192,6 +193,8 @@ export default async function StudentDashboardPage() {
 
   // 6. Recently viewed & Bookmarks
   const [
+    notices,
+    semesterSubjects,
     { data: latestResources },
     { data: popularResources },
     { data: questionPapers },
@@ -200,6 +203,8 @@ export default async function StudentDashboardPage() {
     { data: shortNoteResources },
     { data: subjectCountRows },
   ] = await Promise.all([
+    noticesPromise,
+    subjectsPromise,
     latestQuery,
     popularQuery,
     qpCatIds.length > 0 ? qpQuery : Promise.resolve({ data: [] }),
