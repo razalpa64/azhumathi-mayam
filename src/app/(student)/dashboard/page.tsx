@@ -301,7 +301,7 @@ export default async function StudentDashboardPage() {
             ) : null}
           </div>
 
-          <h1 className="mt-3.5 text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px] lg:mt-4 lg:text-[42px] lg:leading-[1.08]">
+          <h1 className="mt-3.5 text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px] lg:mt-4 lg:text-[38px] lg:leading-[1.1] xl:text-[42px] xl:leading-[1.08]">
             {greeting}, {profile.full_name.split(' ')[0]}
           </h1>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-canvas/75 lg:mt-3 lg:max-w-xl lg:text-[15px]">
@@ -349,7 +349,7 @@ export default async function StudentDashboardPage() {
       </section>
 
       {/* Search */}
-      <div className="anim-rise lg:max-w-2xl" style={{ animationDelay: '60ms' }}>
+      <div className="anim-rise" style={{ animationDelay: '60ms' }}>
         <GlobalSearchBar />
       </div>
 
