@@ -90,7 +90,14 @@ export async function GET(request: NextRequest) {
 
   if (universityId) query = query.eq('university_id', universityId);
   if (programmeId) query = query.eq('programme_id', programmeId);
-  if (specializationId) query = query.eq('specialization_id', specializationId);
+  // "My branch" always includes shared (NULL) materials — the same
+  // rule the dashboard feeds use. When a subject is picked, its course
+  // group already defines the audience, so the branch tag is skipped.
+  if (specializationId && !subjectGroupIds) {
+    query = query.or(
+      `specialization_id.is.null,specialization_id.eq.${specializationId}`
+    );
+  }
   if (regulationId) query = query.eq('regulation_id', regulationId);
   if (semesterId) query = query.eq('semester_id', semesterId);
   if (subjectGroupIds) query = query.in('subject_id', subjectGroupIds);

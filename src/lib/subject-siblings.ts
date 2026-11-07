@@ -44,3 +44,26 @@ export async function getSubjectGroupIds(
 export function subjectGroupKey(subjectCode: string, regulationId: string | null): string {
   return `${subjectCode}|${regulationId ?? ''}`;
 }
+
+/**
+ * The branch a resource is FOR, derived from its course: if the course
+ * is taken by several branches (multiple copies), the material belongs
+ * to all of them (NULL = shared); if it is a single-branch course, it
+ * belongs to that branch. Uploads store this on the resource so the
+ * resource's branch tag can never contradict its subject — the mismatch
+ * that used to hide shared-course uploads from most of their students.
+ */
+export async function resolveCourseAudienceSpecialization(
+  supabase: SupabaseClient,
+  subjectId: string
+): Promise<string | null> {
+  const groupIds = await getSubjectGroupIds(supabase, subjectId);
+  if (groupIds.length > 1) return null;
+
+  const { data: subject } = await supabase
+    .from('subjects')
+    .select('specialization_id')
+    .eq('id', subjectId)
+    .maybeSingle();
+  return (subject?.specialization_id as string | null | undefined) ?? null;
+}

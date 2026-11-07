@@ -3,6 +3,10 @@ import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiStaff, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import {
+  getSubjectGroupIds,
+  resolveCourseAudienceSpecialization,
+} from '@/lib/subject-siblings';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
 
 const createResourceSchema = z.object({
@@ -57,6 +61,8 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, Number.parseInt(sp.get('page') || '1', 10) || 1);
   const pageSize = Math.min(50, Math.max(1, Number.parseInt(sp.get('pageSize') || '20', 10) || 20));
 
+  const subjectGroupIds = subjectId ? await getSubjectGroupIds(adminClient, subjectId) : null;
+
   let query = adminClient
     .from('resources')
     .select(ADMIN_RESOURCE_SELECT, { count: 'exact' })
@@ -65,7 +71,7 @@ export async function GET(request: NextRequest) {
   if (status === 'published' || status === 'draft') query = query.eq('publication_status', status);
   if (programmeId) query = query.eq('programme_id', programmeId);
   if (semesterId) query = query.eq('semester_id', semesterId);
-  if (subjectId) query = query.eq('subject_id', subjectId);
+  if (subjectGroupIds) query = query.in('subject_id', subjectGroupIds);
   if (categoryId) query = query.eq('category_id', categoryId);
   if (q) {
     query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,file_name.ilike.%${q}%`);
@@ -122,6 +128,13 @@ export async function POST(request: NextRequest) {
     )
   );
 
+  // The course decides who the material is for — never the form's
+  // branch field, which admins mainly use to narrow the subject list.
+  const audienceSpecializationId = await resolveCourseAudienceSpecialization(
+    adminClient,
+    payload.subject_id
+  );
+
   const { data: created, error } = await adminClient
     .from('resources')
     .insert({
@@ -129,7 +142,7 @@ export async function POST(request: NextRequest) {
       description: payload.description || null,
       university_id: payload.university_id || null,
       programme_id: payload.programme_id,
-      specialization_id: payload.specialization_id || null,
+      specialization_id: audienceSpecializationId,
       regulation_id: payload.regulation_id || null,
       semester_id: payload.semester_id,
       subject_id: payload.subject_id,
@@ -165,8 +178,8 @@ export async function POST(request: NextRequest) {
       .eq('programme_id', payload.programme_id)
       .eq('semester_id', payload.semester_id);
 
-    if (payload.specialization_id) {
-      studentQuery = studentQuery.eq('specialization_id', payload.specialization_id);
+    if (audienceSpecializationId) {
+      studentQuery = studentQuery.eq('specialization_id', audienceSpecializationId);
     }
 
     const { data: targetStudents } = await studentQuery.limit(500);

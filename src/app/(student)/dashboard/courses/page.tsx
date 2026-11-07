@@ -93,7 +93,13 @@ export default async function CoursesPage() {
                   s.semester_id === sem.id &&
                   (!profile.specialization_id ||
                     !s.specialization_id ||
-                    s.specialization_id === profile.specialization_id)
+                    s.specialization_id === profile.specialization_id) &&
+                  (!profile.regulation_id ||
+                    !s.regulation_id ||
+                    s.regulation_id === profile.regulation_id) &&
+                  (!profile.university_id ||
+                    !s.university_id ||
+                    s.university_id === profile.university_id)
               ).length;
 
               return (

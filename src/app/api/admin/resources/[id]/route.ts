@@ -3,6 +3,7 @@ import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiStaff, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { resolveCourseAudienceSpecialization } from '@/lib/subject-siblings';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
 
 const updateResourceSchema = z.object({
@@ -65,6 +66,13 @@ export async function PATCH(
   if (payload.regulation_id !== undefined) updates.regulation_id = payload.regulation_id;
   if (payload.semester_id !== undefined) updates.semester_id = payload.semester_id;
   if (payload.subject_id !== undefined) updates.subject_id = payload.subject_id;
+  if (payload.subject_id !== undefined) {
+    // Keep the resource's branch in step with its (new) course.
+    updates.specialization_id = await resolveCourseAudienceSpecialization(
+      adminClient,
+      payload.subject_id
+    );
+  }
   if (payload.category_id !== undefined) updates.category_id = payload.category_id;
   if (payload.academic_year !== undefined) updates.academic_year = payload.academic_year || null;
   if (payload.keywords !== undefined) {
