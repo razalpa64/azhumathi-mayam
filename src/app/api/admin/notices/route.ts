@@ -3,6 +3,7 @@ import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { fetchAllRows } from '@/lib/supabase/fetch-all';
 import { isValidSafeExternalUrl } from '@/lib/utils';
 
 const noticeSchema = z.object({
@@ -98,19 +99,28 @@ export async function POST(request: NextRequest) {
 
   // Push notification to active students when published
   if (payload.publication_status === 'published') {
-    let studentQuery = adminClient
-      .from('profiles')
-      .select('id')
-      .eq('role', 'student')
-      .eq('is_active', true);
+    const buildStudentQuery = () => {
+      let studentQuery = adminClient
+        .from('profiles')
+        .select('id')
+        .eq('role', 'student')
+        .eq('is_active', true)
+        .order('id');
 
-    if (payload.target_programme_id) {
-      studentQuery = studentQuery.eq('programme_id', payload.target_programme_id);
-    }
+      if (payload.target_programme_id) {
+        studentQuery = studentQuery.eq('programme_id', payload.target_programme_id);
+      }
+      return studentQuery;
+    };
 
-    const { data: students } = await studentQuery.limit(1000);
-    if (students && students.length > 0) {
-      const notifications = students.map((s) => ({
+    // Page through every matching student — a flat .limit() here
+    // silently un-notified everyone past the cap.
+    const students = await fetchAllRows(
+      async (from, to) => buildStudentQuery().range(from, to),
+      500
+    );
+    for (let i = 0; i < students.length; i += 500) {
+      const notifications = students.slice(i, i + 500).map((s) => ({
         user_id: s.id,
         notice_id: created.id,
         title: payload.title,

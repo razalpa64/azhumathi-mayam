@@ -125,6 +125,13 @@ async function main() {
     );
     await pg.query(resourceAudienceSql);
 
+    console.log('3j. Applying 0014_resource_taxonomy_from_subject.sql (align material taxonomy with courses)...');
+    const resourceTaxonomySql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0014_resource_taxonomy_from_subject.sql'),
+      'utf8'
+    );
+    await pg.query(resourceTaxonomySql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {

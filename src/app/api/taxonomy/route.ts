@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isStaffRole, requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { fetchAllRows } from '@/lib/supabase/fetch-all';
 
 export async function GET() {
   const auth = await requireApiAuth();
@@ -18,11 +19,6 @@ export async function GET() {
     .order('display_order')
     .order('name');
   let semQuery = supabase.from('semesters').select('*').order('semester_number');
-  let subjQuery = supabase
-    .from('subjects')
-    .select('*')
-    .order('subject_code')
-    .order('name');
   let catQuery = supabase
     .from('resource_categories')
     .select('*')
@@ -35,9 +31,24 @@ export async function GET() {
     specQuery = specQuery.eq('is_active', true);
     regQuery = regQuery.eq('is_active', true);
     semQuery = semQuery.eq('is_active', true);
-    subjQuery = subjQuery.eq('publication_status', 'published');
     catQuery = catQuery.eq('is_active', true);
   }
+
+  // Subjects outnumber PostgREST's 1,000-row response cap (1,500+),
+  // so this fetch MUST paginate — a plain select silently drops every
+  // subject past the first thousand. Fresh builder per page.
+  const buildSubjectQuery = () => {
+    let subjQuery = supabase
+      .from('subjects')
+      .select('*')
+      .order('subject_code')
+      .order('name')
+      .order('id');
+    if (!isAdmin) {
+      subjQuery = subjQuery.eq('publication_status', 'published');
+    }
+    return subjQuery;
+  };
 
   const [
     { data: universities },
@@ -45,16 +56,16 @@ export async function GET() {
     { data: specializations },
     { data: regulations },
     { data: semesters },
-    { data: subjects },
     { data: categories },
+    subjects,
   ] = await Promise.all([
     univQuery,
     progQuery,
     specQuery,
     regQuery,
     semQuery,
-    subjQuery,
     catQuery,
+    fetchAllRows(async (from, to) => buildSubjectQuery().range(from, to)),
   ]);
 
   return NextResponse.json({
