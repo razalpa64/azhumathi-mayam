@@ -108,10 +108,33 @@ export function StudentShell({
   const mainRef = useRef<HTMLElement | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  // A new page always starts at the top: without this the previous page's
-  // scroll offset leaks into the next page and everything looks shifted.
+  // The tab strip (the top "menubar") slides away while you scroll DOWN
+  // into content and comes straight back the moment you scroll up — it
+  // collapses its own height, so it never floats over anything. The
+  // burgundy brand header always stays, and the bottom menubar is NEVER
+  // hidden: it is a permanent row of the shell.
+  const [stripHidden, setStripHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  function handleMainScroll(event: React.UIEvent<HTMLElement>) {
+    const y = event.currentTarget.scrollTop;
+    const dy = y - lastScrollY.current;
+    if (y <= 72) {
+      if (stripHidden) setStripHidden(false);
+    } else if (dy > 10) {
+      if (!stripHidden) setStripHidden(true);
+    } else if (dy < -10) {
+      if (stripHidden) setStripHidden(false);
+    }
+    lastScrollY.current = y;
+  }
+
+  // A new page always starts at the top with the strip in place: without
+  // this the previous page's scroll offset leaks into the next page.
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0;
+    lastScrollY.current = 0;
+    setStripHidden(false);
   }, [pathname]);
 
   // Pin the shell to the height the phone actually shows. 100dvh is the
@@ -303,7 +326,17 @@ export function StudentShell({
           mis-paint other elements). On desktop the page scrolls, so the
           strip sticks to the top instead. Hidden in the chat room; the
           menu sheet is not. */}
-      <div className="flex-none border-b border-line/70 bg-canvas lg:sticky lg:top-0 lg:z-40 lg:bg-canvas/90 lg:backdrop-blur-md">
+      <div
+        className={cn(
+          'grid flex-none transition-[grid-template-rows,opacity] duration-300 ease-out',
+          stripHidden && !mobileOpen
+            ? 'grid-rows-[0fr] opacity-0 lg:grid-rows-[1fr] lg:opacity-100'
+            : 'grid-rows-[1fr] opacity-100'
+        )}
+        aria-hidden={(stripHidden && !mobileOpen) || undefined}
+      >
+        <div className="min-h-0 overflow-hidden lg:overflow-visible">
+      <div className="border-b border-line/70 bg-canvas lg:sticky lg:top-0 lg:z-40 lg:bg-canvas/90 lg:backdrop-blur-md">
         <div
           className={cn(
             'mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10',
@@ -414,6 +447,8 @@ export function StudentShell({
           </div>
         ) : null}
       </div>
+        </div>
+      </div>
 
       {/* Main Content — the shell's one scroll region on phones (on
           desktop it is a plain block and the page scrolls instead).
@@ -423,6 +458,7 @@ export function StudentShell({
       <main
         id="app-main"
         ref={mainRef}
+        onScroll={handleMainScroll}
         className="relative isolate mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-canvas px-4 pt-6 sm:px-6 lg:overflow-visible lg:px-10 lg:pt-6 xl:max-w-[1440px]"
       >
         <div key={pathname} className="anim-page flex min-h-full flex-col pb-10 lg:pb-16">
