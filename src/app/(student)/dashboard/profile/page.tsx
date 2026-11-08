@@ -25,13 +25,14 @@ export default async function StudentProfilePage() {
       : profile.programme
         ? [...seeded.programmes, profile.programme]
         : seeded.programmes;
-  const specializations =
-    !profile.specialization_id ||
-    seeded.specializations.some((s) => s.id === profile.specialization_id)
-      ? seeded.specializations
-      : profile.specialization
-        ? [...seeded.specializations, profile.specialization]
-        : seeded.specializations;
+  // Branches are offered for the chosen programme without the "has
+  // subjects" narrowing: that narrowing could empty the branch field for a
+  // whole programme (most subjects are programme-level, with no branch at
+  // all), leaving a student unable to correct their own branch. A quiet
+  // dashboard is fixable; a dead field is not.
+  const specializations = seeded.specializations.length
+    ? seeded.specializations
+    : taxonomy.specializations;
   const universities =
     !profile.university_id || seeded.universities.some((u) => u.id === profile.university_id)
       ? seeded.universities
