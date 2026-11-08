@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { SgpaCalculatorClient } from '@/components/calculator/SgpaCalculatorClient';
 import { UNIVERSITY_SCALES } from '@/lib/university-grades';
 import { getSiteUrl } from '@/lib/site';
+import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { StudentShell } from '@/components/student/StudentShell';
 
 const description =
   'Free SGPA & CGPA calculator for KTU, Calicut University, MG University, University of Kerala, Kannur University and CUSAT students. Pick your university, enter grades, and get SGPA, CGPA and the official percentage conversion instantly — no sign-up.';
@@ -38,7 +41,7 @@ const FAQS: { q: string; a: string }[] = [
   },
 ];
 
-export default function SgpaCalculatorPage() {
+export default async function SgpaCalculatorPage() {
   const siteUrl = getSiteUrl();
 
   const faqJsonLd = {
@@ -61,30 +64,27 @@ export default function SgpaCalculatorPage() {
     description,
   };
 
-  return (
-    <div className="min-h-screen bg-[#FFFDFC] text-neutral-900 antialiased">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
+  // The calculator is a nav item inside the app, so a signed-in student
+  // must stay inside the app shell — leaving the shell here meant the
+  // bottom bar and tab strip vanished the moment you opened the
+  // calculator. Logged-out visitors (and staff) still get the
+  // standalone, search-indexed marketing page.
+  const profile = await getAuthenticatedProfile().catch(() => null);
+  const insideApp = Boolean(profile && !isStaffRole(profile.role));
 
-      {/* Header */}
-      <header className="border-b border-neutral-100 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3.5 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5" aria-label="Azhumathi Mayam home">
-            <img src="/icon.svg" alt="" className="h-9 w-9 shrink-0" />
-            <span className="text-base font-extrabold tracking-tight text-burgundy sm:text-lg">
-              Azhumathi Mayam
-            </span>
-          </Link>
-          <Link
-            href="/"
-            className="ml-auto text-sm font-semibold text-burgundy underline-offset-4 hover:underline"
-          >
-            Home
-          </Link>
-        </div>
-      </header>
+  let unreadNotifications = 0;
+  if (insideApp && profile) {
+    const supabase = await createSupabaseServerClient();
+    const { count } = await supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', profile.id)
+      .eq('is_read', false);
+    unreadNotifications = count || 0;
+  }
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+  const calculatorBody = (
+    <>
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-bold tracking-[0.18em] text-burgundy uppercase">
             Free tool · No sign-up
@@ -192,8 +192,52 @@ export default function SgpaCalculatorPage() {
             </Link>
           </div>
         </section>
-      </main>
+    </>
+  );
 
+  const page = (
+    <div
+      className={
+        insideApp
+          ? 'text-neutral-900 antialiased'
+          : 'min-h-screen bg-[#FFFDFC] text-neutral-900 antialiased'
+      }
+    >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
+
+      {/* Header — the app shell already has a header and tab strip */}
+      {insideApp ? null : (
+      <header className="border-b border-neutral-100 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3.5 sm:px-6">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="Azhumathi Mayam home">
+            <img src="/icon.svg" alt="" className="h-9 w-9 shrink-0" />
+            <span className="text-base font-extrabold tracking-tight text-burgundy sm:text-lg">
+              Azhumathi Mayam
+            </span>
+          </Link>
+          <Link
+            href="/"
+            className="ml-auto text-sm font-semibold text-burgundy underline-offset-4 hover:underline"
+          >
+            Home
+          </Link>
+        </div>
+      </header>
+      )}
+
+      {/* Inside the app the shell already provides the <main> landmark —
+          nesting a second one confuses screen readers. */}
+      {insideApp ? (
+        <div className="w-full max-w-5xl">
+          {calculatorBody}
+        </div>
+      ) : (
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+        {calculatorBody}
+      </main>
+      )}
+      {insideApp ? null : (
       <footer className="border-t border-neutral-100 bg-white">
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-3 px-4 py-6 text-center sm:px-6">
           <p className="text-sm font-bold text-burgundy">Azhumathi Mayam</p>
@@ -208,6 +252,17 @@ export default function SgpaCalculatorPage() {
           </p>
         </div>
       </footer>
+      )}
     </div>
   );
+
+  if (insideApp && profile) {
+    return (
+      <StudentShell profile={profile} unreadNotifications={unreadNotifications}>
+        {page}
+      </StudentShell>
+    );
+  }
+
+  return page;
 }
