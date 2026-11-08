@@ -66,6 +66,7 @@ const STRIP_TABS = [
   { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },
   { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
   { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
+  { href: '/dashboard/study-planner', label: 'Study Planner', icon: CalendarClock },
   { href: '/dashboard/requests', label: 'Requests', icon: Inbox },
 ];
 
