@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDown,
   Clock,
@@ -99,9 +99,23 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
     el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
   }
 
-  // Land at the newest message on open
-  useEffect(() => {
+  // Land at the newest message on open — layout effect so the jump
+  // happens before first paint, never a flash of the oldest messages.
+  useLayoutEffect(() => {
     scrollToBottom(false);
+  }, []);
+
+  // When the on-screen keyboard opens or closes, the visible viewport
+  // changes height; if the reader is following the conversation, keep
+  // the newest message in view (the WhatsApp behaviour).
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const onResize = () => {
+      if (stickRef.current) scrollToBottom(false);
+    };
+    viewport.addEventListener('resize', onResize);
+    return () => viewport.removeEventListener('resize', onResize);
   }, []);
 
   // Follow new messages only while the reader is near the bottom
@@ -195,7 +209,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
   }
 
   return (
-    <section className="relative flex h-[calc(100dvh-168px)] min-h-[430px] flex-col overflow-hidden rounded-[24px] border border-line bg-canvas lg:h-[calc(100dvh-142px)] lg:rounded-[28px]">
+    <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-line bg-canvas lg:rounded-[28px]">
       {/* Room header */}
       <div className="flex items-center gap-3 border-b border-line bg-canvas px-4 py-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-burgundy text-white">
@@ -214,7 +228,10 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
           Clears at midnight
         </span>
         <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-muted">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
           Live
         </span>
       </div>
@@ -223,7 +240,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto bg-[#FAF3F1] px-3.5 py-4 sm:px-5 lg:px-8 lg:py-6"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#FAF3F1] px-3.5 py-4 sm:px-5 lg:px-8 lg:py-6"
       >
         <div className="mb-1.5 flex items-center gap-3 px-1">
           <span className="h-px flex-1 bg-burgundy/10" />
@@ -357,8 +374,9 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
         </button>
       ) : null}
 
-      {/* Composer — sits on the same warm ground as the messages */}
-      <div className="bg-[#FAF3F1] px-3 pb-3 pt-1.5 sm:px-4 sm:pb-4">
+      {/* Composer — pinned to the card's foot, soft shadow above it so
+          messages slide under cleanly as they pass */}
+      <div className="bg-[#FAF3F1] px-3 pb-3 pt-1.5 shadow-[0_-10px_20px_-14px_rgba(36,7,7,0.35)] sm:px-4 sm:pb-4">
         {error ? (
           <p className="mb-2 px-1 text-[11px] font-medium text-[#C62F34]">{error}</p>
         ) : null}
@@ -381,7 +399,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
               }}
               placeholder="Message everyone…"
               aria-label="Message everyone"
-              className="max-h-[110px] w-full resize-none bg-transparent py-1 text-sm leading-relaxed text-charcoal placeholder:text-muted/80 focus:outline-none"
+              className="max-h-[110px] w-full resize-none bg-transparent py-1 text-base leading-relaxed text-charcoal placeholder:text-muted/80 focus:outline-none sm:text-sm"
             />
             {draft.length > CHAT_MESSAGE_MAX - 100 ? (
               <p className="pr-1 text-right text-[10px] leading-none text-muted">
