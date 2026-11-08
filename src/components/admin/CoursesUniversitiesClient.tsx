@@ -222,7 +222,7 @@ export function CoursesUniversitiesClient({
 
       {/* PROGRAMMES TAB */}
       {tab === 'programmes' ? (
-        <div className="grid gap-6 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <form
             onSubmit={createProgramme}
             className="lg:col-span-4 rounded-xl border border-line bg-canvas p-5 space-y-4 h-fit"
@@ -357,7 +357,7 @@ export function CoursesUniversitiesClient({
 
       {/* UNIVERSITIES TAB */}
       {tab === 'universities' ? (
-        <div className="grid gap-6 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <form
             onSubmit={createUniversity}
             className="lg:col-span-4 rounded-xl border border-line bg-canvas p-5 space-y-4 h-fit"
@@ -452,7 +452,7 @@ export function CoursesUniversitiesClient({
 
       {/* CATEGORIES TAB */}
       {tab === 'categories' ? (
-        <div className="grid gap-6 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <form
             onSubmit={createCategory}
             className="lg:col-span-4 rounded-xl border border-line bg-canvas p-5 space-y-4 h-fit"

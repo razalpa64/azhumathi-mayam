@@ -511,7 +511,7 @@ export function MaterialsBrowserClient({
               aria-label="Resource filters"
               className="rounded-[20px] border border-line bg-neutral-soft/65 p-4 lg:rounded-[26px] lg:p-6"
             >
-              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 lg:gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4 lg:gap-4">
                 <div>
                   <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">University</label>
                   <select
@@ -684,7 +684,7 @@ export function MaterialsBrowserClient({
 
       {/* Results Grid */}
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 6 }).map((_, idx) => (
             <div
               key={idx}
@@ -707,7 +707,7 @@ export function MaterialsBrowserClient({
         />
       ) : (
         <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {items.slice(0, 6).map((res) => (
               <ResourceCard
                 key={res.id}
@@ -727,7 +727,7 @@ export function MaterialsBrowserClient({
           ) : null}
 
           {items.length > 6 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {items.slice(6).map((res) => (
                 <ResourceCard
                   key={res.id}

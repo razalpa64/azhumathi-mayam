@@ -113,7 +113,7 @@ export function SpecializationsClient({
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <form
           onSubmit={handleCreate}
           className="lg:col-span-4 rounded-xl border border-line bg-canvas p-5 space-y-4 h-fit"

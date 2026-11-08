@@ -89,7 +89,7 @@ export default async function CoursesPage() {
             </Link>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
             {enrolledSemesters.map((sem) => {
               const isCurrent = sem.id === profile.semester_id;
               const subjectCount = taxonomy.subjects.filter(
@@ -157,7 +157,7 @@ export default async function CoursesPage() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {otherProgrammes.map((prog) => {
               const specs = taxonomy.specializations.filter((sp) => sp.programme_id === prog.id);
               const sems = taxonomy.semesters.filter((sm) => sm.programme_id === prog.id);

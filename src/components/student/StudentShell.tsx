@@ -107,6 +107,7 @@ export function StudentShell({
   // they cannot float over content either.
   const mainRef = useRef<HTMLElement | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const stripRef = useRef<HTMLElement | null>(null);
 
   // The tab strip (the top "menubar") slides away while you scroll DOWN
   // into content and comes straight back the moment you scroll up — it
@@ -137,6 +138,24 @@ export function StudentShell({
     if (mainRef.current) mainRef.current.scrollTop = 0;
     lastScrollY.current = 0;
     setStripHidden(false);
+  }, [pathname]);
+
+  // Put the current tab in the middle of the pill strip. Without this the
+  // strip always started at "Overview", so landing on Study Materials (or
+  // anything further right) showed a half-cut pill at the screen edge and
+  // it looked like the layout was broken. Measured against the strip's own
+  // scroll content, so nesting and padding cannot skew it.
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip || strip.clientWidth === 0) return;
+    const active = strip.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!active) return;
+    const stripBox = strip.getBoundingClientRect();
+    const activeBox = active.getBoundingClientRect();
+    if (activeBox.width === 0) return;
+    const offsetInStrip = activeBox.left - stripBox.left + strip.scrollLeft;
+    const centred = offsetInStrip - (strip.clientWidth - activeBox.width) / 2;
+    strip.scrollLeft = Math.max(0, centred);
   }, [pathname]);
 
   // Pin the shell to the height the phone actually shows. 100dvh is the
@@ -352,6 +371,7 @@ export function StudentShell({
           )}
         >
           <nav
+            ref={stripRef}
             aria-label="Student workspace sections"
             className="no-scrollbar -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 py-2 lg:gap-2 lg:py-2"
           >

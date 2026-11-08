@@ -191,7 +191,7 @@ export function AdsManagerClient({ initialAds, initialSettings }: AdsManagerClie
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Configure Placement Form */}
         <form
           onSubmit={handleCreate}

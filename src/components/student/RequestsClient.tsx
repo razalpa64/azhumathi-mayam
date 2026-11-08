@@ -82,7 +82,7 @@ export function RequestsClient({ initialItems }: { initialItems: ResourceRequest
     'h-11 w-full rounded-lg border border-line-strong bg-canvas px-3.5 text-sm text-charcoal placeholder:text-muted/60 focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy/15 disabled:opacity-60';
 
   return (
-    <div className="grid gap-8 lg:grid-cols-12">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
       {/* Ask for something */}
       <form
         onSubmit={handleSubmit}

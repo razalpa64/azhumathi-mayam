@@ -144,7 +144,7 @@ export function ProfileEditorClient({
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-12">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
       {/* Summary Card */}
       <aside className="lg:col-span-4 space-y-4">
         <div className="rounded-xl border border-line bg-canvas p-6 space-y-5 lg:rounded-[26px] lg:p-7">
@@ -235,7 +235,7 @@ export function ProfileEditorClient({
           </div>
         ) : null}
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label htmlFor="full_name" className="mb-1.5 block text-xs font-semibold text-charcoal">
               Full Name

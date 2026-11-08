@@ -299,7 +299,7 @@ export function UploadResourceClient({
         </div>
       ) : null}
 
-      <div className="grid gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         {/* Form Column */}
         <div className="lg:col-span-7 space-y-6">
           {/* Step 1: Prominent Google Drive Sharing Link Card */}
@@ -432,7 +432,7 @@ export function UploadResourceClient({
               Academic Categorization & Resource Details
             </h2>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-xs font-semibold text-charcoal">
                   Resource Title <span className="text-burgundy">*</span>

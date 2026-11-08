@@ -645,7 +645,7 @@ export function ResourcesManagerClient({
                 />
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-charcoal">Programme</label>
                   <select

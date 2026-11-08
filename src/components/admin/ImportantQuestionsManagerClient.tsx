@@ -208,7 +208,7 @@ export function ImportantQuestionsManagerClient({
                 rows={3}
                 className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm font-medium text-charcoal outline-none transition-colors focus:border-burgundy-border focus:ring-2 focus:ring-burgundy/15"
               />
-              <div className="grid gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
                 <input
                   value={module}
                   onChange={(e) => setModule(e.target.value)}

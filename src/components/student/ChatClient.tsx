@@ -325,7 +325,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
                             ) : null}
                           </p>
                         ) : null}
-                        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                        <p className="whitespace-pre-wrap wrap-anywhere text-sm leading-relaxed">
                           {msg.body}
                         </p>
                       </div>

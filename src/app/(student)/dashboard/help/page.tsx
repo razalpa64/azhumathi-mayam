@@ -58,7 +58,7 @@ export default async function HelpPage() {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <a
             href={`tel:${SUPPORT_PHONE_TEL}`}
             className="flex items-center gap-3 rounded-lg border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border lg:rounded-2xl lg:px-5 lg:py-4"
@@ -97,7 +97,7 @@ export default async function HelpPage() {
       {/* Quick fixes */}
       <section className="space-y-3">
         <h2 className="text-base font-semibold text-charcoal">Before you call</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {QUICK_FIXES.map((item) => (
             <div
               key={item.q}

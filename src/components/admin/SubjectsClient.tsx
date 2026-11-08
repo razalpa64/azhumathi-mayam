@@ -158,7 +158,7 @@ export function SubjectsClient({
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Create Subject Form */}
         <form
           onSubmit={handleCreate}

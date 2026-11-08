@@ -743,7 +743,7 @@ export function ResourceViewerClient({
               More notes and question papers from the same subject and semester.
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {relatedResources.map((rel, i) => (
               <ResourceCard key={rel.id} resource={rel} index={i} />
             ))}

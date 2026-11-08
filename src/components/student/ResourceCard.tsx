@@ -87,7 +87,7 @@ export function ResourceCard({
   return (
     <article
       style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
-      className="anim-rise group flex flex-col justify-between rounded-[22px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border lg:rounded-[24px] lg:p-5"
+      className="anim-rise group flex min-w-0 flex-col justify-between rounded-[22px] border border-line bg-canvas p-5 transition-colors hover:border-burgundy-border lg:rounded-[24px] lg:p-5"
     >
       <div>
         <div className="flex items-start justify-between gap-3">
@@ -130,6 +130,13 @@ export function ResourceCard({
           href={`/resources/${resource.id}`}
           className="mt-3 block focus:outline-none focus-visible:underline"
         >
+          {/*
+            Uploaded titles are often the raw file name — one long
+            unbroken run of capitals and underscores. It wraps (the page
+            sets `overflow-wrap: anywhere`) instead of stretching the card
+            past the screen; never add `whitespace-nowrap` or `break-words`
+            here, both put the clipping straight back.
+          */}
           <h3 className="text-base font-bold text-charcoal group-hover:text-burgundy transition-colors leading-snug lg:text-base">
             {resource.title}
           </h3>
