@@ -60,6 +60,20 @@ export async function middleware(request: NextRequest) {
       return supabaseResponse;
     }
 
+    // Public pages that check the session themselves: the landing page
+    // redirects signed-in users, the calculator renders inside the app
+    // shell when signed in, and a shared material link decides between
+    // the public preview and the full viewer. Running the middleware's
+    // own getUser() + profile query first meant three or four database
+    // round trips before the first byte of a public page.
+    const isSelfCheckingPublicPage =
+      pathname === '/' ||
+      pathname === '/sgpa-calculator' ||
+      pathname.startsWith('/resources');
+    if (isSelfCheckingPublicPage) {
+      return supabaseResponse;
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -89,7 +103,19 @@ export async function middleware(request: NextRequest) {
       return supabaseResponse;
     }
 
-    // Verify role & active status from profiles table
+    // One profile lookup, and only when this request actually needs a
+    // role decision:
+    //   * /login and /register — to send a signed-in user to their home;
+    //   * /admin — to keep students out of the console.
+    // Every /dashboard page already resolves the profile in its layout
+    // (`requireStudentAppUser`), so repeating the query here added a
+    // database round trip to every single tap for no extra protection.
+    const needsRoleCheck = isRootPage || isAuthPage || isAdminRoute;
+
+    if (!needsRoleCheck) {
+      return supabaseResponse;
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('role, is_active')

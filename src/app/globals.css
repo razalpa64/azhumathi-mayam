@@ -58,6 +58,25 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
+/*
+  Overflow guards. File names, subject codes and pasted Drive URLs are
+  long unbroken strings: on a 360px phone they used to push content
+  sideways instead of wrapping. `break-word` only breaks a word when it
+  genuinely cannot fit, so normal text is untouched.
+*/
+body {
+  overflow-wrap: break-word;
+}
+
+/* Nothing may exceed its container, whatever gets pasted in */
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
 ::selection {
   background-color: #790000;
   color: #FFFDFC;

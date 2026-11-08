@@ -246,8 +246,9 @@ export default async function ResourceDetailPage({
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
 
-  const supabase = await createSupabaseServerClient();
-  const sessionProfile = await getAuthenticatedProfile();
+  // Defensive: a session lookup failure must never take the shared link
+  // down — fall back to the public preview.
+  const sessionProfile = await getAuthenticatedProfile().catch(() => null);
 
   // Logged out: serve a real preview (this is the page a forwarded
   // WhatsApp link opens) instead of bouncing straight to /login.
@@ -257,6 +258,9 @@ export default async function ResourceDetailPage({
     return <PublicPreview resource={preview} />;
   }
 
+  // Only build the cookie-bound client once we know there is a session to
+  // read with it — the anonymous preview never touches it.
+  const supabase = await createSupabaseServerClient();
   const profile = await requireAuthenticatedUser();
   const isAdmin = isStaffRole(profile.role);
 
