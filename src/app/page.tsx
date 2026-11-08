@@ -2,8 +2,14 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { LandingPage, type LandingStats } from '@/components/landing/LandingPage';
+import { fetchAllRows } from '@/lib/supabase/fetch-all';
+import {
+  LandingPage,
+  LANDING_FAQS,
+  type LandingStats,
+} from '@/components/landing/LandingPage';
 import { SITE_DESCRIPTION } from '@/lib/site';
+import { UNIVERSITY_SCALES } from '@/lib/university-grades';
 
 export const metadata: Metadata = {
   title: {
@@ -41,19 +47,48 @@ export default async function RootPage() {
   try {
     const admin = createSupabaseAdminClient();
     const [uniRes, progRes, subjRes, resRes] = await Promise.all([
-      admin.from('universities').select('name').order('name'),
-      admin.from('programmes').select('id', { count: 'exact', head: true }),
-      admin.from('subjects').select('id', { count: 'exact', head: true }),
+      admin
+        .from('universities')
+        .select('name')
+        .eq('is_active', true)
+        .order('display_order')
+        .order('name'),
+      admin.from('programmes').select('id').eq('is_active', true).order('display_order'),
+      admin
+        .from('subjects')
+        .select('id', { count: 'exact', head: true })
+        .eq('publication_status', 'published'),
       admin
         .from('resources')
         .select('id', { count: 'exact', head: true })
         .eq('publication_status', 'published'),
     ]);
     universities = (uniRes.data || []).map((u) => u.name as string).filter(Boolean);
-    if (progRes.count || subjRes.count || resRes.count) {
+
+    // Only programmes that actually have published subjects are counted.
+    // The taxonomy carries every degree we plan to support (PG included),
+    // and advertising "12 programmes" when half open onto nothing is the
+    // fastest way to lose a visitor who joins for one of them. One
+    // paginated pass over subject ids beats a count query per programme.
+    const programmeIds = new Set((progRes.data || []).map((p) => p.id as string));
+    const seededRows = await fetchAllRows(async (from, to) =>
+      admin
+        .from('subjects')
+        .select('programme_id')
+        .eq('publication_status', 'published')
+        .order('id')
+        .range(from, to)
+    );
+    const seededProgrammes = new Set(
+      seededRows
+        .map((row) => row.programme_id as string | null)
+        .filter((pid): pid is string => Boolean(pid && programmeIds.has(pid)))
+    ).size;
+
+    if (seededProgrammes || subjRes.count || resRes.count) {
       stats = {
         universities: universities.length,
-        programmes: progRes.count || 0,
+        programmes: seededProgrammes,
         subjects: subjRes.count || 0,
         materials: resRes.count || 0,
       };
@@ -62,5 +97,32 @@ export default async function RootPage() {
     stats = null;
   }
 
-  return <LandingPage stats={stats} universities={universities} />;
+  // The "universities covered" chips must never render empty: if the
+  // database is unreachable the section would otherwise show a heading
+  // with nothing under it.
+  if (universities.length === 0) {
+    universities = UNIVERSITY_SCALES.map((scale) => scale.name);
+  }
+
+  // FAQ rich results — the same questions a visitor reads on the page.
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: LANDING_FAQS.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    })),
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        // Server-rendered constant — no user input flows in here.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <LandingPage stats={stats} universities={universities} />
+    </>
+  );
 }

@@ -178,20 +178,23 @@ export function RegisterForm({
         return;
       }
 
-      if (data.requiresManualLogin) {
-        router.replace('/login?registered=1');
-        return;
-      }
-
-      if (
+      // A shared deep link (a forwarded material, a subject) must survive
+      // sign-up too, not just sign-in.
+      const safeNext =
         nextParam &&
         (nextParam.startsWith('/dashboard') || nextParam.startsWith('/resources')) &&
         !nextParam.startsWith('//')
-      ) {
-        router.replace(nextParam);
-      } else {
-        router.replace(data.redirectTo || '/dashboard');
+          ? nextParam
+          : null;
+
+      if (data.requiresManualLogin) {
+        router.replace(
+          `/login?registered=1${safeNext ? `&next=${encodeURIComponent(safeNext)}` : ''}`
+        );
+        return;
       }
+
+      router.replace(safeNext || data.redirectTo || '/dashboard');
       router.refresh();
     } catch {
       setError('Network error while creating your account. Please try again.');

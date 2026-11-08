@@ -51,7 +51,7 @@ const FEATURES = [
   },
 ];
 
-const FAQS = [
+export const LANDING_FAQS = [
   {
     q: 'Where can I download KTU previous year question papers?',
     a: 'Create a free Azhimathi Mayam account, choose your university, course, branch and semester, and the previous year question papers for your subjects appear right on your dashboard — along with notes, syllabus and most-repeated exam questions for the same subjects.',
@@ -304,7 +304,7 @@ export function LandingPage({
             Questions students ask
           </h2>
           <div className="mt-8 space-y-3">
-            {FAQS.map((faq) => (
+            {LANDING_FAQS.map((faq) => (
               <details
                 key={faq.q}
                 className="group rounded-2xl bg-canvas p-5 ring-1 ring-burgundy/[0.06]"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   BookOpen,
@@ -319,6 +319,19 @@ export function MaterialsBrowserClient({
   useEffect(() => {
     fetchResources();
   }, [fetchResources]);
+
+  // Changing page used to leave the reader at the bottom of the list,
+  // staring at the footer. A new page starts at its own first card.
+  const mountedOnce = useRef(false);
+  useEffect(() => {
+    if (!mountedOnce.current) {
+      mountedOnce.current = true;
+      return;
+    }
+    const region = document.getElementById('app-main');
+    if (region) region.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
 
   function handleResetToMyCourse() {
     setUniversityId('');

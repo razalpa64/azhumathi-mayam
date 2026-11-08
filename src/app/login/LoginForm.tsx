@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { SUPPORT_PHONE_DISPLAY, SUPPORT_WHATSAPP_URL } from '@/lib/support';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Eye,
@@ -197,10 +198,26 @@ export function LoginForm() {
       </div>
 
       {showForgotHelp ? (
-        <p role="status" className="rounded-2xl bg-burgundy-tint px-4 py-3 text-[13px] leading-relaxed text-charcoal">
-          Forgot your password? Ask your college office to reset it for you — then come back
-          here and sign in with the new one.
-        </p>
+        <div
+          role="status"
+          className="rounded-2xl bg-burgundy-tint px-4 py-3 text-[13px] leading-relaxed text-charcoal"
+        >
+          <p>
+            Forgot your password? Message us on WhatsApp with your username — we&apos;ll reset it
+            for you.
+          </p>
+          <a
+            href={`${SUPPORT_WHATSAPP_URL}?text=${encodeURIComponent(
+              'Hi Azhimathi Mayam, I forgot my password. My username is: '
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1.5 font-semibold text-burgundy hover:underline underline-offset-4"
+          >
+            WhatsApp {SUPPORT_PHONE_DISPLAY}
+            <ArrowRight className="h-3.5 w-3.5" />
+          </a>
+        </div>
       ) : null}
 
       <button

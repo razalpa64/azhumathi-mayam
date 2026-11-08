@@ -385,6 +385,7 @@ export function StudentShell({
           exactly the visible space when its content is short, while
           longer pages simply grow the scroll area. */}
       <main
+        id="app-main"
         ref={mainRef}
         className="relative isolate mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-canvas px-4 pt-6 sm:px-6 lg:overflow-visible lg:px-10 lg:pt-6 xl:max-w-[1440px]"
       >
