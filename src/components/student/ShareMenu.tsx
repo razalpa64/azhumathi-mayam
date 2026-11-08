@@ -102,7 +102,7 @@ export function ShareMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-xl border border-line bg-white font-bold text-charcoal transition hover:border-burgundy-border hover:text-burgundy',
+          'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border border-line bg-white font-bold text-charcoal transition hover:border-burgundy-border hover:text-burgundy',
           size === 'md' ? 'h-10 px-3.5 text-sm' : 'h-9 px-3 text-xs'
         )}
       >
