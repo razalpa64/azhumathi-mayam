@@ -113,6 +113,10 @@ export const viewport: Viewport = {
   themeColor: '#660000',
   width: 'device-width',
   initialScale: 1,
+  // Android Chrome: when the keyboard opens, shrink the layout viewport
+  // (and with it the shells' 100dvh column) instead of letting the
+  // keyboard float over the bottom bar / chat composer.
+  interactiveWidget: 'resizes-content',
   // No viewportFit: 'cover' — edge-to-edge drawing slid the app header
   // under the status bar on Android Chrome (safe-area-inset-top does not
   // reliably include the status bar there). The default keeps the layout
