@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // web-push is a Node-only CJS library; load it at runtime, never bundle.
+  serverExternalPackages: ['web-push'],
   allowedDevOrigins: ['*.e2b.app', 'localhost', '127.0.0.1'],
   eslint: {
     ignoreDuringBuilds: true,

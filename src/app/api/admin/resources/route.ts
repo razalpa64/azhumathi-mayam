@@ -8,6 +8,7 @@ import {
   resolveCourseAudienceSpecialization,
 } from '@/lib/subject-siblings';
 import { fetchAllRows } from '@/lib/supabase/fetch-all';
+import { sendPushToUsers } from '@/lib/push';
 import { storageProvider } from '@/lib/storage/google-drive-link-provider';
 
 const createResourceSchema = z.object({
@@ -245,6 +246,22 @@ export async function POST(request: NextRequest) {
         link_url: `/resources/${created.id}`,
       }));
       await adminClient.from('notifications').insert(notifications);
+    }
+
+    // Same audience, second channel: web push to subscribed devices.
+    // Best-effort — a push failure never fails the upload.
+    try {
+      await sendPushToUsers(
+        adminClient,
+        targetStudents.map((s) => s.id),
+        {
+          title: 'New study material',
+          body: `${created.title} — added for your semester.`,
+          url: `/resources/${created.id}`,
+        }
+      );
+    } catch {
+      // Push is optional; in-app notifications above are the record.
     }
   }
 

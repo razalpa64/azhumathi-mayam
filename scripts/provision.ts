@@ -174,6 +174,20 @@ async function main() {
     );
     await pg.query(cuBa3Sql);
 
+    console.log('3q. Applying 0021_push_subscriptions.sql (Web Push subscriptions)...');
+    const pushSubscriptionsSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0021_push_subscriptions.sql'),
+      'utf8'
+    );
+    await pg.query(pushSubscriptionsSql);
+
+    console.log('3r. Applying 0022_study_plans.sql (Exam study plans)...');
+    const studyPlansSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0022_study_plans.sql'),
+      'utf8'
+    );
+    await pg.query(studyPlansSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {

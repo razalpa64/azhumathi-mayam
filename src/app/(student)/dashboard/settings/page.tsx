@@ -1,6 +1,7 @@
 import { ShieldCheck } from 'lucide-react';
 import { requireStudentAppUser } from '@/lib/auth/session';
 import { PasswordChangeForm } from '@/components/student/PasswordChangeForm';
+import { PushNotificationsCard } from '@/components/student/PushNotificationsCard';
 import { formatDateTime } from '@/lib/utils';
 
 export const metadata = {
@@ -22,8 +23,9 @@ export default async function StudentSettingsPage() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-12">
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-7 space-y-8">
           <PasswordChangeForm />
+          <PushNotificationsCard />
         </div>
 
         <aside className="lg:col-span-5 space-y-4">
