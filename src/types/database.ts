@@ -284,6 +284,44 @@ export interface ResourceRequest {
   student?: Pick<Profile, 'id' | 'full_name' | 'username'> | null;
 }
 
+export type MaterialSubmissionStatus = 'pending' | 'approved' | 'rejected';
+
+/** A student's Google-Drive material contribution awaiting moderation (0024). */
+export interface MaterialSubmission {
+  id: string;
+  student_id: string;
+  subject_id: string;
+  category_id: string | null;
+  title: string;
+  description: string | null;
+  google_drive_share_url: string;
+  file_type: ResourceFileType;
+  status: MaterialSubmissionStatus;
+  admin_note: string | null;
+  created_resource_id: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  student?: Pick<Profile, 'id' | 'full_name' | 'username'> | null;
+  subject?: { id: string; subject_code: string; name: string } | null;
+  category?: { id: string; name: string } | null;
+}
+
+/** A staff-curated most-repeated exam question for a subject (0024). */
+export interface ImportantQuestion {
+  id: string;
+  subject_id: string;
+  question: string;
+  module: string | null;
+  topic: string | null;
+  years_asked: string | null;
+  times_asked: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AdminActivityLog {
   id: string;
   admin_id: string | null;

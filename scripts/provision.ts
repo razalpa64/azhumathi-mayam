@@ -195,6 +195,13 @@ async function main() {
     );
     await pg.query(noticeTargetSql);
 
+    console.log('3t. Applying 0024_contributions_important_questions.sql (Student uploads + important questions)...');
+    const contributionsSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0024_contributions_important_questions.sql'),
+      'utf8'
+    );
+    await pg.query(contributionsSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {

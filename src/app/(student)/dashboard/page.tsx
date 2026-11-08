@@ -24,6 +24,8 @@ import { audienceSubjectIds, type SubjectGroupRow } from '@/lib/subject-siblings
 import { getActiveAdvertisementsByPlacement } from '@/lib/ads';
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
 import { ExamCountdownCard } from '@/components/student/ExamCountdownCard';
+import { StreakCard } from '@/components/student/StreakCard';
+import { computeStreak } from '@/lib/streak';
 import { NoticeBoard } from '@/components/student/NoticeBoard';
 import { ResourceCard } from '@/components/student/ResourceCard';
 import { AdSlot } from '@/components/ads/AdSlot';
@@ -284,6 +286,7 @@ export default async function StudentDashboardPage() {
     { data: userBookmarks },
     { data: shortNoteResources },
     { data: subjectCountRows },
+    { data: streakPlanRow },
   ] = await Promise.all([
     noticesPromise,
     subjectsPromise,
@@ -299,7 +302,17 @@ export default async function StudentDashboardPage() {
     supabase.from('bookmarks').select('resource_id').eq('user_id', profile.id),
     snCatIds.length > 0 ? shortNotesQuery : Promise.resolve({ data: [] }),
     subjectCountPromise,
+    // Study streak source (table may not exist yet → treated as none).
+    supabase
+      .from('study_plans')
+      .select('completed_keys')
+      .eq('user_id', profile.id)
+      .maybeSingle(),
   ]);
+
+  const streak = computeStreak(
+    ((streakPlanRow?.completed_keys || []) as string[]) || []
+  );
 
   // Aggregate counts per subject
   // Counts are aggregated per COURSE (subject_code + scheme), not per
@@ -480,6 +493,9 @@ export default async function StudentDashboardPage() {
 
       {/* Exam countdown (only when the student has a study plan) */}
       <ExamCountdownCard />
+
+      {/* Study streak (appears once the student has studied a day) */}
+      <StreakCard streak={streak} />
 
       {/* Quick actions */}
       <div className="anim-rise grid grid-cols-2 gap-3 lg:grid-cols-4" style={{ animationDelay: '170ms' }}>

@@ -9,6 +9,7 @@ import {
   BookOpen,
   CalendarRange,
   FilePlus2,
+  Flame,
   FolderKanban,
   GitBranch,
   GraduationCap,
@@ -22,6 +23,7 @@ import {
   Scale,
   Settings,
   Sparkles,
+  UploadCloud,
   UserCog,
   Users,
   X,
@@ -33,6 +35,7 @@ import { cn, getInitials } from '@/lib/utils';
 interface AdminShellProps {
   profile: Profile;
   pendingRequests?: number;
+  pendingSubmissions?: number;
   children: React.ReactNode;
 }
 
@@ -43,7 +46,7 @@ interface NavItem {
   exact?: boolean;
   /** Super-admin territory: sub-admins never see these. */
   mainOnly?: boolean;
-  badge?: 'requests';
+  badge?: 'requests' | 'submissions';
 }
 
 /**
@@ -61,6 +64,8 @@ const NAV_SECTIONS: { label: string | null; items: NavItem[] }[] = [
       { href: '/admin/upload', label: 'Upload Resources', icon: FilePlus2 },
       { href: '/admin/resources', label: 'Study Materials', icon: FolderKanban },
       { href: '/admin/requests', label: 'Student Requests', icon: Inbox, badge: 'requests' },
+      { href: '/admin/submissions', label: 'Student Uploads', icon: UploadCloud, badge: 'submissions' },
+      { href: '/admin/important-questions', label: 'Important Questions', icon: Flame },
       { href: '/admin/notices', label: 'Notices', icon: Megaphone, mainOnly: true },
     ],
   },
@@ -99,7 +104,12 @@ const MOBILE_NAV: (Omit<NavItem, 'badge'> & { badge: '' | 'requests' })[] = [
   { href: '/admin/requests', label: 'Requests', icon: Inbox, badge: 'requests' },
 ];
 
-export function AdminShell({ profile, pendingRequests = 0, children }: AdminShellProps) {
+export function AdminShell({
+  profile,
+  pendingRequests = 0,
+  pendingSubmissions = 0,
+  children,
+}: AdminShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -152,7 +162,13 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
   function renderNavLink(item: NavItem, rail: boolean) {
     const Icon = item.icon;
     const active = isActive(item.href, item.exact);
-    const showBadge = item.badge === 'requests' && pendingRequests > 0;
+    const badgeCount =
+      item.badge === 'requests'
+        ? pendingRequests
+        : item.badge === 'submissions'
+          ? pendingSubmissions
+          : 0;
+    const showBadge = badgeCount > 0;
     return (
       <Link
         key={item.href}
@@ -192,7 +208,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           />
           {rail && showBadge ? (
             <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E5484D] px-1 text-[9px] font-bold text-white ring-2 ring-burgundy">
-              {pendingRequests > 99 ? '99+' : pendingRequests}
+              {badgeCount > 99 ? '99+' : badgeCount}
             </span>
           ) : null}
         </span>
@@ -201,7 +217,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             <span className="flex-1 truncate">{item.label}</span>
             {showBadge ? (
               <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#E5484D] px-1.5 text-[10px] font-bold text-white shadow-[0_4px_10px_-4px_rgba(229,72,77,0.9)]">
-                {pendingRequests > 99 ? '99+' : pendingRequests}
+                {badgeCount > 99 ? '99+' : badgeCount}
               </span>
             ) : null}
           </>

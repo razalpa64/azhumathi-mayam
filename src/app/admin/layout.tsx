@@ -22,8 +22,18 @@ export default async function AdminLayout({
     .select('id', { count: 'exact', head: true })
     .eq('status', 'pending');
 
+  // Student-upload moderation queue (table may not exist yet → 0).
+  const { count: pendingSubmissions } = await adminClient
+    .from('material_submissions')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending');
+
   return (
-    <AdminShell profile={profile} pendingRequests={pendingRequests || 0}>
+    <AdminShell
+      profile={profile}
+      pendingRequests={pendingRequests || 0}
+      pendingSubmissions={pendingSubmissions || 0}
+    >
       {children}
     </AdminShell>
   );
