@@ -44,20 +44,13 @@ export const metadata: Metadata = {
       'Azhimathi Mayam — Study Notes, Question Papers & Syllabus for Kerala Students',
     description: SITE_DESCRIPTION,
     locale: 'en_IN',
-    images: [
-      {
-        url: '/icons/icon-512.png',
-        width: 512,
-        height: 512,
-        alt: 'Azhimathi Mayam — study notes for Kerala university students',
-      },
-    ],
+    // The image comes from src/app/opengraph-image.tsx (1200×630 brand
+    // card) — deliberately not spelled out here so it can never drift.
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Azhimathi Mayam — Study Notes, Question Papers & Syllabus',
     description: SITE_DESCRIPTION,
-    images: ['/icons/icon-512.png'],
   },
   manifest: '/manifest.webmanifest',
   appleWebApp: {

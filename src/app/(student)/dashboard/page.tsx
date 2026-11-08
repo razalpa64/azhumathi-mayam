@@ -80,15 +80,28 @@ export default async function StudentDashboardPage() {
       nQuery = nQuery.is('target_programme_id', null);
     }
 
+    // Expiry, semester and branch must be filtered IN the database, before
+    // the limit. Filtering afterwards meant six expired notices could push
+    // the student's real notices out of the window — the board silently
+    // looked empty even though notices existed.
+    nQuery = nQuery.or(`expiry_date.is.null,expiry_date.gt.${nowIso}`);
+    if (profile.semester_id) {
+      nQuery = nQuery.or(
+        `target_semester_id.is.null,target_semester_id.eq.${profile.semester_id}`
+      );
+    } else {
+      nQuery = nQuery.is('target_semester_id', null);
+    }
+    if (profile.specialization_id) {
+      nQuery = nQuery.or(
+        `target_specialization_id.is.null,target_specialization_id.eq.${profile.specialization_id}`
+      );
+    } else {
+      nQuery = nQuery.is('target_specialization_id', null);
+    }
+
     const { data: rawNotices } = await nQuery;
-    return ((rawNotices || []) as unknown as Notice[]).filter(
-      (n) =>
-        (!n.expiry_date || n.expiry_date > nowIso) &&
-        // Semester/branch-targeted notices are for that audience only.
-        (!n.target_semester_id || n.target_semester_id === profile.semester_id) &&
-        (!n.target_specialization_id ||
-          n.target_specialization_id === profile.specialization_id)
-    );
+    return (rawNotices || []) as unknown as Notice[];
   })();
 
   // 2. Current semester subjects (strictly scoped to student's programme + semester)

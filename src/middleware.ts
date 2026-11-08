@@ -67,8 +67,12 @@ export async function middleware(request: NextRequest) {
     const isAuthPage = pathname === '/login' || pathname === '/register';
     const isRootPage = pathname === '/';
     const isAdminRoute = pathname.startsWith('/admin');
-    const isStudentProtectedRoute =
-      pathname.startsWith('/dashboard') || pathname.startsWith('/resources');
+    const isStudentProtectedRoute = pathname.startsWith('/dashboard');
+    // /resources/<id> is deliberately NOT gated here: shared material
+    // links land on WhatsApp, and a forwarded link must open a real
+    // preview (what the paper is, which subject) rather than a blank
+    // login wall. The page itself serves the preview when logged out and
+    // the full viewer when signed in.
 
     if (!user) {
       if (isAdminRoute || isStudentProtectedRoute) {
