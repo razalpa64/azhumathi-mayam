@@ -1,6 +1,13 @@
+import type { Metadata } from 'next';
 import { requireStudentAppUser } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { StudentShell } from '@/components/student/StudentShell';
+
+// Signed-in student pages must never be indexed (the public landing
+// page at / is the search-facing entry point).
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function StudentLayout({
   children,

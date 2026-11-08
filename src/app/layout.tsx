@@ -9,19 +9,60 @@ import './globals.css';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { getWebsiteSettings } from '@/lib/auth/session';
 import { resolveAdsenseClientId } from '@/lib/adsense';
+import {
+  getSiteUrl,
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_NAME_MALAYALAM,
+} from '@/lib/site';
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: 'അഴിമതി മയം — notes, syllabus & question papers',
-    template: '%s | അഴിമതി മയം',
+    default:
+      'Azhimathi Mayam — Study Notes, Question Papers & Syllabus | KTU, Calicut University',
+    template: '%s | Azhimathi Mayam',
   },
-  description:
-    'അഴിമതി മയം — study notes, syllabi and previous question papers, organised by your course and semester.',
-  applicationName: 'അഴിമതി മയം',
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: 'education',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    url: '/',
+    siteName: `${SITE_NAME_MALAYALAM} (${SITE_NAME})`,
+    title:
+      'Azhimathi Mayam — Study Notes, Question Papers & Syllabus for Kerala Students',
+    description: SITE_DESCRIPTION,
+    locale: 'en_IN',
+    images: [
+      {
+        url: '/icons/icon-512.png',
+        width: 512,
+        height: 512,
+        alt: 'Azhimathi Mayam — study notes for Kerala university students',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Azhimathi Mayam — Study Notes, Question Papers & Syllabus',
+    description: SITE_DESCRIPTION,
+    images: ['/icons/icon-512.png'],
+  },
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
-    title: 'അഴിമതി മയം',
+    title: SITE_NAME_MALAYALAM,
     statusBarStyle: 'black-translucent',
   },
   icons: {
@@ -33,8 +74,39 @@ export const metadata: Metadata = {
   },
   robots: {
     index: true,
-    follow: false,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
+};
+
+/** Structured data so search engines understand what the site is. */
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      url: `${siteUrl}/`,
+      name: SITE_NAME,
+      alternateName: SITE_NAME_MALAYALAM,
+      description: SITE_DESCRIPTION,
+      inLanguage: ['en-IN', 'ml-IN'],
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
+      name: SITE_NAME,
+      alternateName: SITE_NAME_MALAYALAM,
+      url: `${siteUrl}/`,
+      logo: `${siteUrl}/icons/icon-512.png`,
+      description: SITE_DESCRIPTION,
+    },
+  ],
 };
 
 export const viewport: Viewport = {
@@ -64,6 +136,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-canvas text-charcoal antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         {children}
         <Analytics />
         <ServiceWorkerRegister />
