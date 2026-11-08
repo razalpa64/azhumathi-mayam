@@ -80,6 +80,32 @@ export async function POST(request: NextRequest) {
 
     const adminClient = createSupabaseAdminClient();
 
+    // The scheme decides which subjects the student sees, so a scheme from
+    // another university would hand them an empty dashboard. The picker
+    // cannot produce one; the API must not trust the client anyway.
+    if (parsed.data.regulation_id) {
+      const { data: regulation } = await adminClient
+        .from('academic_regulations')
+        .select('id, university_id, is_active')
+        .eq('id', parsed.data.regulation_id)
+        .maybeSingle();
+      if (!regulation || regulation.is_active === false) {
+        return NextResponse.json(
+          { error: 'That regulation/scheme is no longer available. Please pick another.' },
+          { status: 400 }
+        );
+      }
+      if (
+        regulation.university_id &&
+        regulation.university_id !== (parsed.data.university_id ?? null)
+      ) {
+        return NextResponse.json(
+          { error: 'That regulation/scheme belongs to a different university.' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Check duplicate username
     const { data: existingProfile } = await adminClient
       .from('profiles')

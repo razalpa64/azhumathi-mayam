@@ -49,6 +49,13 @@ html {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /*
+    Reserve the scrollbar column on every page. Without this, a short page
+    and a long page render at different widths and the whole site jumps a
+    few pixels sideways as you move between them — the "layout moved"
+    feeling. No effect on phones, where the scrollbar overlays.
+  */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -123,30 +130,24 @@ iframe {
 }
 
 /*
-  Motion — deliberately small. One gentle "rise" used for page changes,
-  dashboard blocks and chat bubbles. Nothing bounces, nothing spins for
-  decoration; if the system asks for reduced motion, everything is still.
-*/
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
+  Motion — small, and now strictly non-positional.
 
-/* "backwards" (not "both"): once the animation ends the element keeps no
-   lingering transform, so position:fixed children (the reader's
-   full-screen fallback) anchor to the viewport as they should. */
+  Pages, dashboard blocks and chat bubbles used to slide up by 6-10px as
+  they arrived. On a phone that reads as the layout moving under your
+  thumb: the thing you were about to tap has shifted. Everything that
+  arrives now fades in place (opacity only), so nothing a student is
+  looking at ever changes position after it appears.
+
+  Real motion stays where it explains something — a sheet or drawer that
+  comes from an edge, a popover that grows out of its trigger — and the
+  reduced-motion rule at the bottom of this file still stops all of it.
+*/
 .anim-rise {
-  animation: rise 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  animation: fade-in 0.3s ease-out backwards;
 }
 
 .anim-page {
-  animation: rise 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  animation: fade-in 0.22s ease-out backwards;
 }
 
 /* The install card gliding up from the bottom edge */
@@ -165,8 +166,9 @@ iframe {
   animation: sheet-in 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
 }
 
-/* Cards and popovers arriving: a breath of scale with the rise, so
-   surfaces feel placed rather than snapped in. */
+/* Cards and popovers arriving: a breath of scale, so surfaces feel
+   placed rather than snapped in. Only ever used for things that appear
+   in response to a tap, never for page content. */
 @keyframes scale-in {
   from {
     opacity: 0;
@@ -212,10 +214,10 @@ iframe {
   animation: drawer-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
 }
 
-/* Staggered entrances: children rise one after another (stat cards,
+/* Staggered entrances: children fade in one after another (stat cards,
    tile grids). Pair with inline animation-delay for finer control. */
 .anim-stagger > * {
-  animation: rise 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  animation: fade-in 0.3s ease-out backwards;
 }
 .anim-stagger > *:nth-child(2) { animation-delay: 60ms; }
 .anim-stagger > *:nth-child(3) { animation-delay: 120ms; }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -15,6 +15,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { applicableSchemes, keepValidSchemeId } from '@/lib/regulation-scope';
 import type {
   AcademicRegulation,
   Programme,
@@ -73,28 +74,31 @@ export function RegisterForm({
     [semesters, programmeId]
   );
 
-  // Schemes: the student's own university's schemes first (in the order
-  // staff set), then the schemes shared by every Kerala university.
-  // Never a mixed pile — and each option says which university it belongs
-  // to and which admission batches it covers.
-  const filteredRegulations = useMemo(() => {
-    const list = regulations.filter(
-      (r) => !universityId || !r.university_id || r.university_id === universityId
-    );
-    const rank = (r: (typeof list)[number]) =>
-      r.university_id && r.university_id === universityId ? 0 : r.university_id ? 1 : 2;
-    return [...list].sort((a, b) => {
-      const byRank = rank(a) - rank(b);
-      if (byRank !== 0) return byRank;
-      if (a.display_order !== b.display_order) return a.display_order - b.display_order;
-      return a.name.localeCompare(b.name);
-    });
-  }, [regulations, universityId]);
+  // Schemes follow the university the student picked: nothing is offered
+  // until one is chosen, KTU gets its own 2019/2024 schemes and never the
+  // Kerala common ones, and the degree level trims the rest. The rule and
+  // the reasoning behind it live in src/lib/regulation-scope.ts — the
+  // profile editor uses the same function, so the two pickers cannot drift.
+  const filteredRegulations = useMemo(
+    () => applicableSchemes({ regulations, programmes, universityId, programmeId }),
+    [regulations, programmes, universityId, programmeId]
+  );
 
   const selectedUniversity = universities.find((u) => u.id === universityId);
   const ownSchemes = filteredRegulations.filter(
     (r) => r.university_id && r.university_id === universityId
   );
+
+  // A scheme chosen before the university/programme changed may no longer
+  // be on offer — drop it, and take the only option when there is just one
+  // so the student is never left with an empty answer we already know.
+  useEffect(() => {
+    setRegulationId((previous) => {
+      const kept = keepValidSchemeId(previous, filteredRegulations);
+      if (kept) return kept;
+      return filteredRegulations.length === 1 ? filteredRegulations[0].id : '';
+    });
+  }, [filteredRegulations]);
 
   // One flat, short list. Native Android renders <optgroup> headings as
   // full-size rows and wraps any long label onto two lines, which turned
@@ -131,13 +135,9 @@ export function RegisterForm({
   }
 
   function handleUniversityChange(nextUniId: string) {
+    // The scheme list is derived from this value; the effect above prunes
+    // or pre-selects the scheme to match.
     setUniversityId(nextUniId);
-    // If that university has exactly one scheme of its own, pick it —
-    // saves the student a decision we already know the answer to.
-    const own = regulations.filter(
-      (r) => nextUniId && r.university_id === nextUniId
-    );
-    setRegulationId(own.length === 1 ? own[0].id : '');
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -451,10 +451,16 @@ export function RegisterForm({
               id="regulation"
               value={regulationId}
               onChange={(e) => setRegulationId(e.target.value)}
-              disabled={loading}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
+              disabled={loading || !universityId || filteredRegulations.length === 0}
+              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
             >
-              <option value="">Select Scheme (Optional)</option>
+              <option value="">
+                {!universityId
+                  ? 'Choose your university first'
+                  : filteredRegulations.length === 0
+                    ? 'No scheme listed for this course yet'
+                    : 'Select Scheme (Optional)'}
+              </option>
               {schemeOptions.map(({ reg, label }) => (
                 <option key={reg.id} value={reg.id}>
                   {label}
@@ -466,10 +472,15 @@ export function RegisterForm({
                 {selectedScheme.name} · Admissions: {selectedScheme.batch_range}
               </p>
             ) : null}
-            {universityId && ownSchemes.length === 0 ? (
+            {!universityId ? (
               <p className="mt-1 text-[11px] text-muted">
-                No {selectedUniversity?.short_name}-only scheme yet — pick the common regulation that
-                matches your grade card.
+                Pick your university and only its schemes appear here.
+              </p>
+            ) : null}
+            {universityId && ownSchemes.length === 0 && filteredRegulations.length > 0 ? (
+              <p className="mt-1 text-[11px] text-muted">
+                No {selectedUniversity?.short_name}-only scheme yet — these are the shared Kerala
+                regulations. Pick the one on your grade card.
               </p>
             ) : null}
           </div>

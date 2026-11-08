@@ -129,8 +129,10 @@ export function StudentShell({
     lastScrollY.current = y;
   }
 
-  // A new page always starts at the top with the strip in place: without
-  // this the previous page's scroll offset leaks into the next page.
+  // A new page always starts at the top with the strip in place. The key
+  // on <main> below already gives every route a fresh scroll region (so
+  // the page paints at the top instead of jumping there after the first
+  // frame); this also covers the case where the element is reused.
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0;
     lastScrollY.current = 0;
@@ -150,7 +152,11 @@ export function StudentShell({
     const apply = () => {
       const viewport = window.visualViewport;
       const height = Math.round(viewport?.height ?? window.innerHeight);
-      if (height > 0 && Math.abs(height - last) >= 1) {
+      // 4px of hysteresis: the visual viewport jitters by a pixel or two
+      // while the browser chrome animates, and re-pinning the shell on
+      // those wobbles made the whole layout shiver. Anything smaller than
+      // this is not a real change of the visible area.
+      if (height > 0 && Math.abs(height - last) >= 4) {
         last = height;
         el.style.setProperty('--app-h', `${height}px`);
       }
@@ -456,6 +462,11 @@ export function StudentShell({
           exactly the visible space when its content is short, while
           longer pages simply grow the scroll area. */}
       <main
+        // Keyed by route: a new page gets a brand-new scroll container, so
+        // it is painted at the top. Reusing one and resetting scrollTop in
+        // an effect painted the new page at the previous offset for a
+        // frame, then snapped it up — the most visible "the layout moved".
+        key={pathname}
         id="app-main"
         ref={mainRef}
         onScroll={handleMainScroll}
