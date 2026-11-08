@@ -24,7 +24,7 @@ export default async function GroupChatPage() {
   ) as unknown as ChatMessage[];
 
   return (
-    <div className="anim-rise mx-auto w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl">
+    <div className="anim-rise mx-auto -mb-8 flex min-h-0 w-full max-w-3xl flex-1 flex-col lg:-mb-10 lg:max-w-4xl xl:max-w-5xl">
       <h1 className="sr-only">Group chat</h1>
       <ChatClient
         initialMessages={initialMessages}

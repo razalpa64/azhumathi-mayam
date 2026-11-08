@@ -116,7 +116,7 @@ export function StudentShell({
     .join(' • ');
 
   return (
-    <div className="desktop-ambient min-h-screen flex flex-col bg-canvas">
+    <div className="desktop-ambient min-h-dvh flex flex-col bg-canvas">
       {/* Burgundy wave header — scrolls away with the page, only the tab strip sticks */}
       <div className="relative bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10">
@@ -335,8 +335,11 @@ export function StudentShell({
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto w-full max-w-7xl xl:max-w-[1440px] flex-1 px-4 pb-32 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-6">
-        <div key={pathname} className="anim-page">
+      <main className="mx-auto flex w-full max-w-7xl xl:max-w-[1440px] flex-1 flex-col px-4 pb-32 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-6">
+        {/* flex column so a page (the group chat) can fill exactly the
+            space between the tab strip and the bottom padding instead
+            of guessing viewport heights in pixels. */}
+        <div key={pathname} className="anim-page flex min-h-0 flex-1 flex-col">
           {children}
         </div>
       </main>
