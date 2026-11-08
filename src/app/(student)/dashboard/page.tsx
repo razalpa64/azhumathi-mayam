@@ -514,15 +514,15 @@ export default async function StudentDashboardPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="group flex items-center gap-3 rounded-[20px] border border-line bg-canvas px-4 py-3.5 transition-colors hover:border-burgundy-border sm:px-5 lg:rounded-[20px] lg:px-5 lg:py-3.5 lg:transition-all lg:hover:-translate-y-0.5 lg:hover:shadow-[0_16px_28px_-20px_rgba(36,7,7,0.4)]"
+              className="group flex items-center gap-2.5 rounded-[20px] border border-line bg-canvas px-3.5 py-3 transition-colors hover:border-burgundy-border sm:px-4 lg:transition-all lg:hover:-translate-y-0.5 lg:hover:shadow-[0_16px_28px_-20px_rgba(36,7,7,0.4)]"
             >
-              <span className="lg:flex lg:h-9 lg:w-9 lg:shrink-0 lg:items-center lg:justify-center lg:rounded-xl lg:bg-burgundy-tint">
-                <Icon className="h-6 w-6 shrink-0 text-burgundy lg:h-5 lg:w-5" strokeWidth={1.8} />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-burgundy-tint">
+                <Icon className="h-5 w-5 shrink-0 text-burgundy" strokeWidth={1.8} />
               </span>
-              <span className="truncate text-sm font-semibold text-charcoal group-hover:text-burgundy sm:text-[15px] lg:text-[15px]">
+              <span className="min-w-0 flex-1 text-[13px] font-semibold leading-snug text-charcoal group-hover:text-burgundy sm:text-sm">
                 {item.label}
               </span>
-              <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-burgundy" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-burgundy" />
             </Link>
           );
         })}
