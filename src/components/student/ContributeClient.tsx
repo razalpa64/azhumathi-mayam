@@ -158,7 +158,7 @@ export function ContributeClient({
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="block">
                 <span className="mb-1.5 block text-xs font-semibold text-charcoal">Subject</span>
                 <select
@@ -212,7 +212,7 @@ export function ContributeClient({
               />
             </label>
 
-            <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_140px]">
               <label className="block">
                 <span className="mb-1.5 block text-xs font-semibold text-charcoal">
                   Google Drive sharing link

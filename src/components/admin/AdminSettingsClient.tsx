@@ -64,7 +64,7 @@ export function AdminSettingsClient({ initialSettings }: AdminSettingsClientProp
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         {/* Global Controls */}
         <form
           onSubmit={handleSaveSettings}

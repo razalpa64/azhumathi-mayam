@@ -74,7 +74,7 @@ export default async function HistoryPage() {
           }
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {entries.map((entry) => (
             <div key={entry.resource.id} className="space-y-1.5">
               <p className="text-[11px] font-mono text-muted">

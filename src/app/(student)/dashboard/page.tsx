@@ -595,7 +595,7 @@ export default async function StudentDashboardPage() {
             description="Subjects haven’t been added for this semester yet. Check back soon."
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {semesterSubjects.map((subj) => {
               const stats =
                 subjectStats.get(`${subj.subject_code}|${subj.regulation_id ?? ''}`) || {
@@ -690,7 +690,7 @@ export default async function StudentDashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {(shortNoteResources as unknown as Resource[]).map((res, i) => (
               <ResourceCard
                 key={res.id}
@@ -744,7 +744,7 @@ export default async function StudentDashboardPage() {
             }
           />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {(latestResources as unknown as Resource[]).map((res, i) => (
               <ResourceCard
                 key={res.id}
@@ -789,7 +789,7 @@ export default async function StudentDashboardPage() {
       </section>
 
       {/* Previous Question Papers & Popular Course Resources */}
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Previous Question Papers Quick Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -908,7 +908,7 @@ export default async function StudentDashboardPage() {
               History
             </Link>
           </div>
-          <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-4">
             {recentlyViewed.map((res, i) => (
               <ResourceCard
                 key={res.id}

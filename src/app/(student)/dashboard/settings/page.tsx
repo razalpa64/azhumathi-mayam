@@ -22,7 +22,7 @@ export default async function StudentSettingsPage() {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         <div className="lg:col-span-7 space-y-8">
           <PasswordChangeForm />
           <PushNotificationsCard />

@@ -176,7 +176,7 @@ export default async function MySemesterPage() {
             description="Subjects for this semester haven’t been added yet."
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {semSubjects.map((subj) => (
               <div
                 key={subj.id}
@@ -239,7 +239,7 @@ export default async function MySemesterPage() {
             description="Nothing uploaded for this semester yet."
           />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {semResources.map((res) => (
               <ResourceCard
                 key={res.id}

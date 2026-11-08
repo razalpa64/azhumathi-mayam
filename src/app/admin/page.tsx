@@ -247,7 +247,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Live Metrics Grid */}
-      <section className="anim-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="anim-stagger grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -301,7 +301,7 @@ export default async function AdminOverviewPage() {
       </section>
 
       {/* Two-Column Tables: Recent Uploads & Top Downloads */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">Recently added</h2>
@@ -386,7 +386,7 @@ export default async function AdminOverviewPage() {
 
       {/* New students & Audit Trail — super admin only */}
       {isMainAdmin ? (
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">New students</h2>

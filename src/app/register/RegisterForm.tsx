@@ -226,7 +226,7 @@ export function RegisterForm({
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <label
             htmlFor="full_name"
@@ -279,7 +279,7 @@ export function RegisterForm({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <label
             htmlFor="password"
@@ -349,7 +349,7 @@ export function RegisterForm({
           <span className="text-[11px] text-muted">You can change this later</span>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label htmlFor="university" className="mb-1 block text-xs font-medium text-charcoal">
               University

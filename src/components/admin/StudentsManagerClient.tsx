@@ -470,7 +470,7 @@ export function StudentsManagerClient({
               </div>
             ) : null}
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label className="mb-1 block text-xs font-semibold text-charcoal">
                   Student Full Name <span className="text-burgundy">*</span>
@@ -668,7 +668,7 @@ export function StudentsManagerClient({
               </div>
             ) : null}
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label className="mb-1 block text-xs font-semibold text-charcoal">Full Name</label>
                 <input

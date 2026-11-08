@@ -204,7 +204,7 @@ export function LandingPage({
           a study plan that tells you what to read today — built for how
           students actually prepare.
         </p>
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -265,7 +265,7 @@ export function LandingPage({
         <h2 className="text-2xl font-bold tracking-tight text-charcoal">
           Start studying in under a minute
         </h2>
-        <ol className="mt-8 grid gap-5 sm:grid-cols-3">
+        <ol className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
           {[
             [
               '1',

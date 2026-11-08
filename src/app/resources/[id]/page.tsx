@@ -218,7 +218,7 @@ function PublicPreview({ resource }: { resource: PreviewMaterial }) {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             ['Notes & papers', 'Module-wise notes, previous papers and syllabus PDFs.'],
             ['Your semester', 'Everything arranged by course, branch and semester.'],

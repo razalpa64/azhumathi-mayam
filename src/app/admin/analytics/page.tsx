@@ -74,7 +74,7 @@ export default async function AdminAnalyticsPage() {
       </div>
 
       {/* Summary Strip */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-line bg-canvas p-5">
           <div className="flex items-center justify-between text-xs text-muted">
             <span>Total Students</span>
@@ -142,7 +142,7 @@ export default async function AdminAnalyticsPage() {
       </section>
 
       {/* Two-Column: Recent Download Events & Full Admin Audit Log */}
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <section className="lg:col-span-5 rounded-xl border border-line bg-canvas p-5 space-y-3 h-fit">
           <h2 className="text-sm font-semibold text-charcoal">Recent Student Download Events</h2>
           {!downloadsLogRes.data || downloadsLogRes.data.length === 0 ? (

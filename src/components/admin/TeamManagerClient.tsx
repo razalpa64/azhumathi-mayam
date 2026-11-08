@@ -227,7 +227,7 @@ export function TeamManagerClient() {
           <UserPlus className="h-4 w-4 text-burgundy" />
           Create a sub-admin
         </h2>
-        <form onSubmit={handleCreate} className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <form onSubmit={handleCreate} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <label className="block">
             <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-muted">
               Full name

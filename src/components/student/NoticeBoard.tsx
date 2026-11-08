@@ -34,7 +34,7 @@ export function NoticeBoard({ notices, noticesEnabled }: NoticeBoardProps) {
         <span className="text-xs text-muted">{notices.length} new</span>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 lg:gap-4">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 lg:gap-4">
         {notices.map((notice) => {
           const isHighPriority = notice.priority === 'urgent' || notice.priority === 'important';
           return (
