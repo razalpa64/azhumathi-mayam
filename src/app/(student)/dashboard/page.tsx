@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Bookmark,
   BookOpen,
+  Calculator,
   Calendar,
   ChevronRight,
   Clock,
@@ -15,6 +16,7 @@ import {
   LifeBuoy,
   NotebookPen,
   TrendingUp,
+  UploadCloud,
   Zap,
 } from 'lucide-react';
 import { requireStudentAppUser, getWebsiteSettings } from '@/lib/auth/session';
@@ -498,12 +500,14 @@ export default async function StudentDashboardPage() {
       <StreakCard streak={streak} />
 
       {/* Quick actions */}
-      <div className="anim-rise grid grid-cols-2 gap-3 lg:grid-cols-4" style={{ animationDelay: '170ms' }}>
+      <div className="anim-rise grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" style={{ animationDelay: '170ms' }}>
         {[
           { href: '/dashboard/semester', label: 'My subjects', icon: Layers },
           { href: '/dashboard/question-papers', label: 'Question papers', icon: FileQuestion },
           { href: '/dashboard/short-notes', label: 'Short notes', icon: NotebookPen },
           { href: '/dashboard/bookmarks', label: `Saved (${bookmarkSet.size})`, icon: Bookmark },
+          { href: '/dashboard/contribute', label: 'Contribute notes', icon: UploadCloud },
+          { href: '/sgpa-calculator', label: 'SGPA calculator', icon: Calculator },
         ].map((item) => {
           const Icon = item.icon;
           return (
@@ -746,16 +750,26 @@ export default async function StudentDashboardPage() {
           <h2 className="text-[15px] font-semibold text-charcoal">Can’t find what you need?</h2>
           <p className="mt-0.5 text-[13px] leading-relaxed text-muted">
             A missing module, a paper from a year that isn’t here, a cheat sheet before the
-            exam — ask. We actually read these.
+            exam — ask. We actually read these. Or share a note you already have and
+            climb the contributors board.
           </p>
         </div>
-        <Link
-          href="/dashboard/requests"
-          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-burgundy px-4 text-[13px] font-semibold text-canvas transition-colors hover:bg-burgundy-dark"
-        >
-          <span>Make a request</span>
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Link
+            href="/dashboard/requests"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full bg-burgundy px-4 text-[13px] font-semibold text-canvas transition-colors hover:bg-burgundy-dark"
+          >
+            <span>Make a request</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/dashboard/contribute"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full border border-burgundy-border bg-canvas px-4 text-[13px] font-semibold text-burgundy transition-colors hover:bg-burgundy-tint"
+          >
+            <UploadCloud className="h-4 w-4" />
+            <span>Contribute notes</span>
+          </Link>
+        </div>
       </section>
 
       {/* Previous Question Papers & Popular Course Resources */}

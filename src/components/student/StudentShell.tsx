@@ -74,6 +74,8 @@ const STRIP_TABS = [
   { href: '/dashboard/important-questions', label: 'Important Qs', icon: Flame },
   { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
   { href: '/dashboard/study-planner', label: 'Study Planner', icon: CalendarClock },
+  { href: '/sgpa-calculator', label: 'SGPA Calculator', icon: Calculator },
+  { href: '/dashboard/contribute', label: 'Contribute', icon: UploadCloud },
   { href: '/dashboard/requests', label: 'Requests', icon: Inbox },
 ];
 

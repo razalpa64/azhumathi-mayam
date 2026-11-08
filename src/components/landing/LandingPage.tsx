@@ -102,6 +102,12 @@ export function LandingPage({
         </Link>
         <nav className="flex items-center gap-2 sm:gap-3" aria-label="Account">
           <Link
+            href="/sgpa-calculator"
+            className="hidden rounded-full px-4 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint min-[420px]:block"
+          >
+            SGPA Calculator
+          </Link>
+          <Link
             href="/login"
             className="rounded-full px-4 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint"
           >
