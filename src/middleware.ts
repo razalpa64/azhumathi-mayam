@@ -74,7 +74,10 @@ export async function middleware(request: NextRequest) {
       if (isAdminRoute || isStudentProtectedRoute) {
         const loginUrl = request.nextUrl.clone();
         loginUrl.pathname = '/login';
-        loginUrl.searchParams.set('next', pathname);
+        // Keep the full path + query so shared deep links (e.g.
+        // /dashboard/materials?subjectId=… from a WhatsApp forward)
+        // land exactly where they were meant to after signing in.
+        loginUrl.searchParams.set('next', pathname + request.nextUrl.search);
         return NextResponse.redirect(loginUrl);
       }
       // Everything else (/, /login, /register, public files) is public:

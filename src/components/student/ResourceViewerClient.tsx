@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { ResourceCard } from '@/components/student/ResourceCard';
+import { ShareMenu } from '@/components/student/ShareMenu';
 import { AdSlot } from '@/components/ads/AdSlot';
 import type { Advertisement, Resource } from '@/types/database';
 import { cn, formatDate } from '@/lib/utils';
@@ -382,6 +383,19 @@ export function ResourceViewerClient({
                 </>
               )}
             </button>
+          ) : null}
+
+          {!isAdminViewer ? (
+            <ShareMenu
+              size="md"
+              path={`/resources/${resource.id}`}
+              title={resource.title}
+              subjectLabel={
+                resource.subject
+                  ? `${resource.subject.subject_code} — ${resource.subject.name}`
+                  : null
+              }
+            />
           ) : null}
         </div>
       </div>

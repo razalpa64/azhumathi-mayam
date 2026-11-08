@@ -325,7 +325,10 @@ export function LandingPage({
           >
             help.azhimathimayam@gmail.com
           </a>{' '}
-          · 86061 59002
+          · 86061 59002 ·{' '}
+          <Link href="/sgpa-calculator" className="font-medium text-burgundy hover:underline">
+            KTU SGPA Calculator
+          </Link>
         </p>
       </footer>
     </div>

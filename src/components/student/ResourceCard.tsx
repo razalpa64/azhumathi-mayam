@@ -12,6 +12,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { ShareMenu } from '@/components/student/ShareMenu';
 import type { Resource } from '@/types/database';
 import { cn, formatDate } from '@/lib/utils';
 
@@ -213,6 +214,16 @@ export function ResourceCard({
             )}
             <span>Download</span>
           </button>
+
+          <ShareMenu
+            path={`/resources/${resource.id}`}
+            title={resource.title}
+            subjectLabel={
+              resource.subject
+                ? `${resource.subject.subject_code} — ${resource.subject.name}`
+                : null
+            }
+          />
         </div>
 
         {downloadHint ? (

@@ -22,6 +22,7 @@ import {
   type PlanSubject,
   type StudyPlanInputs,
 } from '@/lib/study-plan';
+import { computeStreak } from '@/lib/streak';
 import { EmptyState } from '@/components/ui/EmptyState';
 
 const DAILY_OPTIONS = [60, 90, 120, 180, 240, 300];
@@ -354,6 +355,7 @@ export function StudyPlannerClient({
   // -------------------------------------------------------------- view
   if (!plan || !generated) return null;
 
+  const streak = computeStreak(plan.completedKeys);
   const doneCount = generated.days.reduce(
     (sum, day) => sum + day.tasks.filter((t) => completedSet.has(t.key)).length,
     0
@@ -470,6 +472,39 @@ export function StudyPlannerClient({
           </p>
         ) : null}
       </section>
+
+      {/* Study streak — the daily-return hook */}
+      {streak.totalStudyDays > 0 ? (
+        <section
+          aria-label="Your study streak"
+          className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-line bg-canvas px-5 py-4 lg:rounded-[28px]"
+        >
+          <p className="inline-flex items-center gap-2 text-sm font-bold text-charcoal">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-burgundy text-white">
+              <Flame className="h-4 w-4" />
+            </span>
+            {streak.currentStreak > 0
+              ? `${streak.currentStreak}-day streak`
+              : 'Streak paused — light it again today'}
+          </p>
+          <p className="text-xs text-muted">
+            Best {streak.longestStreak} · {streak.totalStudyDays} study days
+            {streak.studiedToday
+              ? ' · today done ✓'
+              : streak.currentStreak > 0
+                ? ' · one task today keeps it alive'
+                : ''}
+          </p>
+          <span className="ml-auto flex items-center gap-1" aria-hidden="true">
+            {streak.lastSevenDays.map((day) => (
+              <span
+                key={day.key}
+                className={`h-2.5 w-2.5 rounded-full ${day.studied ? 'bg-burgundy' : 'bg-neutral-soft ring-1 ring-line'}`}
+              />
+            ))}
+          </span>
+        </section>
+      ) : null}
 
       {/* Day-by-day plan */}
       {rawDays > 0 ? (
