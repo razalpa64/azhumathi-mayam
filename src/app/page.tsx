@@ -21,7 +21,15 @@ export const metadata: Metadata = {
 };
 
 export default async function RootPage() {
-  const profile = await getAuthenticatedProfile();
+  // Defensive: this is the public, search-indexed page. If the session
+  // lookup ever fails, treat the visitor as logged out and still render
+  // the landing page rather than erroring.
+  let profile: Awaited<ReturnType<typeof getAuthenticatedProfile>> = null;
+  try {
+    profile = await getAuthenticatedProfile();
+  } catch {
+    profile = null;
+  }
   if (profile) {
     redirect(isStaffRole(profile.role) ? '/admin' : '/dashboard');
   }
