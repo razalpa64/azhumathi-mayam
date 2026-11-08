@@ -1,5 +1,5 @@
 import { requireMainAdminUser } from '@/lib/auth/session';
-import { getAdminTaxonomyBundle } from '@/lib/admin-taxonomy';
+import { getAdminLookupBundle } from '@/lib/admin-taxonomy';
 import { StudentsManagerClient } from '@/components/admin/StudentsManagerClient';
 
 export const metadata = {
@@ -8,7 +8,7 @@ export const metadata = {
 
 export default async function AdminStudentsPage() {
   await requireMainAdminUser();
-  const taxonomy = await getAdminTaxonomyBundle();
+  const taxonomy = await getAdminLookupBundle();
 
   return (
     <StudentsManagerClient

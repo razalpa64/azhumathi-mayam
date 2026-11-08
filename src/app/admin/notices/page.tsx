@@ -1,6 +1,6 @@
 import { requireMainAdminUser, getWebsiteSettings } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { getAdminTaxonomyBundle } from '@/lib/admin-taxonomy';
+import { getAdminLookupBundle } from '@/lib/admin-taxonomy';
 import { NoticesManagerClient } from '@/components/admin/NoticesManagerClient';
 import type { Notice } from '@/types/database';
 
@@ -18,7 +18,7 @@ export default async function AdminNoticesPage() {
       .select('*, target_programme:programmes(id, code, name)')
       .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false }),
-    getAdminTaxonomyBundle(),
+    getAdminLookupBundle(),
     getWebsiteSettings(),
   ]);
 

@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { fetchAllRows } from '@/lib/supabase/fetch-all';
 import type {
@@ -10,7 +11,7 @@ import type {
   University,
 } from '@/types/database';
 
-export async function getPublishedTaxonomyBundle() {
+async function fetchPublishedTaxonomyBundle() {
   const supabase = await createSupabaseServerClient();
 
   const [
@@ -62,3 +63,9 @@ export async function getPublishedTaxonomyBundle() {
     categories: (categories || []) as ResourceCategory[],
   };
 }
+
+/**
+ * Per-request cached: several server components on a page can ask for
+ * the bundle without re-downloading the full taxonomy each time.
+ */
+export const getPublishedTaxonomyBundle = cache(fetchPublishedTaxonomyBundle);

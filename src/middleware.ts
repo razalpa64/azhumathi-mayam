@@ -50,16 +50,19 @@ export async function middleware(request: NextRequest) {
       }
     );
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
     const pathname = request.nextUrl.pathname;
 
-    // Allow API routes to perform their own JSON 401/403 checks
+    // API routes perform their own JSON 401/403 checks (and refresh
+    // their own session cookies via their Supabase server client), so
+    // skip the auth network round-trip for them entirely — it used to
+    // precede every API call, including chat/notification polling.
     if (pathname.startsWith('/api/')) {
       return supabaseResponse;
     }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const isAuthPage = pathname === '/login' || pathname === '/register';
     const isRootPage = pathname === '/';
