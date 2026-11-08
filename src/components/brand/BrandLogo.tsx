@@ -41,10 +41,10 @@ export function BrandLogo({
           priority
         />
       </div>
-      <div className="flex flex-col leading-tight">
+      <div className="flex min-w-0 flex-col">
         <span
           className={cn(
-            'font-logo font-bold tracking-tight',
+            'font-logo font-bold leading-[1.45] tracking-tight',
             dimensions.title,
             theme === 'dark' ? 'text-canvas' : 'text-charcoal'
           )}
@@ -54,7 +54,7 @@ export function BrandLogo({
         {subtitle ? (
           <span
             className={cn(
-              'font-medium tracking-wide uppercase',
+              'mt-0.5 font-medium leading-none tracking-wide uppercase',
               dimensions.sub,
               theme === 'dark' ? 'text-canvas/65' : 'text-muted'
             )}

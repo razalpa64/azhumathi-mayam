@@ -192,7 +192,7 @@ export function StudentShell({
                 />
               </span>
               <span className="min-w-0 leading-tight">
-                <span className="block truncate font-logo text-xl font-bold tracking-tight text-white sm:text-[22px] lg:text-[22px]">
+                <span className="block truncate font-logo text-xl font-bold leading-[1.45] tracking-tight text-white sm:text-[22px] lg:text-[22px]">
                   അഴിമതി മയം
                 </span>
                 {!isChat ? (

@@ -26,7 +26,7 @@ export default async function LoginPage() {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_90%_at_85%_0%,rgba(255,255,255,0.13),transparent_65%)]"
         />
         <div className="relative mx-auto flex max-w-2xl flex-col items-center px-6 pb-36 pt-14 text-center sm:pb-40 sm:pt-20">
-          <h1 className="font-logo text-[44px] font-extrabold leading-[1.18] tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] sm:text-6xl sm:leading-[1.15]">
+          <h1 className="font-logo text-[44px] font-extrabold leading-[1.45] tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] sm:text-6xl sm:leading-[1.4]">
             അഴിമതി
             <br />
             മയം
