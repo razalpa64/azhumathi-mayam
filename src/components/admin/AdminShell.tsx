@@ -165,7 +165,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           rail && 'justify-center px-0 py-2',
           active
             ? 'bg-white/10 font-semibold text-white shadow-[0_12px_24px_-12px_rgba(0,0,0,0.6)]'
-            : 'font-medium text-canvas/65 hover:bg-white/[0.06] hover:text-white'
+            : 'font-medium text-canvas/90 hover:bg-white/[0.06] hover:text-white'
         )}
       >
         {/* Active marker: a soft-rose bar on the leading edge */}
@@ -183,7 +183,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             rail ? 'h-9 w-9' : 'h-8 w-8',
             active
               ? 'bg-white text-burgundy-deep shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)]'
-              : 'bg-white/[0.05] text-canvas/55 ring-1 ring-white/[0.06] group-hover:bg-white/10 group-hover:text-canvas'
+              : 'bg-white/[0.09] text-canvas/80 ring-1 ring-white/[0.1] group-hover:bg-white/10 group-hover:text-canvas'
           )}
         >
           <Icon
@@ -248,7 +248,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           <span className="block truncate font-logo text-[17px] font-bold tracking-tight text-white">
             അഴിമതി മയം
           </span>
-          <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-[0.24em] text-canvas/45">
+          <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-[0.24em] text-canvas/75">
             Admin Console
           </span>
         </span>
@@ -275,7 +275,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-canvas/70 transition-colors hover:bg-white/10 hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-canvas/90 transition-colors hover:bg-white/10 hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer"
               aria-label="Close menu"
             >
               <X className="h-[18px] w-[18px]" />
@@ -284,7 +284,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             <button
               type="button"
               onClick={toggleCollapsed}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-canvas/55 transition-all hover:bg-white/[0.07] hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-canvas/80 transition-all hover:bg-white/[0.07] hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer"
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
@@ -309,7 +309,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                   <div aria-hidden="true" className="mx-2.5 mb-2 h-px bg-white/[0.08]" />
                 ) : (
                   <div className="mb-1.5 flex items-center gap-2 px-2.5">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-canvas/35">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-canvas/65">
                       {section.label}
                     </span>
                     <span aria-hidden="true" className="h-px flex-1 bg-white/[0.06]" />
@@ -344,7 +344,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                 disabled={loggingOut}
                 title="Logout"
                 aria-label="Logout"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-canvas/65 transition-colors hover:bg-[#C62F34] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer disabled:opacity-50"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-canvas/90 transition-colors hover:bg-[#C62F34] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -363,7 +363,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                   <span className="block truncate text-[13px] font-semibold text-canvas">
                     {profile.full_name}
                   </span>
-                  <span className="block truncate text-[11px] text-canvas/50">
+                  <span className="block truncate text-[11px] text-canvas/80">
                     @{profile.username} · {isMainAdmin ? 'Super Admin' : 'Sub-admin'}
                   </span>
                 </span>
@@ -374,7 +374,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                 disabled={loggingOut}
                 title="Logout"
                 aria-label="Logout"
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-canvas/65 transition-all hover:bg-[#C62F34] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95 cursor-pointer disabled:opacity-50"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-canvas/90 transition-all hover:bg-[#C62F34] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -457,7 +457,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                 aria-current={active ? 'page' : undefined}
                 className={cn(
                   'relative flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95',
-                  active ? 'bg-white/12 font-semibold text-white' : 'text-canvas/60 hover:text-canvas'
+                  active ? 'bg-white/12 font-semibold text-white' : 'text-canvas/85 hover:text-canvas'
                 )}
               >
                 <span className="relative">
@@ -476,7 +476,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open full administrator menu"
-            className="flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium text-canvas/60 transition-colors hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95 cursor-pointer"
+            className="flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium text-canvas/85 transition-colors hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95 cursor-pointer"
           >
             <Menu className="h-[21px] w-[21px]" strokeWidth={1.8} />
             <span className="leading-none">Menu</span>
