@@ -1,5 +1,5 @@
 import { requireStaffUser } from '@/lib/auth/session';
-import { getAdminTaxonomyBundle } from '@/lib/admin-taxonomy';
+import { getAdminLookupBundle } from '@/lib/admin-taxonomy';
 import { SpecializationsClient } from '@/components/admin/SpecializationsClient';
 
 export const metadata = {
@@ -8,7 +8,7 @@ export const metadata = {
 
 export default async function AdminSpecializationsPage() {
   await requireStaffUser();
-  const taxonomy = await getAdminTaxonomyBundle();
+  const taxonomy = await getAdminLookupBundle();
 
   return (
     <SpecializationsClient

@@ -247,14 +247,14 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Live Metrics Grid */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="anim-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <Link
               key={stat.label}
               href={stat.href}
-              className="group rounded-xl border border-line bg-canvas p-5 hover:border-burgundy-border transition-colors"
+              className="group rounded-xl border border-line bg-canvas p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-burgundy-border hover:shadow-[0_16px_30px_-22px_rgba(36,7,7,0.45)]"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-muted">{stat.label}</span>
@@ -273,7 +273,7 @@ export default async function AdminOverviewPage() {
       </section>
 
       {/* Storage Architecture Status Banner */}
-      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line bg-neutral-soft/75 px-5 py-4">
+      <section className="anim-rise flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line bg-neutral-soft/75 px-5 py-4" style={{ animationDelay: '200ms' }}>
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line-strong bg-canvas text-burgundy">
             <HardDrive className="h-4 w-4" />
@@ -302,7 +302,7 @@ export default async function AdminOverviewPage() {
 
       {/* Two-Column Tables: Recent Uploads & Top Downloads */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
+        <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">Recently added</h2>
             <Link href="/admin/resources" className="text-xs font-semibold text-burgundy hover:underline">
@@ -344,7 +344,7 @@ export default async function AdminOverviewPage() {
           )}
         </section>
 
-        <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
+        <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">Most downloaded</h2>
             <Link href="/admin/analytics" className="text-xs font-semibold text-burgundy hover:underline">
@@ -387,7 +387,7 @@ export default async function AdminOverviewPage() {
       {/* New students & Audit Trail — super admin only */}
       {isMainAdmin ? (
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
+        <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">New students</h2>
             <Link href="/admin/students" className="text-xs font-semibold text-burgundy hover:underline">
@@ -423,7 +423,7 @@ export default async function AdminOverviewPage() {
           )}
         </section>
 
-        <section className="rounded-xl border border-line bg-canvas p-5 space-y-4">
+        <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">Recent changes</h2>
             <Link href="/admin/analytics" className="text-xs font-semibold text-burgundy hover:underline">

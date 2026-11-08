@@ -146,10 +146,109 @@ body {
   animation: sheet-in 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
 }
 
+/* Cards and popovers arriving: a breath of scale with the rise, so
+   surfaces feel placed rather than snapped in. */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-scale-in {
+  animation: scale-in 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+/* Plain fade (overlays, scrims). */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.anim-fade {
+  animation: fade-in 0.25s ease-out backwards;
+}
+
+/* Side drawers gliding in from the left edge. */
+@keyframes drawer-in {
+  from {
+    opacity: 0.4;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-drawer {
+  animation: drawer-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+/* Staggered entrances: children rise one after another (stat cards,
+   tile grids). Pair with inline animation-delay for finer control. */
+.anim-stagger > * {
+  animation: rise 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+.anim-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.anim-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.anim-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.anim-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.anim-stagger > *:nth-child(6) { animation-delay: 300ms; }
+.anim-stagger > *:nth-child(7) { animation-delay: 360ms; }
+.anim-stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+/* Skeleton shimmer: a soft light sweeping across loading blocks —
+   calmer and richer than a flat pulse. */
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  background-image: linear-gradient(
+    100deg,
+    rgba(36, 7, 7, 0.055) 40%,
+    rgba(36, 7, 7, 0.11) 50%,
+    rgba(36, 7, 7, 0.055) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton-light {
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.18) 40%,
+    rgba(255, 255, 255, 0.32) 50%,
+    rgba(255, 255, 255, 0.18) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .anim-rise,
   .anim-page,
-  .anim-sheet {
+  .anim-sheet,
+  .anim-scale-in,
+  .anim-drawer,
+  .anim-fade,
+  .anim-stagger > *,
+  .skeleton,
+  .skeleton-light {
     animation: none;
   }
 }

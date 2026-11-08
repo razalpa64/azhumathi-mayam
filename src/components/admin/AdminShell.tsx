@@ -111,10 +111,10 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  'flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium transition-colors',
+                  'flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium transition-all duration-200',
                   active
                     ? 'bg-burgundy text-canvas font-semibold ring-1 ring-white/15'
-                    : 'text-canvas/75 hover:bg-white/8 hover:text-canvas'
+                    : 'text-canvas/75 hover:bg-white/8 hover:text-canvas hover:translate-x-0.5'
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -175,10 +175,10 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div
-            className="fixed inset-0 bg-black/50"
+            className="anim-fade fixed inset-0 bg-black/50"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative z-10 h-full w-72 max-w-[85vw]">
+          <div className="anim-drawer relative z-10 h-full w-72 max-w-[85vw]">
             {sidebarContent}
           </div>
         </div>
@@ -210,7 +210,11 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
         </header>
 
         <main className="flex-1 p-5 pb-24 sm:p-7 sm:pb-24 lg:p-9 max-w-7xl w-full mx-auto 2xl:max-w-[1560px]">
-          {children}
+          {/* Keyed by route: each console page rises in gently instead
+              of snapping, matching the student shell's page motion. */}
+          <div key={pathname} className="anim-page">
+            {children}
+          </div>
         </main>
       </div>
 
