@@ -23,6 +23,7 @@ import { fetchAllRows } from '@/lib/supabase/fetch-all';
 import { audienceSubjectIds, type SubjectGroupRow } from '@/lib/subject-siblings';
 import { getActiveAdvertisementsByPlacement } from '@/lib/ads';
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
+import { ExamCountdownCard } from '@/components/student/ExamCountdownCard';
 import { NoticeBoard } from '@/components/student/NoticeBoard';
 import { ResourceCard } from '@/components/student/ResourceCard';
 import { AdSlot } from '@/components/ads/AdSlot';
@@ -471,6 +472,9 @@ export default async function StudentDashboardPage() {
       <div className="anim-rise lg:hidden" style={{ animationDelay: '60ms' }}>
         <GlobalSearchBar />
       </div>
+
+      {/* Exam countdown (only when the student has a study plan) */}
+      <ExamCountdownCard />
 
       {/* Quick actions */}
       <div className="anim-rise grid grid-cols-2 gap-3 lg:grid-cols-4" style={{ animationDelay: '170ms' }}>

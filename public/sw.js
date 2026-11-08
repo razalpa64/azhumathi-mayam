@@ -12,7 +12,7 @@
  *    and freshness matters more than shaving milliseconds here.
  */
 
-const VERSION = 'azm-v1';
+const VERSION = 'azm-v2';
 const STATIC_CACHE = VERSION + '-static';
 
 const PRECACHE = [
@@ -78,4 +78,43 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request).catch(() => caches.match('/offline')));
   }
+});
+
+// Web Push: new study material for the student's course audience.
+// Payload: { title, body, url, icon } as JSON (see src/lib/push.ts).
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : '' };
+  }
+  const title = data.title || 'Azhimathi Mayam';
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || 'Something new was added for your semester.',
+      icon: data.icon || '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data: { url: data.url || '/dashboard/notifications' },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target =
+    (event.notification.data && event.notification.data.url) || '/dashboard';
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((windows) => {
+        for (const client of windows) {
+          if ('focus' in client) {
+            if ('navigate' in client) client.navigate(target);
+            return client.focus();
+          }
+        }
+        return self.clients.openWindow(target);
+      })
+  );
 });
