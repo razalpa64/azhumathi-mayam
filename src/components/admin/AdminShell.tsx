@@ -191,7 +191,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             strokeWidth={active ? 2.2 : 1.9}
           />
           {rail && showBadge ? (
-            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E5484D] px-1 text-[9px] font-bold text-white ring-2 ring-[#3d000a]">
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E5484D] px-1 text-[9px] font-bold text-white ring-2 ring-burgundy">
               {pendingRequests > 99 ? '99+' : pendingRequests}
             </span>
           ) : null}
@@ -258,16 +258,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
 
   function renderSidebar(rail: boolean, variant: 'desktop' | 'drawer') {
     return (
-      <div className="relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-[linear-gradient(180deg,#6d0000_0%,#4a0008_46%,#33000a_100%)] text-canvas">
-        {/* Ambient light: a soft glow pooling at the top of the wine */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-48 bg-[radial-gradient(120%_100%_at_18%_0%,rgba(255,255,255,0.10),transparent_62%)]"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-40 bg-[radial-gradient(120%_100%_at_85%_100%,rgba(244,184,193,0.07),transparent_60%)]"
-        />
+      <div className="relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-burgundy text-canvas shadow-[inset_-1px_0_0_rgba(255,255,255,0.07)]">
 
         {/* Brand row */}
         <div
@@ -309,7 +300,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
         {/* Grouped navigation — scrolls with softened edges */}
         <nav
           aria-label="Administrator navigation"
-          className="mt-2 min-h-0 flex-1 overflow-y-auto px-3 pb-5 pt-2 [mask-image:linear-gradient(to_bottom,transparent,black_14px,black_calc(100%-14px),transparent)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
+          className="mt-2 min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-5 pt-2 [mask-image:linear-gradient(to_bottom,transparent,black_14px,black_calc(100%-14px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {sections.map((section, si) => (
             <div key={section.label || `top-${si}`} className={si === 0 ? 'mt-2' : 'mt-6'}>
