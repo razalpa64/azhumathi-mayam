@@ -14,18 +14,29 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { Notice, NoticePriority, NoticeType, Programme } from '@/types/database';
+import type {
+  Notice,
+  NoticePriority,
+  NoticeType,
+  Programme,
+  Semester,
+  Specialization,
+} from '@/types/database';
 import { formatDate } from '@/lib/utils';
 
 interface NoticesManagerClientProps {
   initialNotices: Notice[];
   programmes: Programme[];
+  semesters: Semester[];
+  specializations: Specialization[];
   initialNoticesEnabled: boolean;
 }
 
 export function NoticesManagerClient({
   initialNotices,
   programmes,
+  semesters,
+  specializations,
   initialNoticesEnabled,
 }: NoticesManagerClientProps) {
   const router = useRouter();
@@ -39,6 +50,23 @@ export function NoticesManagerClient({
   const [priority, setPriority] = useState<NoticePriority>('normal');
   const [isPinned, setIsPinned] = useState(false);
   const [targetProgrammeId, setTargetProgrammeId] = useState('');
+  const [targetSemesterId, setTargetSemesterId] = useState('');
+  const [targetSpecializationId, setTargetSpecializationId] = useState('');
+
+  // Semester/branch options belong to the chosen programme; choosing a
+  // different programme resets them (both are optional narrowing).
+  const programmeSemesters = semesters.filter(
+    (s) => s.programme_id === targetProgrammeId
+  );
+  const programmeBranches = specializations.filter(
+    (s) => s.programme_id === targetProgrammeId
+  );
+
+  function handleProgrammeChange(programmeId: string) {
+    setTargetProgrammeId(programmeId);
+    setTargetSemesterId('');
+    setTargetSpecializationId('');
+  }
   const [externalLink, setExternalLink] = useState('');
   const [externalLinkLabel, setExternalLinkLabel] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -115,6 +143,8 @@ export function NoticesManagerClient({
           priority,
           is_pinned: isPinned,
           target_programme_id: targetProgrammeId || null,
+          target_semester_id: targetSemesterId || null,
+          target_specialization_id: targetSpecializationId || null,
           attachment_url: attachmentUrl.trim() || null,
           attachment_type: attachmentUrl.trim() ? attachmentType || 'drive' : null,
           attachment_name: attachmentName.trim() || null,
@@ -133,6 +163,11 @@ export function NoticesManagerClient({
       setNotices((prev) => [data.notice, ...prev]);
       setTitle('');
       setDescription('');
+      // Audience targeting resets to "everyone" so the next notice
+      // never inherits a narrow semester/branch by accident.
+      setTargetProgrammeId('');
+      setTargetSemesterId('');
+      setTargetSpecializationId('');
       setAttachmentUrl('');
       setAttachmentType(null);
       setAttachmentName('');
@@ -290,7 +325,7 @@ export function NoticesManagerClient({
               </label>
               <select
                 value={targetProgrammeId}
-                onChange={(e) => setTargetProgrammeId(e.target.value)}
+                onChange={(e) => handleProgrammeChange(e.target.value)}
                 className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2 text-xs"
               >
                 <option value="">All Students (Global)</option>
@@ -312,6 +347,53 @@ export function NoticesManagerClient({
               />
             </div>
           </div>
+
+          {/* Optional narrowing: pick a semester and/or branch of the
+              programme above and only those students are notified. */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-charcoal">
+                Semester <span className="font-normal text-muted">(optional)</span>
+              </label>
+              <select
+                value={targetSemesterId}
+                onChange={(e) => setTargetSemesterId(e.target.value)}
+                disabled={!targetProgrammeId}
+                className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">All semesters</option>
+                {programmeSemesters.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-charcoal">
+                Branch <span className="font-normal text-muted">(optional)</span>
+              </label>
+              <select
+                value={targetSpecializationId}
+                onChange={(e) => setTargetSpecializationId(e.target.value)}
+                disabled={!targetProgrammeId}
+                className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">All branches</option>
+                {programmeBranches.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <p className="-mt-1 text-[11px] leading-relaxed text-muted">
+            {targetProgrammeId
+              ? 'Leave semester and branch on “All” to notify the whole programme — or narrow it and only those students get the notification and push.'
+              : 'Choose a programme first if you want to narrow the audience to one semester or branch.'}
+          </p>
 
           {/* Image / PDF Upload or Attachment Link */}
           <div className="rounded-lg border border-line bg-neutral-soft p-3 space-y-2">
@@ -426,6 +508,14 @@ export function NoticesManagerClient({
                     ) : (
                       <Badge variant="muted">Global</Badge>
                     )}
+                    {n.target_semester ? (
+                      <Badge variant="neutral">{n.target_semester.label}</Badge>
+                    ) : null}
+                    {n.target_specialization ? (
+                      <Badge variant="neutral">
+                        {n.target_specialization.name} ({n.target_specialization.code})
+                      </Badge>
+                    ) : null}
                   </div>
                   <span className="font-mono text-[11px] text-muted">
                     {formatDate(n.start_date)}

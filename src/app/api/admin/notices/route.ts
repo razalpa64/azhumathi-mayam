@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { fetchAllRows } from '@/lib/supabase/fetch-all';
+import { sendPushToUsers } from '@/lib/push';
 import { isValidSafeExternalUrl } from '@/lib/utils';
 
 const noticeSchema = z.object({
@@ -20,6 +21,9 @@ const noticeSchema = z.object({
   external_link: z.string().trim().max(1024).nullable().optional(),
   external_link_label: z.string().trim().max(80).nullable().optional(),
   target_programme_id: z.string().uuid().nullable().optional(),
+  // Optional narrowing: when set, only that semester / branch is notified.
+  target_semester_id: z.string().uuid().nullable().optional(),
+  target_specialization_id: z.string().uuid().nullable().optional(),
   publication_status: z.enum(['draft', 'published']).default('published'),
   start_date: z.string().optional(),
   expiry_date: z.string().nullable().optional(),
@@ -32,7 +36,9 @@ export async function GET() {
   const adminClient = createSupabaseAdminClient();
   const { data, error } = await adminClient
     .from('notices')
-    .select('*, target_programme:programmes(id, code, name)')
+    .select(
+      '*, target_programme:programmes(id, code, name), target_semester:semesters(id, semester_number, label), target_specialization:specializations(id, code, name)'
+    )
     .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false });
 
@@ -85,19 +91,26 @@ export async function POST(request: NextRequest) {
       external_link: payload.external_link || null,
       external_link_label: payload.external_link_label || null,
       target_programme_id: payload.target_programme_id || null,
+      target_semester_id: payload.target_semester_id || null,
+      target_specialization_id: payload.target_specialization_id || null,
       publication_status: payload.publication_status,
       start_date: startDate,
       expiry_date: expiryDate,
       created_by: auth.profile.id,
     })
-    .select('*, target_programme:programmes(id, code, name)')
+    .select(
+      '*, target_programme:programmes(id, code, name), target_semester:semesters(id, semester_number, label), target_specialization:specializations(id, code, name)'
+    )
     .single();
 
   if (error || !created) {
     return NextResponse.json({ error: error?.message || 'Failed to publish notice.' }, { status: 400 });
   }
 
-  // Push notification to active students when published
+  // Notify active students when published. The audience starts from
+  // the programme target (if any) and narrows further when the
+  // optional semester and/or branch targets are set — only those
+  // students receive it.
   if (payload.publication_status === 'published') {
     const buildStudentQuery = () => {
       let studentQuery = adminClient
@@ -109,6 +122,15 @@ export async function POST(request: NextRequest) {
 
       if (payload.target_programme_id) {
         studentQuery = studentQuery.eq('programme_id', payload.target_programme_id);
+      }
+      if (payload.target_semester_id) {
+        studentQuery = studentQuery.eq('semester_id', payload.target_semester_id);
+      }
+      if (payload.target_specialization_id) {
+        studentQuery = studentQuery.eq(
+          'specialization_id',
+          payload.target_specialization_id
+        );
       }
       return studentQuery;
     };
@@ -129,6 +151,22 @@ export async function POST(request: NextRequest) {
         link_url: '/dashboard/notifications',
       }));
       await adminClient.from('notifications').insert(notifications);
+    }
+
+    // Same narrowed audience, second channel: web push to subscribed
+    // devices. Best-effort — never fails the publish.
+    try {
+      await sendPushToUsers(
+        adminClient,
+        students.map((s) => s.id),
+        {
+          title: payload.title,
+          body: payload.description.slice(0, 120),
+          url: '/dashboard/notifications',
+        }
+      );
+    } catch {
+      // Push is optional; in-app notifications above are the record.
     }
   }
 

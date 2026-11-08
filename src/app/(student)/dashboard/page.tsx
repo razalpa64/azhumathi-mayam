@@ -78,7 +78,12 @@ export default async function StudentDashboardPage() {
 
     const { data: rawNotices } = await nQuery;
     return ((rawNotices || []) as unknown as Notice[]).filter(
-      (n) => !n.expiry_date || n.expiry_date > nowIso
+      (n) =>
+        (!n.expiry_date || n.expiry_date > nowIso) &&
+        // Semester/branch-targeted notices are for that audience only.
+        (!n.target_semester_id || n.target_semester_id === profile.semester_id) &&
+        (!n.target_specialization_id ||
+          n.target_specialization_id === profile.specialization_id)
     );
   })();
 
