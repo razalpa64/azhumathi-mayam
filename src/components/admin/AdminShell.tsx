@@ -113,31 +113,14 @@ export function AdminShell({
   const pathname = usePathname();
   const router = useRouter();
 
-  // Same auto-hiding bottom bar as the student shell (phones): hides
-  // while scrolling down, returns on scroll-up; a route change always
-  // lands at the top with the bar visible (no scroll-position leaks).
-  const [chromeHidden, setChromeHidden] = useState(false);
-  const lastScrollY = useRef(0);
+  // The bottom bar is permanent (never hides while scrolling); a route
+  // change only resets the scroll region to the top so pages don't open
+  // mid-scroll.
   const mainRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0;
-    lastScrollY.current = 0;
-    setChromeHidden(false);
   }, [pathname]);
-
-  function handleMainScroll(event: React.UIEvent<HTMLElement>) {
-    const y = event.currentTarget.scrollTop;
-    const dy = y - lastScrollY.current;
-    if (y <= 64) {
-      if (chromeHidden) setChromeHidden(false);
-    } else if (dy > 8) {
-      if (!chromeHidden) setChromeHidden(true);
-    } else if (dy < -8) {
-      if (chromeHidden) setChromeHidden(false);
-    }
-    lastScrollY.current = y;
-  }
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -483,8 +466,7 @@ export function AdminShell({
 
         <main
           ref={mainRef}
-          onScroll={handleMainScroll}
-          className="mx-auto min-h-0 w-full max-w-7xl flex-1 overflow-y-auto overscroll-contain p-4 pb-10 sm:p-7 sm:pb-10 lg:overflow-visible lg:p-9 2xl:max-w-[1560px]"
+          className="relative isolate mx-auto min-h-0 w-full max-w-7xl flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-canvas p-4 pb-10 sm:p-7 sm:pb-10 lg:overflow-visible lg:p-9 2xl:max-w-[1560px]"
         >
           {/* Keyed by route: each console page rises in gently instead
               of snapping, matching the student shell's page motion. */}
@@ -496,15 +478,7 @@ export function AdminShell({
       {/* Mobile bottom bar — the daily tools, one thumb away. In-flow
           row of the shell, not position:fixed, so mobile browser chrome
           can never strand it half off-screen. */}
-      <div
-        className={cn(
-          'grid flex-none transition-[grid-template-rows,opacity] duration-300 ease-out lg:hidden',
-          chromeHidden ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
-        )}
-        aria-hidden={chromeHidden || undefined}
-      >
-        <div className="min-h-0 overflow-hidden">
-      <nav aria-label="Admin quick navigation">
+      <nav aria-label="Admin quick navigation" className="flex-none lg:hidden">
         <div className="grid grid-cols-5 border-t border-white/10 bg-[#3d000a]/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
           {MOBILE_NAV.map((item) => {
             const Icon = item.icon;
@@ -542,8 +516,6 @@ export function AdminShell({
           </button>
         </div>
       </nav>
-        </div>
-      </div>
       </div>
 
 

@@ -73,13 +73,37 @@ export function RegisterForm({
     [semesters, programmeId]
   );
 
-  const filteredRegulations = useMemo(
-    () =>
-      universityId
-        ? regulations.filter((r) => !r.university_id || r.university_id === universityId)
-        : regulations,
-    [regulations, universityId]
+  // Schemes: the student's own university's schemes first (in the order
+  // staff set), then the schemes shared by every Kerala university.
+  // Never a mixed pile — and each option says which university it belongs
+  // to and which admission batches it covers.
+  const filteredRegulations = useMemo(() => {
+    const list = regulations.filter(
+      (r) => !universityId || !r.university_id || r.university_id === universityId
+    );
+    const rank = (r: (typeof list)[number]) =>
+      r.university_id && r.university_id === universityId ? 0 : r.university_id ? 1 : 2;
+    return [...list].sort((a, b) => {
+      const byRank = rank(a) - rank(b);
+      if (byRank !== 0) return byRank;
+      if (a.display_order !== b.display_order) return a.display_order - b.display_order;
+      return a.name.localeCompare(b.name);
+    });
+  }, [regulations, universityId]);
+
+  const selectedUniversity = universities.find((u) => u.id === universityId);
+  const ownSchemes = filteredRegulations.filter(
+    (r) => r.university_id && r.university_id === universityId
   );
+  const sharedSchemes = filteredRegulations.filter((r) => !r.university_id);
+  // Until a university is picked we still list everything — just under one
+  // heading instead of pretending to know which university it belongs to.
+  const regulationGroups = universityId
+    ? [
+        { label: `${selectedUniversity?.short_name ?? 'University'} schemes`, items: ownSchemes },
+        { label: 'Common to Kerala universities', items: sharedSchemes },
+      ]
+    : [{ label: 'All schemes', items: filteredRegulations }];
 
   const loginHref =
     nextParam &&
@@ -96,7 +120,12 @@ export function RegisterForm({
 
   function handleUniversityChange(nextUniId: string) {
     setUniversityId(nextUniId);
-    setRegulationId('');
+    // If that university has exactly one scheme of its own, pick it —
+    // saves the student a decision we already know the answer to.
+    const own = regulations.filter(
+      (r) => nextUniId && r.university_id === nextUniId
+    );
+    setRegulationId(own.length === 1 ? own[0].id : '');
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -317,13 +346,18 @@ export function RegisterForm({
               disabled={loading}
               className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
             >
-              <option value="">Select University (Optional)</option>
+              <option value="">Select your university</option>
               {universities.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.short_name} — {u.name}
                 </option>
               ))}
             </select>
+            <p className="mt-1 text-[11px] text-muted">
+              {selectedUniversity
+                ? `Showing ${selectedUniversity.short_name} schemes below.`
+                : 'Pick yours so we show the right scheme.'}
+            </p>
           </div>
 
           <div>
@@ -406,12 +440,25 @@ export function RegisterForm({
               className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Select Scheme (Optional)</option>
-              {filteredRegulations.map((reg) => (
-                <option key={reg.id} value={reg.id}>
-                  {reg.name}
-                </option>
-              ))}
+              {regulationGroups.map((group) =>
+                group.items.length > 0 ? (
+                  <optgroup key={group.label} label={group.label}>
+                    {group.items.map((reg) => (
+                      <option key={reg.id} value={reg.id}>
+                        {reg.name}
+                        {reg.batch_range ? ` · ${reg.batch_range}` : ''}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : null
+              )}
             </select>
+            {universityId && ownSchemes.length === 0 ? (
+              <p className="mt-1 text-[11px] text-muted">
+                No {selectedUniversity?.short_name}-only scheme yet — pick the common regulation that
+                matches your grade card.
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
