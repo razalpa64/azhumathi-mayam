@@ -288,7 +288,7 @@ export function AdminShell({
           />
         </span>
         <span className="min-w-0 leading-tight">
-          <span className="block truncate font-logo text-[17px] font-bold tracking-tight text-white">
+          <span className="block truncate font-logo text-[17px] font-bold leading-[1.45] tracking-tight text-white">
             അഴിമതി മയം
           </span>
           <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-[0.24em] text-canvas/75">

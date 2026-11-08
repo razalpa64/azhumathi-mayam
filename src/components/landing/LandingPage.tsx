@@ -80,44 +80,54 @@ export function LandingPage({
   return (
     <div className="min-h-dvh bg-canvas text-charcoal">
       {/* ── Header ─────────────────────────────────────────── */}
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="relative h-10 w-10 overflow-hidden rounded-xl ring-1 ring-burgundy-border">
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-8 sm:py-5">
+        {/* Brand — never shrinks the logo, never wraps the wordmark */}
+        <Link
+          href="/"
+          className="flex min-w-0 items-center gap-2.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy sm:gap-3"
+        >
+          <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg ring-1 ring-burgundy-border sm:h-10 sm:w-10 sm:rounded-xl">
             <Image
               src="/brand/logo.png"
               alt="Azhimathi Mayam logo"
               width={40}
               height={40}
               className="h-full w-full object-cover"
+              priority
             />
           </span>
-          <span className="leading-tight">
-            <span className="block font-logo text-lg font-bold text-burgundy-deep">
+          {/* Baloo Chettan 2 has a tall Malayalam line box — a tight
+              leading clipped the top of "അഴിമതി"; give it room. */}
+          <span className="min-w-0">
+            <span className="block truncate font-logo text-base font-bold leading-[1.55] text-burgundy-deep sm:text-lg">
               അഴിമതി മയം
             </span>
-            <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
+            <span className="mt-0.5 block truncate text-[9px] font-bold uppercase leading-none tracking-[0.16em] text-muted sm:text-[10px] sm:tracking-[0.22em]">
               Azhimathi Mayam
             </span>
           </span>
         </Link>
-        <nav className="flex items-center gap-2 sm:gap-3" aria-label="Account">
+
+        {/* Actions — no wrapping, ever: shorter labels on phones */}
+        <nav className="flex shrink-0 items-center gap-1 sm:gap-3" aria-label="Account">
           <Link
             href="/sgpa-calculator"
-            className="hidden rounded-full px-4 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint min-[420px]:block"
+            className="hidden whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint sm:block lg:px-4"
           >
             SGPA Calculator
           </Link>
           <Link
             href="/login"
-            className="rounded-full px-4 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint"
+            className="whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint sm:px-4"
           >
             Sign in
           </Link>
           <Link
             href="/register"
-            className="rounded-full bg-burgundy px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(121,0,0,0.8)] transition-all hover:bg-burgundy-dark active:scale-95"
+            className="whitespace-nowrap rounded-full bg-burgundy px-3.5 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(121,0,0,0.8)] transition-all hover:bg-burgundy-dark active:scale-95 sm:px-4"
           >
-            Create free account
+            <span className="sm:hidden">Join free</span>
+            <span className="hidden sm:inline">Create free account</span>
           </Link>
         </nav>
       </header>
@@ -153,6 +163,14 @@ export function LandingPage({
               I already have an account
             </Link>
           </div>
+          {/* The header hides the calculator on phones, so offer it here */}
+          <Link
+            href="/sgpa-calculator"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white/90 underline decoration-white/40 underline-offset-4 transition-colors hover:text-white sm:hidden"
+          >
+            Try the SGPA calculator
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
 
           {stats ? (
             <dl className="mt-12 grid grid-cols-2 gap-6 border-t border-white/15 pt-8 sm:grid-cols-4">
