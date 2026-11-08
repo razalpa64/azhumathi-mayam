@@ -254,7 +254,9 @@ export function LoginForm() {
         Create new account
       </Link>
 
-      <p className="flex items-center justify-center gap-2 pt-3 text-[13px] text-[#8A7A74]">
+      {/* The brand already fills the desktop side panel; dropping this line
+          there is what keeps the whole card above the fold on a short laptop. */}
+      <p className="flex items-center justify-center gap-2 pt-3 text-[13px] text-[#8A7A74] lg:hidden">
         <ShieldCheck className="h-4.5 w-4.5 shrink-0 text-burgundy" />
         <span className="font-logo font-bold text-burgundy">അഴിമതി മയം</span>
         <span aria-hidden="true" className="text-[#D8BDB4]">•</span>
