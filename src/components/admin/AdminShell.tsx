@@ -402,7 +402,10 @@ export function AdminShell({
   }
 
   return (
-    <div className="flex min-h-dvh bg-canvas">
+    // App shell on phones (same rule as the student shell): fixed-height
+    // column, only <main> scrolls, top/bottom bars are in-flow rows — the
+    // browser chrome resizing the viewport mid-scroll can't strand them.
+    <div className="flex h-dvh overflow-hidden bg-canvas lg:h-auto lg:min-h-dvh lg:overflow-visible">
       {/* Desktop sidebar (full or icon rail) */}
       <aside
         className={cn(
@@ -427,7 +430,7 @@ export function AdminShell({
       ) : null}
 
       {/* Main column */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {/* Mobile & tablet header */}
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-canvas/95 px-4 backdrop-blur-md sm:px-6 lg:hidden">
           <div className="flex items-center gap-2.5">
@@ -451,17 +454,18 @@ export function AdminShell({
           </Link>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl flex-1 p-4 pb-28 sm:p-7 sm:pb-28 lg:p-9 2xl:max-w-[1560px]">
+        <main className="mx-auto min-h-0 w-full max-w-7xl flex-1 overflow-y-auto overscroll-contain p-4 pb-10 sm:p-7 sm:pb-10 lg:overflow-visible lg:p-9 2xl:max-w-[1560px]">
           {/* Keyed by route: each console page rises in gently instead
               of snapping, matching the student shell's page motion. */}
           <div key={pathname} className="anim-page">
             {children}
           </div>
         </main>
-      </div>
 
-      {/* Mobile bottom bar — the daily tools, one thumb away */}
-      <nav aria-label="Admin quick navigation" className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
+      {/* Mobile bottom bar — the daily tools, one thumb away. In-flow
+          row of the shell, not position:fixed, so mobile browser chrome
+          can never strand it half off-screen. */}
+      <nav aria-label="Admin quick navigation" className="flex-none lg:hidden">
         <div className="grid grid-cols-5 border-t border-white/10 bg-[#3d000a]/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
           {MOBILE_NAV.map((item) => {
             const Icon = item.icon;
@@ -499,6 +503,9 @@ export function AdminShell({
           </button>
         </div>
       </nav>
+      </div>
+
+
     </div>
   );
 }

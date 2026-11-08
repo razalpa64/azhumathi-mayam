@@ -131,9 +131,14 @@ export function StudentShell({
   const isChat = pathname === '/dashboard/chat';
 
   return (
-    <div className="desktop-ambient min-h-dvh flex flex-col bg-canvas">
-      {/* Burgundy wave header — scrolls away with the page, only the tab strip sticks */}
-      <div className="relative bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
+    // App shell on phones: the column is exactly the viewport height and
+    // <main> is the only thing that scrolls, so the top bar and bottom bar
+    // are ordinary in-flow rows — they can never slide half off-screen or
+    // scroll away when the browser chrome shows/hides mid-scroll. On
+    // desktop the page itself scrolls as before (root grows with content).
+    <div className="desktop-ambient flex h-dvh flex-col overflow-hidden bg-canvas lg:h-auto lg:min-h-dvh lg:overflow-visible">
+      {/* Burgundy wave header — pinned at the top of the shell on phones */}
+      <div className="relative flex-none bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas [padding-top:env(safe-area-inset-top)]">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10">
           <div className="flex items-center justify-between gap-3 pb-10 pt-3.5 sm:pb-11 sm:pt-4 lg:pb-10 lg:pt-4">
             {/* Brand */}
@@ -245,9 +250,10 @@ export function StudentShell({
         </svg>
       </div>
 
-      {/* Sticky pill strip — the one slim bar that stays while scrolling.
+      {/* Pill strip — a fixed row of the shell on phones; on desktop the
+          page scrolls and the strip sticks to the top instead.
           Hidden in the chat room; the mobile menu sheet below it is not. */}
-      <div className="sticky top-0 z-40 border-b border-line/70 bg-canvas/90 backdrop-blur-md">
+      <div className="sticky top-0 z-40 flex-none border-b border-line/70 bg-canvas/90 backdrop-blur-md">
         <div
           className={cn(
             'mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10',
@@ -359,46 +365,22 @@ export function StudentShell({
         ) : null}
       </div>
 
-      {/* Main Content */}
-      <main className="mx-auto flex w-full max-w-7xl xl:max-w-[1440px] flex-1 flex-col px-4 pb-32 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-6">
-        {/* flex column so a page (the group chat) can fill exactly the
-            space between the tab strip and the bottom padding instead
-            of guessing viewport heights in pixels. */}
-        <div key={pathname} className="anim-page flex min-h-0 flex-1 flex-col">
+      {/* Main Content — the shell's one scroll region on phones (on
+          desktop it is a plain block and the page scrolls instead).
+          min-h-full on the wrapper lets a page (the group chat) fill
+          exactly the visible space when its content is short, while
+          longer pages simply grow the scroll area. */}
+      <main className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain px-4 pt-6 sm:px-6 lg:overflow-visible lg:px-10 lg:pt-6 xl:max-w-[1440px]">
+        <div key={pathname} className="anim-page flex min-h-full flex-col pb-10 lg:pb-16">
           {children}
         </div>
-      </main>
 
-      {/* Mobile bottom navigation — a full-width bar on the bottom edge
-          (messaging-app style); the active tab sits on a soft pill. */}
-      <nav aria-label="Bottom" className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
-        <div className="grid grid-cols-5 border-t border-line bg-canvas/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
-          {BOTTOM_NAV.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href, item.exact);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-all active:scale-95',
-                  active
-                    ? 'bg-burgundy-tint font-semibold text-burgundy'
-                    : 'text-muted hover:text-charcoal'
-                )}
-              >
-                <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.3 : 1.8} />
-                <span className="leading-none">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-
-      {/* Footer (steps aside in the chat room, like the tab strip) */}
+      {/* Footer — the last thing inside the scroll region, so on phones it
+          only appears at the very end of the page (steps aside in the chat
+          room, like the tab strip). Negative margins bleed the band to the
+          shell's edges; the inner container re-applies the page padding. */}
       {!isChat ? (
-      <footer className="mt-6 border-t border-line bg-neutral-soft/60">
+      <footer className="-mx-4 mt-6 border-t border-line bg-neutral-soft/60 sm:-mx-6 lg:-mx-10">
         <div className="mx-auto flex max-w-7xl xl:max-w-[1440px] flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row lg:py-7 lg:text-[13px] sm:px-6 lg:px-10">
           <div className="flex items-center gap-2.5">
             <span className="font-logo text-base font-bold text-burgundy">അഴിമതി മയം</span>
@@ -434,6 +416,36 @@ export function StudentShell({
         </div>
       </footer>
       ) : null}
+      </main>
+
+      {/* Mobile bottom navigation — a full-width row of the shell on the
+          bottom edge (messaging-app style); the active tab sits on a
+          soft pill. In-flow, not fixed: it cannot be stranded
+          half off-screen by browser chrome resizing the viewport. */}
+      <nav aria-label="Bottom" className="flex-none lg:hidden">
+        <div className="grid grid-cols-5 border-t border-line bg-canvas/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
+          {BOTTOM_NAV.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href, item.exact);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-all active:scale-95',
+                  active
+                    ? 'bg-burgundy-tint font-semibold text-burgundy'
+                    : 'text-muted hover:text-charcoal'
+                )}
+              >
+                <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.3 : 1.8} />
+                <span className="leading-none">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* Friendly one-time install invitation — Home screen only */}
       {pathname === '/dashboard' ? <InstallPromptCard /> : null}
