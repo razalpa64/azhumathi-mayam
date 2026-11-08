@@ -54,15 +54,15 @@ const FEATURES = [
 const FAQS = [
   {
     q: 'Where can I download KTU previous year question papers?',
-    a: 'Create a free Azhimathi Mayam account, choose your KTU course, branch and semester, and the previous year question papers for your subjects appear right on your dashboard — along with notes and syllabus for the same subjects.',
+    a: 'Create a free Azhimathi Mayam account, choose your university, course, branch and semester, and the previous year question papers for your subjects appear right on your dashboard — along with notes, syllabus and most-repeated exam questions for the same subjects.',
   },
   {
     q: 'Is Azhimathi Mayam free for students?',
-    a: 'Yes. Study notes, previous question papers, syllabus PDFs, the study planner and exam countdown are all free for students. You only need an account so the materials match your course and semester.',
+    a: 'Yes. Study notes, previous question papers, syllabus PDFs, the SGPA/CGPA calculator, the study planner and exam countdown are all free for students. You only need an account so the materials match your course and semester.',
   },
   {
     q: 'Which universities and courses are covered?',
-    a: 'Azhimathi Mayam covers Kerala universities including KTU (APJ Abdul Kalam Technological University) and the University of Calicut — B.Tech, B.Sc, B.Com, BBA, BCA, BA and more — with materials organised by programme, branch and semester, including the Calicut FYUGP scheme.',
+    a: 'Azhimathi Mayam covers Kerala universities — KTU, the University of Calicut, MG University, University of Kerala, Kannur University and CUSAT — B.Tech, B.Sc, B.Com, BBA, BCA, BA and more — with materials organised by programme, branch and semester, including the Calicut FYUGP scheme. The SGPA/CGPA calculator supports all six universities with their official grade scales.',
   },
   {
     q: 'How are the study materials organised?',
@@ -333,7 +333,7 @@ export function LandingPage({
           </a>{' '}
           · 86061 59002 ·{' '}
           <Link href="/sgpa-calculator" className="font-medium text-burgundy hover:underline">
-            KTU SGPA Calculator
+            SGPA &amp; CGPA Calculator
           </Link>
         </p>
       </footer>

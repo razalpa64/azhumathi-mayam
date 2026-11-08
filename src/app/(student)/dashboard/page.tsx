@@ -312,9 +312,9 @@ export default async function StudentDashboardPage() {
       .maybeSingle(),
   ]);
 
-  const streak = computeStreak(
-    ((streakPlanRow?.completed_keys || []) as string[]) || []
-  );
+  const streakCompletedKeys: string[] =
+    ((streakPlanRow?.completed_keys || []) as string[]) || [];
+  const streak = computeStreak(streakCompletedKeys);
 
   // Aggregate counts per subject
   // Counts are aggregated per COURSE (subject_code + scheme), not per
@@ -497,7 +497,7 @@ export default async function StudentDashboardPage() {
       <ExamCountdownCard />
 
       {/* Study streak (appears once the student has studied a day) */}
-      <StreakCard streak={streak} />
+      <StreakCard streak={streak} completedKeys={streakCompletedKeys} />
 
       {/* Quick actions */}
       <div className="anim-rise grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6" style={{ animationDelay: '170ms' }}>

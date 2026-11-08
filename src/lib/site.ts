@@ -23,7 +23,7 @@ export const SITE_NAME = 'Azhimathi Mayam';
 export const SITE_NAME_MALAYALAM = 'അഴിമതി മയം';
 
 export const SITE_DESCRIPTION =
-  'Free study notes, previous year question papers, syllabus PDFs and exam revision materials for KTU, University of Calicut, MG University and Kannur students — organised by course, branch and semester.';
+  'Free study notes, previous year question papers, syllabus PDFs and exam revision materials for KTU, University of Calicut, MG University, University of Kerala, Kannur University and CUSAT students — organised by course, branch and semester.';
 
 export const SITE_KEYWORDS = [
   'KTU notes',

@@ -1,184 +1,210 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { SgpaCalculatorClient } from '@/components/calculator/SgpaCalculatorClient';
-import { KTU_GRADES } from '@/lib/ktu-grades';
+import { UNIVERSITY_SCALES } from '@/lib/university-grades';
+import { getSiteUrl } from '@/lib/site';
+
+const description =
+  'Free SGPA & CGPA calculator for KTU, Calicut University, MG University, University of Kerala, Kannur University and CUSAT students. Pick your university, enter grades, and get SGPA, CGPA and the official percentage conversion instantly — no sign-up.';
 
 export const metadata: Metadata = {
-  title: {
-    absolute: 'KTU SGPA & CGPA Calculator — 2019 & 2024 Scheme | Azhimathi Mayam',
-  },
-  description:
-    'Free KTU SGPA and CGPA calculator for APJ Abdul Kalam Technological University B.Tech students (2019 & 2024 schemes). Enter subject credits and grades to get your SGPA, CGPA and percentage (CGPA × 10).',
-  keywords: [
-    'KTU SGPA calculator',
-    'KTU CGPA calculator',
-    'KTU percentage conversion',
-    'APJ Abdul Kalam Technological University CGPA',
-    'KTU grade points',
-  ],
+  title: 'SGPA & CGPA Calculator — KTU, Calicut, MG, Kerala, Kannur, CUSAT',
+  description,
   alternates: { canonical: '/sgpa-calculator' },
   openGraph: {
-    type: 'website',
+    title: 'SGPA & CGPA Calculator for Kerala Universities | Azhumathi Mayam',
+    description,
     url: '/sgpa-calculator',
-    title: 'KTU SGPA & CGPA Calculator | Azhimathi Mayam',
-    description:
-      'Calculate your KTU SGPA and CGPA in seconds — 2019 & 2024 schemes, with percentage conversion.',
+    type: 'website',
   },
 };
 
-const FAQS = [
+const FAQS: { q: string; a: string }[] = [
   {
-    q: 'How is KTU SGPA calculated?',
-    a: 'SGPA = Σ (subject credits × grade point) ÷ Σ (subject credits) for that semester. Multiply each subject’s credits by its grade point (S/O = 10, A+ = 9, A = 8.5, B+ = 8, B = 7.5, C+ = 7, C = 6.5, D = 6, P = 5.5, F = 0), add them up, and divide by the total credits.',
+    q: 'How is SGPA calculated?',
+    a: 'SGPA = sum of (subject credits × grade points) divided by the total credits in the semester. Choose your university first — each one assigns different points to the same letter grade (for example, an A is worth 8.5 at KTU but 8 at Calicut University).',
   },
   {
-    q: 'How do I convert KTU CGPA to percentage?',
-    a: 'Percentage = CGPA × 10. This is KTU’s current official conversion (Academic Council decision, June 2023) for both the 2019 and 2024 schemes. An older formula, (CGPA × 10) − 3.75, appears on some older documents.',
+    q: 'How do I convert CGPA to percentage?',
+    a: 'It depends on your university. KTU, Calicut, Kerala and Kannur Universities use Percentage = CGPA × 10, while MG University and CUSAT use Percentage = (CGPA − 0.5) × 10. The calculator applies your university’s official formula automatically and shows it next to the result.',
   },
   {
-    q: 'What is the difference between the 2019 and 2024 scheme grades?',
-    a: 'The grade points are the same half-step scale. The main label change: the 2024 scheme calls the top grade “O” (Outstanding, 10 points) where the 2019 scheme calls it “S”. This calculator lists it as O / S.',
+    q: 'How is CGPA calculated from semester SGPAs?',
+    a: 'CGPA is the credit-weighted average of all semester SGPAs: sum of (semester credits × SGPA) divided by sum of semester credits. Use the "SGPA → CGPA" mode and enter each completed semester.',
   },
   {
-    q: 'Does an F grade count in SGPA?',
-    a: 'Yes — an F carries 0 grade points but its credits still count in the denominator, which is why one back paper pulls the SGPA down. You must clear it to earn those credits.',
+    q: 'Does this calculator work for my university?',
+    a: 'It covers APJ Abdul Kalam Technological University (KTU), University of Calicut, Mahatma Gandhi University, University of Kerala, Kannur University and CUSAT, using each university’s published grade scale. If a grade’s points don’t match your grade card, trust your card — regulations change between batches.',
   },
 ];
 
 export default function SgpaCalculatorPage() {
+  const siteUrl = getSiteUrl();
+
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
+  const appJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'SGPA & CGPA Calculator — KTU, Calicut, MG, Kerala, Kannur, CUSAT',
+    url: `${siteUrl}/sgpa-calculator`,
+    applicationCategory: 'EducationalApplication',
+    operatingSystem: 'Web',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+    description,
+  };
+
   return (
-    <div className="min-h-dvh bg-canvas text-charcoal">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-3">
-          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-burgundy-border">
-            <Image
-              src="/brand/logo.png"
-              alt="Azhimathi Mayam logo"
-              width={40}
-              height={40}
-              className="h-full w-full object-cover"
-            />
-          </span>
-          <span className="min-w-0 leading-tight">
-            <span className="block whitespace-nowrap font-logo text-lg font-bold text-burgundy-deep">
-              അഴിമതി മയം
+    <div className="min-h-screen bg-[#FFFDFC] text-neutral-900 antialiased">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
+
+      {/* Header */}
+      <header className="border-b border-neutral-100 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3.5 sm:px-6">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="Azhumathi Mayam home">
+            <img src="/icon.svg" alt="" className="h-9 w-9 shrink-0" />
+            <span className="text-base font-extrabold tracking-tight text-burgundy sm:text-lg">
+              Azhumathi Mayam
             </span>
-            <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
-              Azhimathi Mayam
-            </span>
-          </span>
-        </Link>
-        <Link
-          href="/"
-          className="shrink-0 rounded-full px-3 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint"
-        >
-          ← Home
-        </Link>
+          </Link>
+          <Link
+            href="/"
+            className="ml-auto text-sm font-semibold text-burgundy underline-offset-4 hover:underline"
+          >
+            Home
+          </Link>
+        </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-5 pb-16 sm:px-8">
-        <div className="max-w-3xl">
-          <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-burgundy">
-            KTU · APJ Abdul Kalam Technological University
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-bold tracking-[0.18em] text-burgundy uppercase">
+            Free tool · No sign-up
           </p>
-          <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-charcoal sm:text-4xl">
-            KTU SGPA &amp; CGPA Calculator
+          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
+            SGPA &amp; CGPA Calculator
           </h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-muted">
-            Enter your subject credits and grades — get your SGPA instantly, then
-            combine semesters into a CGPA with percentage. Works for the 2019 and
-            2024 schemes, and your numbers stay saved on this device for next time.
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-pretty text-neutral-600 sm:text-base">
+            For KTU, Calicut, MG, Kerala, Kannur and CUSAT students. Pick your university, enter
+            your grades, and get your SGPA, CGPA and percentage — calculated with your
+            university&rsquo;s official grade scale.
           </p>
         </div>
 
-        <div className="mt-8 grid items-start gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="mx-auto mt-8 max-w-2xl">
           <SgpaCalculatorClient />
-
-          <aside className="rounded-[24px] bg-white p-6 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.06]">
-            <h2 className="text-[15px] font-semibold text-charcoal">KTU grade points</h2>
-            <table className="mt-4 w-full text-sm">
-              <thead>
-                <tr className="text-left text-[11px] font-bold uppercase tracking-wider text-muted">
-                  <th className="pb-2 font-bold">Grade</th>
-                  <th className="pb-2 font-bold">Points</th>
-                  <th className="pb-2 text-right font-bold">Marks</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {KTU_GRADES.map((g) => (
-                  <tr key={g.label}>
-                    <td className="py-2 font-mono font-semibold text-charcoal">{g.label}</td>
-                    <td className="py-2 tabular-nums text-muted">{g.points}</td>
-                    <td className="py-2 text-right text-muted">{g.range}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="mt-5 rounded-2xl bg-burgundy-tint p-4">
-              <p className="text-[13px] font-semibold text-charcoal">Preparing for next semester?</p>
-              <p className="mt-1 text-[13px] leading-relaxed text-muted">
-                Get free KTU notes, previous question papers and a study plan for
-                your branch and semester.
-              </p>
-              <Link
-                href="/register"
-                className="mt-3 inline-flex rounded-full bg-burgundy px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-burgundy-dark"
-              >
-                Join Azhimathi Mayam — free
-              </Link>
-            </div>
-          </aside>
         </div>
 
-        <section className="mx-auto mt-14 max-w-4xl">
-          <h2 className="text-2xl font-bold tracking-tight text-charcoal">
-            How KTU calculates SGPA &amp; CGPA
+        {/* Grade scales */}
+        <section className="mx-auto mt-14 max-w-3xl">
+          <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">
+            Grade points &amp; percentage formulas by university
           </h2>
-          <div className="mt-4 space-y-3 text-[15px] leading-relaxed text-muted">
-            <p>
-              <strong className="text-charcoal">SGPA</strong> is the credit-weighted
-              average of one semester: Σ (credits × grade point) ÷ total credits.{' '}
-              <strong className="text-charcoal">CGPA</strong> is the same weighted
-              average across every semester you have completed — weight each
-              semester’s SGPA by that semester’s total credits (a plain average of
-              SGPAs is wrong whenever semesters carry different credit loads).
-            </p>
-            <p>
-              Convert to percentage with <strong className="text-charcoal">CGPA × 10</strong>,
-              KTU’s current official formula (Academic Council, June 2023).
-            </p>
+          <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+            Every university assigns its own points and conversion formula. These are the scales
+            used above, straight from each university&rsquo;s regulations.
+          </p>
+          <div className="mt-5 space-y-4">
+            {UNIVERSITY_SCALES.map((s) => (
+              <div key={s.id} className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+                <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-neutral-100 px-4 py-3 sm:px-5">
+                  <h3 className="text-sm font-bold text-neutral-900">
+                    {s.shortName} <span className="font-medium text-neutral-500">· {s.system}</span>
+                  </h3>
+                  <span className="rounded-full bg-burgundy-tint px-2.5 py-1 text-xs font-bold text-burgundy">
+                    % = {s.formulaLabel}
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[420px] text-left text-sm">
+                    <thead>
+                      <tr className="text-xs tracking-wide text-neutral-500 uppercase">
+                        <th className="px-4 py-2.5 font-semibold sm:px-5">Grade</th>
+                        <th className="px-4 py-2.5 font-semibold">Points</th>
+                        <th className="px-4 py-2.5 font-semibold">Marks</th>
+                        <th className="px-4 py-2.5 font-semibold">Meaning</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {s.grades.map((g) => (
+                        <tr key={g.label} className="border-t border-neutral-100">
+                          <td className="px-4 py-2 font-bold text-neutral-900 sm:px-5">{g.label}</td>
+                          <td className="px-4 py-2 font-semibold text-burgundy tabular-nums">{g.points}</td>
+                          <td className="px-4 py-2 text-neutral-600 tabular-nums">{g.range || '—'}</td>
+                          <td className="px-4 py-2 text-neutral-600">{g.meaning || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="border-t border-neutral-100 px-4 py-3 text-xs leading-relaxed text-neutral-600 sm:px-5">
+                  {s.formulaNote}
+                </p>
+              </div>
+            ))}
           </div>
+        </section>
 
-          <h2 className="mt-10 text-2xl font-bold tracking-tight text-charcoal">
+        {/* FAQ */}
+        <section className="mx-auto mt-14 max-w-3xl">
+          <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">
             Frequently asked questions
           </h2>
-          <div className="mt-6 space-y-3">
-            {FAQS.map((faq) => (
-              <details
-                key={faq.q}
-                className="group rounded-2xl bg-white p-5 ring-1 ring-burgundy/[0.06]"
-              >
-                <summary className="cursor-pointer list-none text-[15px] font-semibold text-charcoal marker:hidden">
-                  {faq.q}
-                </summary>
-                <p className="mt-2.5 text-sm leading-relaxed text-muted">{faq.a}</p>
+          <div className="mt-5 space-y-3">
+            {FAQS.map((f) => (
+              <details key={f.q} className="rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 sm:px-5">
+                <summary className="cursor-pointer text-sm font-bold text-neutral-900">{f.q}</summary>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-600">{f.a}</p>
               </details>
             ))}
           </div>
         </section>
+
+        {/* CTA */}
+        <section className="mx-auto mt-14 max-w-3xl rounded-3xl bg-burgundy px-5 py-8 text-center sm:px-10">
+          <h2 className="text-xl font-extrabold text-white text-balance sm:text-2xl">
+            Notes and question papers for your subjects
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/80">
+            Azhumathi Mayam carries study materials, previous question papers and important
+            questions for students across Kerala&rsquo;s universities — free.
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/register"
+              className="inline-flex min-h-11 items-center rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-burgundy shadow-sm transition hover:bg-burgundy-tint"
+            >
+              Create free account
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex min-h-11 items-center rounded-xl border border-white/40 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10"
+            >
+              Explore the platform
+            </Link>
+          </div>
+        </section>
       </main>
 
-      <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p>
-            <span className="font-logo font-bold text-burgundy-deep">അഴിമതി മയം</span> —
-            free notes &amp; question papers for Kerala students.
-          </p>
-          <p className="flex gap-4">
-            <Link href="/" className="font-medium text-burgundy hover:underline">Home</Link>
-            <Link href="/register" className="font-medium text-burgundy hover:underline">Register</Link>
-            <Link href="/login" className="font-medium text-burgundy hover:underline">Sign in</Link>
+      <footer className="border-t border-neutral-100 bg-white">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-3 px-4 py-6 text-center sm:px-6">
+          <p className="text-sm font-bold text-burgundy">Azhumathi Mayam</p>
+          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm text-neutral-600">
+            <Link href="/" className="hover:text-burgundy">Home</Link>
+            <Link href="/login" className="hover:text-burgundy">Sign in</Link>
+            <Link href="/register" className="hover:text-burgundy">Create account</Link>
+          </nav>
+          <p className="text-xs text-neutral-500">
+            Free SGPA/CGPA calculator for KTU, Calicut, MG, Kerala, Kannur and CUSAT students.
+            Results are indicative — your university result is final.
           </p>
         </div>
       </footer>

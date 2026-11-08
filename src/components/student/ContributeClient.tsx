@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   CheckCircle2,
   Clock3,
@@ -14,8 +14,16 @@ import { Badge } from '@/components/ui/Badge';
 import { cn, formatDate } from '@/lib/utils';
 import type { MaterialSubmission } from '@/types/database';
 
+export interface ContributeSubjectOption {
+  id: string;
+  subject_code: string;
+  name: string;
+  semesterLabel: string;
+  semesterNumber: number;
+}
+
 interface ContributeClientProps {
-  subjects: { id: string; subject_code: string; name: string }[];
+  subjects: ContributeSubjectOption[];
   categories: { id: string; name: string }[];
   initialSubmissions: MaterialSubmission[];
   hasAcademicSetup: boolean;
@@ -49,6 +57,17 @@ export function ContributeClient({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
+
+  // Subjects arrive sorted by semester; group them under semester headings.
+  const subjectGroups = useMemo(() => {
+    const groups = new Map<string, ContributeSubjectOption[]>();
+    for (const s of subjects) {
+      const arr = groups.get(s.semesterLabel);
+      if (arr) arr.push(s);
+      else groups.set(s.semesterLabel, [s]);
+    }
+    return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
+  }, [subjects]);
 
   async function refresh() {
     const res = await fetch('/api/student/submissions', { credentials: 'same-origin' });
@@ -134,8 +153,8 @@ export function ContributeClient({
 
         {!hasAcademicSetup ? (
           <p className="mt-4 rounded-2xl border border-line bg-canvas p-4 text-sm text-muted">
-            Finish setting up your course and semester in your profile first —
-            contributions are tied to your subjects.
+            Finish setting up your programme in your profile first — you can
+            contribute to any subject in your programme, any semester.
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
@@ -149,12 +168,19 @@ export function ContributeClient({
                   className={inputClass}
                 >
                   <option value="">Pick the subject…</option>
-                  {subjects.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.subject_code} — {s.name}
-                    </option>
+                  {subjectGroups.map((group) => (
+                    <optgroup key={group.label} label={group.label}>
+                      {group.items.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.subject_code} — {s.name}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
+                <span className="mt-1 block text-[11px] text-muted">
+                  Any semester of your programme — share with juniors too.
+                </span>
               </label>
               <label className="block">
                 <span className="mb-1.5 block text-xs font-semibold text-charcoal">Material type</span>

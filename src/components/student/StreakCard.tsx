@@ -1,6 +1,9 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Flame } from 'lucide-react';
+import { computeStreak, type StreakInfo } from '@/lib/streak';
 import { cn } from '@/lib/utils';
-import type { StreakInfo } from '@/lib/streak';
 
 const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -8,8 +11,27 @@ const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
  * "You're on a 6-day streak" — the daily-return hook for the study
  * planner. Renders nothing until the student has studied at least one
  * day (the planner's own cards handle the not-started state).
+ *
+ * The server passes its own streak computation as the first render, then
+ * the browser recomputes with the student's LOCAL date — otherwise a
+ * student opening the app around midnight would see yesterday's streak.
  */
-export function StreakCard({ streak }: { streak: StreakInfo }) {
+export function StreakCard({
+  streak: serverStreak,
+  completedKeys,
+}: {
+  streak: StreakInfo;
+  completedKeys: string[];
+}) {
+  const [streak, setStreak] = useState<StreakInfo>(serverStreak);
+
+  useEffect(() => {
+    setStreak(computeStreak(completedKeys));
+    // completedKeys identity is stable per page render; recompute on mount
+    // so "today" always matches the student's clock.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (streak.totalStudyDays === 0) return null;
 
   const todayIndex = new Date().getDay();
@@ -31,13 +53,13 @@ export function StreakCard({ streak }: { streak: StreakInfo }) {
         >
           <Flame className="h-7 w-7" />
           {streak.currentStreak > 0 ? (
-            <span className="absolute -right-1.5 -top-1.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-[#E5484D] px-1 text-[11px] font-bold text-white ring-2 ring-white">
+            <span className="absolute -top-1.5 -right-1.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-[#E5484D] px-1 text-[11px] font-bold text-white ring-2 ring-white">
               {streak.currentStreak}
             </span>
           ) : null}
         </span>
         <div>
-          <p className="text-lg font-extrabold leading-tight text-charcoal">
+          <p className="text-lg leading-tight font-extrabold text-charcoal">
             {streak.currentStreak > 0
               ? `${streak.currentStreak}-day study streak`
               : 'Streak paused — restart it today'}

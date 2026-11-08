@@ -47,7 +47,7 @@ export default async function RootPage() {
       admin
         .from('resources')
         .select('id', { count: 'exact', head: true })
-        .eq('status', 'published'),
+        .eq('publication_status', 'published'),
     ]);
     universities = (uniRes.data || []).map((u) => u.name as string).filter(Boolean);
     if (progRes.count || subjRes.count || resRes.count) {
