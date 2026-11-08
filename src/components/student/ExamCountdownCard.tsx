@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CalendarClock, ChevronRight, Flame } from 'lucide-react';
+import { CalendarClock, ChevronRight, Flame, Sparkles } from 'lucide-react';
 import {
   diffDateKeys,
   formatExamDate,
@@ -11,31 +11,47 @@ import {
   type PlanSubject,
 } from '@/lib/study-plan';
 
+type CardView =
+  | { kind: 'invite' }
+  | { kind: 'passed'; examDate: string }
+  | {
+      kind: 'active';
+      daysLeft: number;
+      examDate: string;
+      todayRemaining: number;
+      todayTotal: number;
+    };
+
 /**
- * Dashboard countdown strip: renders only when the student has a
- * study plan with an exam today or in the future. Fetches the plan
- * inputs and regenerates today's view client-side.
+ * Dashboard planner strip. Three states:
+ *  - no plan yet  → an invitation to build one (this is also the
+ *    always-visible entry point to /dashboard/study-planner)
+ *  - active plan  → countdown + today's remaining tasks
+ *  - exam passed  → a nudge to plan the next one
+ * Renders nothing only when the plan cannot be loaded at all.
  */
 export function ExamCountdownCard() {
-  const [view, setView] = useState<{
-    daysLeft: number;
-    examDate: string;
-    todayRemaining: number;
-    todayTotal: number;
-  } | null>(null);
+  const [view, setView] = useState<CardView | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const res = await fetch('/api/student/study-plan');
-        if (!res.ok) return;
+        if (!res.ok || cancelled) return;
         const data = await res.json();
-        if (!data.plan || cancelled) return;
+        if (cancelled) return;
+        if (!data.plan) {
+          setView({ kind: 'invite' });
+          return;
+        }
 
         const today = toDateKey(new Date());
         const rawDays = diffDateKeys(today, data.plan.examDate as string);
-        if (rawDays < 0) return;
+        if (rawDays < 0) {
+          setView({ kind: 'passed', examDate: data.plan.examDate });
+          return;
+        }
 
         const subjects: PlanSubject[] = (data.subjects || []).map(
           (s: { id: string; subject_code: string; name: string }) => ({
@@ -57,6 +73,7 @@ export function ExamCountdownCard() {
         const todayTasks = generated.days[0]?.tasks || [];
         if (!cancelled) {
           setView({
+            kind: 'active',
             daysLeft: rawDays,
             examDate: data.plan.examDate,
             todayRemaining: todayTasks.filter((t) => !completed.has(t.key)).length,
@@ -64,7 +81,7 @@ export function ExamCountdownCard() {
           });
         }
       } catch {
-        // Countdown is a nicety; never break the dashboard over it.
+        // The strip is a nicety; never break the dashboard over it.
       }
     })();
     return () => {
@@ -81,14 +98,34 @@ export function ExamCountdownCard() {
       style={{ animationDelay: '120ms' }}
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-burgundy text-white">
-        {view.daysLeft === 0 ? (
+        {view.kind === 'active' && view.daysLeft === 0 ? (
           <Flame className="h-5 w-5" />
+        ) : view.kind === 'invite' ? (
+          <Sparkles className="h-5 w-5" />
         ) : (
           <CalendarClock className="h-5 w-5" />
         )}
       </span>
       <span className="min-w-0 flex-1">
-        {view.daysLeft === 0 ? (
+        {view.kind === 'invite' ? (
+          <>
+            <span className="block truncate text-[15px] font-bold text-charcoal">
+              Exam coming up? Plan your revision
+            </span>
+            <span className="block text-xs text-muted">
+              Pick your exam day — get a day-by-day study plan for your subjects
+            </span>
+          </>
+        ) : view.kind === 'passed' ? (
+          <>
+            <span className="block truncate text-[15px] font-bold text-charcoal">
+              That exam is behind you — plan the next one
+            </span>
+            <span className="block text-xs text-muted">
+              Last planned exam: {formatExamDate(view.examDate)}
+            </span>
+          </>
+        ) : view.daysLeft === 0 ? (
           <>
             <span className="block truncate text-[15px] font-bold text-charcoal">
               Your exam is today — all the best!
