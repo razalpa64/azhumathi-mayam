@@ -6,9 +6,8 @@ import { BookOpen, FileText, GraduationCap, Layers } from 'lucide-react';
 import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { unstable_cache } from 'next/cache';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { fetchAllRows } from '@/lib/supabase/fetch-all';
-import { filterTaxonomyToSeeded } from '@/lib/seeded-taxonomy';
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import { programmesWithSemesters } from '@/lib/register-options';
 import { RegisterForm } from './RegisterForm';
 import type {
   AcademicRegulation,
@@ -52,40 +51,46 @@ const REGISTRATION_BENEFITS = [
   },
 ];
 
-// Crafting the pickers means reading the whole taxonomy plus a full
-// pass over `subjects` (~2,000 rows, paged) — far too much work to redo
-// for every visitor. It changes only when staff publish content, so it
-// is cached across requests for five minutes.
+/*
+  The sign-up pickers.
+
+  This deliberately does NOT read the `subjects` table. It used to, in
+  order to hide programmes with no materials yet — but that tied a
+  registration form to a paged scan of ~2,000 rows, and whenever the scan
+  came back empty (a failed page, a cold database, a cached short read) the
+  programme picker emptied out and, with it, the semester, branch and
+  scheme pickers that depend on the chosen programme. Not being able to
+  register is a far worse outcome than landing on a quiet dashboard, so
+  sign-up now offers the whole active taxonomy and nothing else.
+
+  A programme is offered only if it has at least one semester, because the
+  semester picker is filled from those rows; if none qualify, everything is
+  offered rather than an empty list.
+
+  Cached across requests for five minutes — it changes only when staff
+  edit the taxonomy, and it is identical for every visitor.
+*/
 const loadTaxonomy = unstable_cache(
   async () => {
     const admin = createSupabaseAdminClient();
     const [
-      { data: universities },
       { data: activeProgrammes },
+      { data: universities },
       { data: specializations },
       { data: regulations },
       { data: semesters },
-      subjectScopeRows,
     ] = await Promise.all([
-      admin.from('universities').select('*').eq('is_active', true).order('display_order').order('name'),
       admin.from('programmes').select('*').eq('is_active', true).order('display_order').order('name'),
+      admin.from('universities').select('*').eq('is_active', true).order('display_order').order('name'),
       admin.from('specializations').select('*').eq('is_active', true).order('display_order').order('name'),
       admin.from('academic_regulations').select('*').eq('is_active', true).order('display_order').order('name'),
       admin.from('semesters').select('*').eq('is_active', true).order('semester_number'),
-      fetchAllRows(async (from, to) =>
-        admin
-          .from('subjects')
-          .select('programme_id, specialization_id')
-          .eq('publication_status', 'published')
-          .order('id')
-          .range(from, to)
-      ),
     ]);
-    // A registration form with no programme in it is a dead end. If every
-    // programme row reads as inactive, that is far more likely a bad flag
-    // than a site with no degrees, so fall back to the full list and shout
-    // about it in the logs instead of showing a student an empty picker.
+
     let programmes = (activeProgrammes || []) as Programme[];
+
+    // Every programme switched off is far more likely a bad flag than a
+    // site with no degrees — retry unfiltered rather than show a dead form.
     if (programmes.length === 0) {
       const { data: allProgrammes } = await admin
         .from('programmes')
@@ -94,20 +99,25 @@ const loadTaxonomy = unstable_cache(
         .order('name');
       programmes = (allProgrammes || []) as Programme[];
       console.warn(
-        `[register] no active programmes in taxonomy — offering ${programmes.length} unfiltered instead`
+        `[register] no active programmes — offering ${programmes.length} unfiltered instead`
       );
     }
+
+    const semesterRows = (semesters || []) as Semester[];
+
+    // Only programmes whose semester picker can actually be filled — the
+    // rest of the form hangs off that choice. See programmesWithSemesters().
+    programmes = programmesWithSemesters(programmes, semesterRows);
 
     return {
       universities: (universities || []) as University[],
       programmes,
       specializations: (specializations || []) as Specialization[],
       regulations: (regulations || []) as AcademicRegulation[],
-      semesters: (semesters || []) as Semester[],
-      subjectScopeRows,
+      semesters: semesterRows,
     };
   },
-  ['register-taxonomy-v1'],
+  ['register-taxonomy-v2'],
   { revalidate: 300, tags: ['taxonomy'] }
 );
 
@@ -117,27 +127,8 @@ export default async function RegisterPage() {
     redirect(isStaffRole(profile.role) ? '/admin' : '/dashboard');
   }
 
-  const {
-    universities,
-    programmes,
-    specializations,
-    regulations,
-    semesters,
-    subjectScopeRows,
-  } = await loadTaxonomy();
-
-  // New students are only offered programmes and branches that have
-  // subjects behind them — picking an unseeded branch would strand
-  // them on an empty dashboard. Options appear automatically once
-  // subjects are seeded.
-  const studentTaxonomy = filterTaxonomyToSeeded(
-    {
-      universities: (universities || []) as University[],
-      programmes: (programmes || []) as Programme[],
-      specializations: (specializations || []) as Specialization[],
-    },
-    subjectScopeRows
-  );
+  const { universities, programmes, specializations, regulations, semesters } =
+    await loadTaxonomy();
 
   return (
     <div className="min-h-screen grid lg:grid-cols-12 bg-canvas">
@@ -235,11 +226,11 @@ export default async function RegisterPage() {
             }
           >
             <RegisterForm
-              universities={studentTaxonomy.universities}
-              programmes={studentTaxonomy.programmes}
-              specializations={studentTaxonomy.specializations}
-              regulations={(regulations || []) as AcademicRegulation[]}
-              semesters={(semesters || []) as Semester[]}
+              universities={universities}
+              programmes={programmes}
+              specializations={specializations}
+              regulations={regulations}
+              semesters={semesters}
             />
           </Suspense>
         </div>

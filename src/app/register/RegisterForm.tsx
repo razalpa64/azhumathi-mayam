@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { applicableSchemes, keepValidSchemeId } from '@/lib/regulation-scope';
+import { semestersForProgramme } from '@/lib/register-options';
 import type {
   AcademicRegulation,
   Programme,
@@ -67,10 +68,7 @@ export function RegisterForm({
   );
 
   const filteredSemesters = useMemo(
-    () =>
-      programmeId
-        ? semesters.filter((s) => s.programme_id === programmeId)
-        : [],
+    () => semestersForProgramme(semesters, programmeId),
     [semesters, programmeId]
   );
 
@@ -421,6 +419,12 @@ export function RegisterForm({
                 </option>
               ))}
             </select>
+            {programmeId && filteredSemesters.length === 0 ? (
+              <p className="mt-1 text-[11px] text-burgundy">
+                No semesters are set up for this programme yet — you can add yours later from your
+                profile.
+              </p>
+            ) : null}
           </div>
 
           <div>
@@ -481,6 +485,11 @@ export function RegisterForm({
             {!universityId ? (
               <p className="mt-1 text-[11px] text-muted">
                 Pick your university and only its schemes appear here.
+              </p>
+            ) : null}
+            {universityId && filteredRegulations.length === 0 ? (
+              <p className="mt-1 text-[11px] text-burgundy">
+                No scheme is listed for this selection yet — you can set it later from your profile.
               </p>
             ) : null}
             {universityId && ownSchemes.length === 0 && filteredRegulations.length > 0 ? (

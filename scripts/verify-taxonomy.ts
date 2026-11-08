@@ -9,7 +9,8 @@
  * Run: npm run test:taxonomy
  */
 import { filterTaxonomyToSeeded, seededIdSets } from '@/lib/seeded-taxonomy';
-import type { Programme, Specialization, Subject, University } from '@/types/database';
+import { programmesWithSemesters, semestersForProgramme } from '@/lib/register-options';
+import type { Programme, Semester, Specialization, Subject, University } from '@/types/database';
 
 const stamp = '2026-01-01T00:00:00.000Z';
 
@@ -115,6 +116,65 @@ if (neverFiltered.universities.length !== taxonomy.universities.length) {
   console.error('FAIL  universities must never be filtered by seeded content');
 } else {
   console.log('ok    universities are never filtered');
+}
+
+// --- Sign-up picker chain -------------------------------------------------
+
+function semester(id: string, programmeId: string, number: number): Semester {
+  return {
+    id,
+    programme_id: programmeId,
+    semester_number: number,
+    label: `Semester ${number}`,
+    is_active: true,
+    created_at: stamp,
+    updated_at: stamp,
+  };
+}
+
+const registerCases: { label: string; programmes: Programme[]; semesters: Semester[]; expected: string[] }[] = [
+  {
+    label: 'sign-up: a programme with no semesters is not offered',
+    programmes: taxonomy.programmes,
+    semesters: [semester('sem1', 'p1', 1)],
+    expected: ['B.Tech'],
+  },
+  {
+    label: 'sign-up: no semester rows at all still offers every programme',
+    programmes: taxonomy.programmes,
+    semesters: [],
+    expected: ['B.Tech', 'B.Sc'],
+  },
+  {
+    label: 'sign-up: semesters for unknown programmes do not empty the list',
+    programmes: taxonomy.programmes,
+    semesters: [semester('sem9', 'gone', 1)],
+    expected: ['B.Tech', 'B.Sc'],
+  },
+];
+
+for (const testCase of registerCases) {
+  const actual = programmesWithSemesters(testCase.programmes, testCase.semesters).map((p) => p.name);
+  const ok = JSON.stringify(actual) === JSON.stringify(testCase.expected);
+  if (!ok) {
+    failures += 1;
+    console.error(`FAIL  ${testCase.label}`);
+    console.error(`      expected ${JSON.stringify(testCase.expected)}`);
+    console.error(`      received ${JSON.stringify(actual)}`);
+  } else {
+    console.log(`ok    ${testCase.label}`);
+  }
+}
+
+const terms = semestersForProgramme(
+  [semester('s2', 'p1', 2), semester('s1', 'p1', 1), semester('s9', 'p2', 1)],
+  'p1'
+);
+if (terms.map((t) => t.semester_number).join(',') !== '1,2') {
+  failures += 1;
+  console.error('FAIL  sign-up: semesters should be the programme\'s own, in order');
+} else {
+  console.log('ok    sign-up: semesters are the programme\'s own, in order');
 }
 
 // The id sets themselves stay honest.
