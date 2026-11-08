@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Camera, CheckCircle2, Loader2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { applicableSchemes, keepValidSchemeId } from '@/lib/regulation-scope';
 import { Badge } from '@/components/ui/Badge';
 import type {
   AcademicRegulation,
@@ -56,13 +57,28 @@ export function ProfileEditorClient({
     [programmeId, semesters]
   );
 
-  const availableRegulations = useMemo(
-    () =>
-      universityId
-        ? regulations.filter((r) => !r.university_id || r.university_id === universityId)
-        : regulations,
-    [regulations, universityId]
-  );
+  // Same rule as sign-up (src/lib/regulation-scope.ts): only the schemes
+  // this university actually runs. Whatever the student is already on is
+  // always kept in the list, so opening this page never blanks a stored
+  // value — it is pruned only when they change university or programme.
+  const availableRegulations = useMemo(() => {
+    const options = applicableSchemes({ regulations, programmes, universityId, programmeId });
+    const current = regulations.find((r) => r.id === regulationId);
+    if (current && !options.some((option) => option.id === current.id)) {
+      return [...options, current];
+    }
+    return options;
+  }, [regulations, programmes, universityId, programmeId, regulationId]);
+
+  function handleUniversityChange(nextUniversityId: string) {
+    setUniversityId(nextUniversityId);
+    setRegulationId((previous) =>
+      keepValidSchemeId(
+        previous,
+        applicableSchemes({ regulations, programmes, universityId: nextUniversityId, programmeId })
+      )
+    );
+  }
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -241,7 +257,7 @@ export function ProfileEditorClient({
             <select
               id="university"
               value={universityId}
-              onChange={(e) => setUniversityId(e.target.value)}
+              onChange={(e) => handleUniversityChange(e.target.value)}
               className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5"
             >
               <option value="">Select University</option>
@@ -266,6 +282,17 @@ export function ProfileEditorClient({
                 setSpecializationId('');
                 const firstSem = semesters.find((s) => s.programme_id === nextProg);
                 setSemesterId(firstSem?.id || '');
+                setRegulationId((previous) =>
+                  keepValidSchemeId(
+                    previous,
+                    applicableSchemes({
+                      regulations,
+                      programmes,
+                      universityId,
+                      programmeId: nextProg,
+                    })
+                  )
+                );
               }}
               className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5"
             >

@@ -58,6 +58,25 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
+  // A scheme from another university would filter the student's subjects
+  // down to nothing (the dashboard, planner and library all filter on it).
+  // Older profiles can still hold one from before the pickers were scoped,
+  // so a mismatched value is cleared here rather than blocking the save.
+  let regulationId = payload.regulation_id ?? null;
+  if (regulationId) {
+    const { data: regulation } = await supabase
+      .from('academic_regulations')
+      .select('id, university_id')
+      .eq('id', regulationId)
+      .maybeSingle();
+    if (
+      !regulation ||
+      (regulation.university_id && regulation.university_id !== (payload.university_id ?? null))
+    ) {
+      regulationId = null;
+    }
+  }
+
   // Strictly update only permitted student profile columns
   const { error } = await supabase
     .from('profiles')
@@ -66,7 +85,7 @@ export async function PATCH(request: NextRequest) {
       university_id: payload.university_id ?? null,
       programme_id: payload.programme_id ?? null,
       specialization_id: payload.programme_id ? payload.specialization_id ?? null : null,
-      regulation_id: payload.regulation_id ?? null,
+      regulation_id: regulationId,
       semester_id: payload.programme_id ? payload.semester_id ?? null : null,
     })
     .eq('id', auth.profile.id);

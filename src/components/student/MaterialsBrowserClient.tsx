@@ -14,7 +14,8 @@ import {
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
 import { ResourceCard } from '@/components/student/ResourceCard';
 import { buildSubjectOptions } from '@/lib/subject-options';
-import { seededIdSets } from '@/lib/seeded-taxonomy';
+import { seededIdSets } from '@/lib/seeded-taxonomy';import { applicableSchemes, keepValidSchemeId } from '@/lib/regulation-scope';
+
 import { AdSlot } from '@/components/ads/AdSlot';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -187,6 +188,26 @@ export function MaterialsBrowserClient({
         : taxonomy.specializations,
     [programmeId, taxonomy.specializations]
   );
+
+  // A scheme belongs to a university. Browsing everything (no university
+  // filter) keeps every scheme available, but once a university is chosen
+  // only its own schemes can match a single row — the same rule the
+  // sign-up and profile pickers use. A scheme already in the URL stays
+  // listed so the applied filter is never invisible.
+  const regulationOptions = useMemo(() => {
+    if (!universityId) return taxonomy.regulations;
+    const options = applicableSchemes({
+      regulations: taxonomy.regulations,
+      programmes: taxonomy.programmes,
+      universityId,
+      programmeId,
+    });
+    const current = taxonomy.regulations.find((row) => row.id === regulationId);
+    if (current && !options.some((option) => option.id === current.id)) {
+      return [...options, current];
+    }
+    return options;
+  }, [taxonomy.regulations, taxonomy.programmes, universityId, programmeId, regulationId]);
 
   // Only offer programmes/branches that actually have subjects —
   // an unseeded branch can only ever produce an empty list. A
@@ -495,7 +516,24 @@ export function MaterialsBrowserClient({
                   <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">University</label>
                   <select
                     value={universityId}
-                    onChange={(e) => { setUniversityId(e.target.value); setPage(1); }}
+                    onChange={(e) => {
+                      const nextUniversity = e.target.value;
+                      setUniversityId(nextUniversity);
+                      setPage(1);
+                      setRegulationId((previous) =>
+                        keepValidSchemeId(
+                          previous,
+                          nextUniversity
+                            ? applicableSchemes({
+                                regulations: taxonomy.regulations,
+                                programmes: taxonomy.programmes,
+                                universityId: nextUniversity,
+                                programmeId,
+                              })
+                            : taxonomy.regulations
+                        )
+                      );
+                    }}
                     className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">Any university</option>
@@ -602,7 +640,7 @@ export function MaterialsBrowserClient({
                     className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
                   >
                     <option value="">All Regulations</option>
-                    {taxonomy.regulations.map((reg) => (
+                    {regulationOptions.map((reg) => (
                       <option key={reg.id} value={reg.id}>
                         {reg.name}
                       </option>
