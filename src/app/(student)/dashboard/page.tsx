@@ -34,7 +34,7 @@ import { AdSlot } from '@/components/ads/AdSlot';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { Notice, Resource, Subject } from '@/types/database';
-import { getGreetingByHour } from '@/lib/utils';
+import { getDisplayName, getGreetingByHour } from '@/lib/utils';
 
 const RESOURCE_JOIN = `
   *,
@@ -370,6 +370,8 @@ export default async function StudentDashboardPage() {
     .filter((r): r is Resource => Boolean(r && r.publication_status === 'published'));
 
   const greeting = getGreetingByHour();
+  // The whole name, not just the first word — see getDisplayName().
+  const displayName = getDisplayName(profile.full_name, profile.username);
   const dateLabel = new Intl.DateTimeFormat('en-IN', {
     weekday: 'long',
     day: 'numeric',
@@ -426,8 +428,8 @@ export default async function StudentDashboardPage() {
             ) : null}
           </div>
 
-          <h1 className="mt-3.5 text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px] lg:mt-3 lg:text-[28px] lg:leading-[1.12] xl:text-[30px]">
-            {greeting}, {profile.full_name.split(' ')[0]}
+          <h1 className="mt-3.5 text-balance text-[27px] font-extrabold leading-[1.15] tracking-tight text-white sm:text-[34px] lg:mt-3 lg:text-[28px] lg:leading-[1.12] xl:text-[30px]">
+            {greeting}, {displayName}
           </h1>
           <div>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-canvas/75 lg:mt-2 lg:max-w-xl lg:text-sm">
