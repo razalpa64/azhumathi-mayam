@@ -199,6 +199,8 @@ export interface Notice {
   external_link: string | null;
   external_link_label: string | null;
   target_programme_id: string | null;
+  target_semester_id: string | null;
+  target_specialization_id: string | null;
   publication_status: PublicationStatus;
   start_date: string;
   expiry_date: string | null;
@@ -206,6 +208,8 @@ export interface Notice {
   created_at: string;
   updated_at: string;
   target_programme?: Pick<Programme, 'id' | 'code' | 'name'> | null;
+  target_semester?: Pick<Semester, 'id' | 'semester_number' | 'label'> | null;
+  target_specialization?: Pick<Specialization, 'id' | 'code' | 'name'> | null;
 }
 
 export interface NotificationItem {

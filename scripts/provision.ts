@@ -188,6 +188,13 @@ async function main() {
     );
     await pg.query(studyPlansSql);
 
+    console.log('3s. Applying 0023_notice_target_semester_branch.sql (Notice semester/branch targeting)...');
+    const noticeTargetSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0023_notice_target_semester_branch.sql'),
+      'utf8'
+    );
+    await pg.query(noticeTargetSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
