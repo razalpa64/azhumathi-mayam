@@ -141,16 +141,35 @@ export default async function StudentDashboardPage() {
     specialization_id: string | null;
     university_id: string | null;
   };
-  const allSemesterSubjects: SemesterSubjectRow[] =
-    profile.programme_id && profile.semester_id
-      ? (((await supabase
-          .from('subjects')
-          .select('id, subject_code, semester_id, regulation_id, specialization_id, university_id')
-          .eq('publication_status', 'published')
-          .eq('programme_id', profile.programme_id)
-          .eq('semester_id', profile.semester_id)
-        ).data || []) as SemesterSubjectRow[])
-      : [];
+  // Started here, awaited together with the category lookup below: each
+  // `await` on its own is a full round trip to the database, and three of
+  // them in a row was the biggest chunk of the dashboard's load time.
+  const allSemesterSubjectsPromise: Promise<SemesterSubjectRow[]> = (async () => {
+    if (!(profile.programme_id && profile.semester_id)) return [] as SemesterSubjectRow[];
+    const { data } = await supabase
+      .from('subjects')
+      .select('id, subject_code, semester_id, regulation_id, specialization_id, university_id')
+      .eq('publication_status', 'published')
+      .eq('programme_id', profile.programme_id)
+      .eq('semester_id', profile.semester_id);
+    return (data || []) as SemesterSubjectRow[];
+  })();
+
+  // Question-paper and short-note categories in ONE lookup instead of two
+  // separate round trips (both flags live on the same tiny table).
+  const categoriesPromise: Promise<
+    { id: string; is_question_paper: boolean; is_short_note: boolean }[]
+  > = (async () => {
+    const { data } = await supabase
+      .from('resource_categories')
+      .select('id, is_question_paper, is_short_note');
+    return (data || []) as { id: string; is_question_paper: boolean; is_short_note: boolean }[];
+  })();
+
+  const [allSemesterSubjects, categoryRows] = await Promise.all([
+    allSemesterSubjectsPromise,
+    categoriesPromise,
+  ]);
   const feedSubjectIds = profile.specialization_id
     ? audienceSubjectIds(
         allSemesterSubjects,
@@ -208,12 +227,8 @@ export default async function StudentDashboardPage() {
     );
   }
 
-  // 5. Question paper category IDs
-  const { data: qpCats } = await supabase
-    .from('resource_categories')
-    .select('id')
-    .eq('is_question_paper', true);
-  const qpCatIds = (qpCats || []).map((c) => c.id);
+  // 5. Question paper category IDs (from the single category lookup above)
+  const qpCatIds = categoryRows.filter((c) => c.is_question_paper).map((c) => c.id);
 
   let qpQuery = supabase
     .from('resources')
@@ -241,19 +256,7 @@ export default async function StudentDashboardPage() {
   }
 
   // 5b. Short Notes & Exam Special (latest for this semester)
-  const snByFlag = await supabase
-    .from('resource_categories')
-    .select('id')
-    .eq('is_short_note', true);
-  const snCats = !snByFlag.error
-    ? snByFlag.data
-    : (
-        await supabase
-          .from('resource_categories')
-          .select('id')
-          .in('slug', ['short-notes', 'cheat-sheets'])
-      ).data;
-  const snCatIds = (snCats || []).map((c) => c.id);
+  const snCatIds = categoryRows.filter((c) => c.is_short_note).map((c) => c.id);
 
   let shortNotesQuery = supabase
     .from('resources')

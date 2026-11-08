@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { BookOpen, FileText, GraduationCap, Layers } from 'lucide-react';
 import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
+import { unstable_cache } from 'next/cache';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { fetchAllRows } from '@/lib/supabase/fetch-all';
 import { filterTaxonomyToSeeded } from '@/lib/seeded-taxonomy';
@@ -51,61 +52,62 @@ const REGISTRATION_BENEFITS = [
   },
 ];
 
+// Crafting the pickers means reading the whole taxonomy plus a full
+// pass over `subjects` (~2,000 rows, paged) — far too much work to redo
+// for every visitor. It changes only when staff publish content, so it
+// is cached across requests for five minutes.
+const loadTaxonomy = unstable_cache(
+  async () => {
+    const admin = createSupabaseAdminClient();
+    const [
+      { data: universities },
+      { data: programmes },
+      { data: specializations },
+      { data: regulations },
+      { data: semesters },
+      subjectScopeRows,
+    ] = await Promise.all([
+      admin.from('universities').select('*').eq('is_active', true).order('display_order').order('name'),
+      admin.from('programmes').select('*').eq('is_active', true).order('display_order').order('name'),
+      admin.from('specializations').select('*').eq('is_active', true).order('display_order').order('name'),
+      admin.from('academic_regulations').select('*').eq('is_active', true).order('display_order').order('name'),
+      admin.from('semesters').select('*').eq('is_active', true).order('semester_number'),
+      fetchAllRows(async (from, to) =>
+        admin
+          .from('subjects')
+          .select('programme_id, specialization_id')
+          .eq('publication_status', 'published')
+          .order('id')
+          .range(from, to)
+      ),
+    ]);
+    return {
+      universities: (universities || []) as University[],
+      programmes: (programmes || []) as Programme[],
+      specializations: (specializations || []) as Specialization[],
+      regulations: (regulations || []) as AcademicRegulation[],
+      semesters: (semesters || []) as Semester[],
+      subjectScopeRows,
+    };
+  },
+  ['register-taxonomy-v1'],
+  { revalidate: 300, tags: ['taxonomy'] }
+);
+
 export default async function RegisterPage() {
   const profile = await getAuthenticatedProfile();
   if (profile) {
     redirect(isStaffRole(profile.role) ? '/admin' : '/dashboard');
   }
 
-  const adminClient = createSupabaseAdminClient();
-  const [
-    { data: universities },
-    { data: programmes },
-    { data: specializations },
-    { data: regulations },
-    { data: semesters },
+  const {
+    universities,
+    programmes,
+    specializations,
+    regulations,
+    semesters,
     subjectScopeRows,
-  ] = await Promise.all([
-    adminClient
-      .from('universities')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order')
-      .order('name'),
-    adminClient
-      .from('programmes')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order')
-      .order('name'),
-    adminClient
-      .from('specializations')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order')
-      .order('name'),
-    adminClient
-      .from('academic_regulations')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order')
-      .order('name'),
-    adminClient
-      .from('semesters')
-      .select('*')
-      .eq('is_active', true)
-      .order('semester_number'),
-    // Which programmes/branches actually have subjects (paginated —
-    // subjects outgrow the 1,000-row response cap).
-    fetchAllRows(async (from, to) =>
-      adminClient
-        .from('subjects')
-        .select('programme_id, specialization_id')
-        .eq('publication_status', 'published')
-        .order('id')
-        .range(from, to)
-    ),
-  ]);
+  } = await loadTaxonomy();
 
   // New students are only offered programmes and branches that have
   // subjects behind them — picking an unseeded branch would strand

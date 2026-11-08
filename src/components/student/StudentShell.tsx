@@ -524,14 +524,14 @@ export function StudentShell({
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-all active:scale-95',
+                  'flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-all active:scale-95',
                   active
                     ? 'bg-burgundy-tint font-semibold text-burgundy'
                     : 'text-muted hover:text-charcoal'
                 )}
               >
-                <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.3 : 1.8} />
-                <span className="leading-none">{item.label}</span>
+                <Icon className="h-[22px] w-[22px] shrink-0" strokeWidth={active ? 2.3 : 1.8} />
+                <span className="w-full truncate text-center leading-tight">{item.label}</span>
               </Link>
             );
           })}

@@ -1,7 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
-import { requireApiAdmin, getWebsiteSettings, logAdminActivity } from '@/lib/auth/session';
+import {
+  requireApiAdmin,
+  getWebsiteSettings,
+  logAdminActivity,
+  SETTINGS_CACHE_TAG,
+} from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 const settingsSchema = z.object({
@@ -51,6 +57,11 @@ export async function PATCH(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: friendlyDbError(error, 'Saving settings failed. Please try again.', 'admin') }, { status: 400 });
   }
+
+  // Settings are cached across requests (they gate AdSense, ads and the
+  // notices switch on every page) — drop that cache the moment staff save
+  // so a change is visible immediately, not five minutes later.
+  revalidateTag(SETTINGS_CACHE_TAG);
 
   await logAdminActivity({
     adminId: auth.profile.id,

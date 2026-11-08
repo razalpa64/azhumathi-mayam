@@ -1,9 +1,13 @@
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import type { Profile, WebsiteSettings } from '@/types/database';
+
+/** Cache tag for website settings — reused by the admin save route. */
+export const SETTINGS_CACHE_TAG = 'website-settings';
 
 const PROFILE_SELECT = `
   *,
@@ -175,7 +179,19 @@ export async function requireApiStaff(): Promise<
   return { ok: true, profile };
 }
 
-export const getWebsiteSettings = cache(fetchWebsiteSettings);
+/**
+ * Settings are read by every layout (AdSense gate) and most pages (ads,
+ * notices switch), but they change only when an admin saves the settings
+ * screen. React `cache` alone still meant one database round trip per
+ * request; this caches across requests and is invalidated by tag from
+ * the admin route, with a 5-minute expiry as a safety net.
+ */
+export const getWebsiteSettings = cache(
+  unstable_cache(fetchWebsiteSettings, ['website-settings'], {
+    tags: [SETTINGS_CACHE_TAG],
+    revalidate: 300,
+  })
+);
 
 async function fetchWebsiteSettings(): Promise<WebsiteSettings> {
   const admin = createSupabaseAdminClient();
