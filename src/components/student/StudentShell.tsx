@@ -115,6 +115,12 @@ export function StudentShell({
     .filter(Boolean)
     .join(' • ');
 
+  // The group chat is a full-screen room (like a messaging app): the
+  // tab strip, header context line and footer step aside so the
+  // conversation gets every pixel. Navigation stays one tap away via
+  // the bottom bar and the header menu.
+  const isChat = pathname === '/dashboard/chat';
+
   return (
     <div className="desktop-ambient min-h-dvh flex flex-col bg-canvas">
       {/* Burgundy wave header — scrolls away with the page, only the tab strip sticks */}
@@ -140,9 +146,11 @@ export function StudentShell({
                 <span className="block truncate font-logo text-xl font-bold tracking-tight text-white sm:text-[22px] lg:text-[22px]">
                   അഴിമതി മയം
                 </span>
-                <span className="mt-0.5 block truncate text-[11px] font-medium tracking-wide text-white/60 lg:text-xs">
-                  {contextLine || 'Notes, syllabus & question papers'}
-                </span>
+                {!isChat ? (
+                  <span className="mt-0.5 block truncate text-[11px] font-medium tracking-wide text-white/60 lg:text-xs">
+                    {contextLine || 'Notes, syllabus & question papers'}
+                  </span>
+                ) : null}
               </span>
             </Link>
 
@@ -228,9 +236,17 @@ export function StudentShell({
         </svg>
       </div>
 
-      {/* Sticky pill strip — the one slim bar that stays while scrolling */}
+      {/* Sticky pill strip — the one slim bar that stays while scrolling.
+          Hidden in the chat room; the mobile menu sheet below it is not. */}
       <div className="sticky top-0 z-40 border-b border-line/70 bg-canvas/90 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10">
+        <div
+          className={cn(
+            'mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10',
+            // In the chat room the strip steps aside on phones (the
+            // reference layout); on desktop it stays — it's the only nav.
+            isChat && 'hidden lg:block'
+          )}
+        >
           <nav
             aria-label="Student workspace sections"
             className="no-scrollbar -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 py-2 lg:gap-2 lg:py-2"
@@ -344,9 +360,10 @@ export function StudentShell({
         </div>
       </main>
 
-      {/* Floating mobile bottom navigation */}
-      <nav aria-label="Bottom" className="fixed inset-x-3 bottom-3 z-40 lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-5 rounded-full border border-line bg-canvas/95 px-2 py-2 shadow-[0_16px_32px_-14px_rgba(36,7,7,0.45)] backdrop-blur-md">
+      {/* Mobile bottom navigation — a full-width bar on the bottom edge
+          (messaging-app style); the active tab sits on a soft pill. */}
+      <nav aria-label="Bottom" className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
+        <div className="grid grid-cols-5 border-t border-line bg-canvas/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
           {BOTTOM_NAV.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href, item.exact);
@@ -356,25 +373,22 @@ export function StudentShell({
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[10px] font-medium transition-all active:scale-95',
-                  active ? 'text-burgundy' : 'text-muted hover:text-charcoal'
+                  'flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-all active:scale-95',
+                  active
+                    ? 'bg-burgundy-tint font-semibold text-burgundy'
+                    : 'text-muted hover:text-charcoal'
                 )}
               >
                 <Icon className="h-[22px] w-[22px]" strokeWidth={active ? 2.3 : 1.8} />
-                <span className={cn('leading-none', active && 'font-bold')}>{item.label}</span>
-                <span
-                  className={cn(
-                    'mt-0.5 h-[3px] w-5 rounded-full bg-burgundy transition-opacity',
-                    active ? 'opacity-100' : 'opacity-0'
-                  )}
-                />
+                <span className="leading-none">{item.label}</span>
               </Link>
             );
           })}
         </div>
       </nav>
 
-      {/* Footer */}
+      {/* Footer (steps aside in the chat room, like the tab strip) */}
+      {!isChat ? (
       <footer className="mt-6 border-t border-line bg-neutral-soft/60">
         <div className="mx-auto flex max-w-7xl xl:max-w-[1440px] flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row lg:py-7 lg:text-[13px] sm:px-6 lg:px-10">
           <div className="flex items-center gap-2.5">
@@ -410,6 +424,7 @@ export function StudentShell({
           </div>
         </div>
       </footer>
+      ) : null}
 
       {/* Friendly one-time install invitation — Home screen only */}
       {pathname === '/dashboard' ? <InstallPromptCard /> : null}

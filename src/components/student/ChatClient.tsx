@@ -6,7 +6,6 @@ import {
   Clock,
   Loader2,
   MessagesSquare,
-  RotateCcw,
   Send,
   Trash2,
 } from 'lucide-react';
@@ -209,10 +208,10 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
   }
 
   return (
-    <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-line bg-canvas lg:rounded-[28px]">
+    <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-line bg-white lg:rounded-[28px]">
       {/* Room header */}
-      <div className="flex items-center gap-3 border-b border-line bg-canvas px-4 py-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-burgundy text-white">
+      <div className="flex items-center gap-3 border-b border-line bg-white px-4 py-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-burgundy-tint text-burgundy">
           <MessagesSquare className="h-5 w-5" strokeWidth={1.9} />
         </span>
         <div className="min-w-0 flex-1 leading-tight">
@@ -223,40 +222,35 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
               : 'Everyone at Azhimathi Mayam, in one room'}
           </p>
         </div>
-        <span className="hidden shrink-0 items-center gap-1.5 rounded-full bg-burgundy-tint px-2.5 py-1 text-[11px] font-medium text-burgundy sm:flex">
-          <RotateCcw className="h-3 w-3" />
-          Clears at midnight
-        </span>
         <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-muted">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-          </span>
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
           Live
         </span>
+      </div>
+
+      {/* Daily-reset banner */}
+      <div className="flex items-center gap-2 bg-burgundy-tint/60 px-4 py-2.5 text-xs font-medium text-burgundy-deep">
+        <Clock className="h-3.5 w-3.5 shrink-0" />
+        Chat clears daily at midnight (IST)
       </div>
 
       {/* Messages */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#FAF3F1] px-3.5 py-4 sm:px-5 lg:px-8 lg:py-6"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-white px-3.5 py-4 sm:px-5 lg:px-8 lg:py-6"
       >
-        <div className="mb-1.5 flex items-center gap-3 px-1">
-          <span className="h-px flex-1 bg-burgundy/10" />
-          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-muted shadow-sm ring-1 ring-line">
+        <div className="mb-4 flex items-center gap-3 px-1">
+          <span className="h-px flex-1 bg-line" />
+          <span className="px-1 text-[11px] font-semibold text-muted">
             Today
           </span>
-          <span className="h-px flex-1 bg-burgundy/10" />
+          <span className="h-px flex-1 bg-line" />
         </div>
-        <p className="mb-4 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted">
-          <Clock className="h-3 w-3" />
-          Fresh start every morning — this chat clears at midnight (IST).
-        </p>
 
         {messages.length === 0 ? (
           <div className="px-4 py-8 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white text-burgundy shadow-sm ring-1 ring-line">
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-burgundy-tint text-burgundy">
               <MessagesSquare className="h-6 w-6" strokeWidth={1.7} />
             </span>
             <p className="mt-4 text-sm font-semibold text-charcoal">Quiet in here, for now</p>
@@ -308,35 +302,33 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
                     )
                   ) : null}
 
-                  <div className={cn('group flex max-w-[80%] items-center gap-1.5 sm:max-w-[65%] lg:max-w-[58%]', own && 'flex-row-reverse')}>
-                    <div
-                      className={cn(
-                        'px-3.5 py-2.5 shadow-[0_1px_2px_rgba(36,7,7,0.10)]',
-                        own
-                          ? 'rounded-2xl rounded-br-md bg-burgundy text-white'
-                          : 'rounded-2xl rounded-bl-md bg-white text-charcoal'
-                      )}
-                    >
-                      {showName ? (
-                        <p className="mb-1 flex flex-wrap items-baseline gap-x-2 leading-none">
-                          <span className="text-xs font-semibold text-burgundy">{name}</span>
-                          {msg.sender?.programme?.name ? (
-                            <span className="text-[10px] text-muted">{msg.sender.programme.name}</span>
-                          ) : null}
-                        </p>
-                      ) : null}
-                      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-                        {msg.body}
-                      </p>
-                      <p
+                  <div
+                    className={cn(
+                      'flex max-w-[80%] flex-col sm:max-w-[65%] lg:max-w-[58%]',
+                      own ? 'items-end' : 'items-start'
+                    )}
+                  >
+                    <div className={cn('group flex items-center gap-1.5', own && 'flex-row-reverse')}>
+                      <div
                         className={cn(
-                          'mt-1 text-right text-[10px] leading-none',
-                          own ? 'text-white/60' : 'text-muted'
+                          'px-3.5 py-2.5 shadow-[0_1px_2px_rgba(36,7,7,0.10)]',
+                          own
+                            ? 'rounded-2xl rounded-br-md bg-burgundy text-white'
+                            : 'rounded-2xl rounded-bl-md bg-white text-charcoal ring-1 ring-line'
                         )}
                       >
-                        {formatChatTime(msg.created_at)}
-                      </p>
-                    </div>
+                        {showName ? (
+                          <p className="mb-1 flex flex-wrap items-baseline gap-x-2 leading-none">
+                            <span className="text-xs font-semibold text-burgundy">{name}</span>
+                            {msg.sender?.programme?.name ? (
+                              <span className="text-[10px] text-muted">{msg.sender.programme.name}</span>
+                            ) : null}
+                          </p>
+                        ) : null}
+                        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                          {msg.body}
+                        </p>
+                      </div>
 
                     {own ? (
                       <button
@@ -349,6 +341,12 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     ) : null}
+                    </div>
+
+                    {/* Timestamp sits quietly under the bubble */}
+                    <p className="mt-1 px-1 text-[10px] leading-none text-muted">
+                      {formatChatTime(msg.created_at)}
+                    </p>
                   </div>
                 </div>
               );
@@ -376,7 +374,7 @@ export function ChatClient({ initialMessages, currentUserId, unavailable }: Chat
 
       {/* Composer — pinned to the card's foot, soft shadow above it so
           messages slide under cleanly as they pass */}
-      <div className="bg-[#FAF3F1] px-3 pb-3 pt-1.5 shadow-[0_-10px_20px_-14px_rgba(36,7,7,0.35)] sm:px-4 sm:pb-4">
+      <div className="bg-white px-3 pb-3 pt-1.5 shadow-[0_-10px_20px_-14px_rgba(36,7,7,0.35)] sm:px-4 sm:pb-4">
         {error ? (
           <p className="mb-2 px-1 text-[11px] font-medium text-[#C62F34]">{error}</p>
         ) : null}
