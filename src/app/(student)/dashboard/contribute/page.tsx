@@ -17,22 +17,38 @@ export interface LeaderboardEntry {
   approved: number;
 }
 
+export interface ContributeSubject {
+  id: string;
+  subject_code: string;
+  name: string;
+  semesterLabel: string;
+  semesterNumber: number;
+}
+
+interface ContributeSubjectRow {
+  id: string;
+  subject_code: string;
+  name: string;
+  semester: { label: string | null; semester_number: number | null } | null;
+}
+
 export default async function ContributePage() {
   const profile = await requireStudentAppUser();
   const supabase = await createSupabaseServerClient();
 
-  const hasAcademicSetup = Boolean(profile.programme_id && profile.semester_id);
+  const hasAcademicSetup = Boolean(profile.programme_id);
 
-  // Subjects the student can contribute to: their own semester subjects
-  // (scoped like everywhere else) — keeps contributions relevant.
-  let subjects: { id: string; subject_code: string; name: string }[] = [];
+  // Subjects the student can contribute to: every subject in their own
+  // programme across all semesters — so seniors can share notes with
+  // juniors too (contributions are moderated before they go live anyway).
+  // Subjects from other programmes/universities stay out of reach.
+  let subjects: ContributeSubject[] = [];
   if (hasAcademicSetup) {
     let query = supabase
       .from('subjects')
-      .select('id, subject_code, name')
+      .select('id, subject_code, name, semester:semesters(label, semester_number)')
       .eq('publication_status', 'published')
       .eq('programme_id', profile.programme_id as string)
-      .eq('semester_id', profile.semester_id as string)
       .order('subject_code');
     if (profile.specialization_id) {
       query = query.or(
@@ -46,7 +62,18 @@ export default async function ContributePage() {
       query = query.or(`university_id.is.null,university_id.eq.${profile.university_id}`);
     }
     const { data } = await query;
-    subjects = data || [];
+    subjects = ((data || []) as unknown as ContributeSubjectRow[])
+      .map((row) => ({
+        id: row.id,
+        subject_code: row.subject_code,
+        name: row.name,
+        semesterLabel: row.semester?.label || 'Semester',
+        semesterNumber: row.semester?.semester_number ?? 0,
+      }))
+      .sort(
+        (a, b) =>
+          a.semesterNumber - b.semesterNumber || a.subject_code.localeCompare(b.subject_code)
+      );
   }
 
   const { data: categories } = await supabase
