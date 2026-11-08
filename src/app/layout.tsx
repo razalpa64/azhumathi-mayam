@@ -8,6 +8,7 @@ import './globals.css';
 import { ServiceWorkerRegister } from '@/components/pwa/ServiceWorkerRegister';
 import { getWebsiteSettings } from '@/lib/auth/session';
 import { resolveAdsenseClientId } from '@/lib/adsense';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   title: {
@@ -65,6 +66,7 @@ export default async function RootLayout({
       <body className="min-h-screen bg-canvas text-charcoal antialiased">
         {children}
         <ServiceWorkerRegister />
+        <Analytics />
         <Script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
