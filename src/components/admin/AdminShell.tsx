@@ -161,43 +161,28 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
         aria-current={active ? 'page' : undefined}
         title={rail ? item.label : undefined}
         className={cn(
-          'group relative flex items-center gap-3 px-2.5 py-2 text-[13px] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-[0.98]',
-          rail ? 'justify-center rounded-xl px-0 py-2' : 'rounded-l-full rounded-r-none',
+          'group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-[0.98]',
+          rail && 'justify-center px-0 py-2',
           active
-            ? rail
-              ? 'bg-white font-semibold text-burgundy-deep shadow-[0_14px_26px_-14px_rgba(0,0,0,0.6)] focus-visible:ring-burgundy/50'
-              : 'bg-white font-semibold text-burgundy shadow-[0_18px_30px_-16px_rgba(0,0,0,0.55)] focus-visible:ring-burgundy/50'
+            ? 'bg-white/10 font-semibold text-white shadow-[0_12px_24px_-12px_rgba(0,0,0,0.6)]'
             : 'font-medium text-canvas/65 hover:bg-white/[0.06] hover:text-white'
         )}
       >
-        {/* Connected-tab notches: white quarter-discs hugging the panel edge */}
-        {active && !rail ? (
-          <>
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute -top-[18px] right-0 h-[18px] w-[18px]"
-              style={{
-                background:
-                  'radial-gradient(circle at 100% 100%, #ffffff 17.5px, rgba(255,255,255,0) 18.5px)',
-              }}
-            />
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute -bottom-[18px] right-0 h-[18px] w-[18px]"
-              style={{
-                background:
-                  'radial-gradient(circle at 100% 0, #ffffff 17.5px, rgba(255,255,255,0) 18.5px)',
-              }}
-            />
-          </>
-        ) : null}
-        {/* Icon chip: glassy when idle, solid burgundy on the active tab */}
+        {/* Active marker: a soft-rose bar on the leading edge */}
+        <span
+          aria-hidden="true"
+          className={cn(
+            'absolute -left-3 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-full bg-[#F4B8C1] shadow-[0_0_12px_rgba(244,184,193,0.55)] transition-opacity duration-200',
+            active ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+        {/* Icon chip: glassy when idle, solid paper when active */}
         <span
           className={cn(
-            'relative flex shrink-0 items-center justify-center rounded-full transition-all duration-200',
+            'relative flex shrink-0 items-center justify-center rounded-lg transition-all duration-200',
             rail ? 'h-9 w-9' : 'h-8 w-8',
             active
-              ? 'bg-burgundy text-white shadow-[0_6px_14px_-6px_rgba(90,0,0,0.7)]'
+              ? 'bg-white text-burgundy-deep shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)]'
               : 'bg-white/[0.05] text-canvas/55 ring-1 ring-white/[0.06] group-hover:bg-white/10 group-hover:text-canvas'
           )}
         >
@@ -273,13 +258,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
 
   function renderSidebar(rail: boolean, variant: 'desktop' | 'drawer') {
     return (
-      <div
-        className={cn(
-          'relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-[linear-gradient(180deg,#6d0000_0%,#4a0008_46%,#33000a_100%)] text-canvas',
-          variant === 'desktop' &&
-            'rounded-[28px] shadow-[0_30px_60px_-25px_rgba(36,7,7,0.6)] ring-1 ring-white/10'
-        )}
-      >
+      <div className="relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-[linear-gradient(180deg,#6d0000_0%,#4a0008_46%,#33000a_100%)] text-canvas">
         {/* Ambient light: a soft glow pooling at the top of the wine */}
         <div
           aria-hidden="true"
@@ -330,10 +309,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
         {/* Grouped navigation — scrolls with softened edges */}
         <nav
           aria-label="Administrator navigation"
-          className={cn(
-            'mt-2 min-h-0 flex-1 overflow-y-auto pb-5 pt-2 [mask-image:linear-gradient(to_bottom,transparent,black_14px,black_calc(100%-14px),transparent)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15',
-            rail ? 'px-3' : 'pl-5 pr-0'
-          )}
+          className="mt-2 min-h-0 flex-1 overflow-y-auto px-3 pb-5 pt-2 [mask-image:linear-gradient(to_bottom,transparent,black_14px,black_calc(100%-14px),transparent)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
         >
           {sections.map((section, si) => (
             <div key={section.label || `top-${si}`} className={si === 0 ? 'mt-2' : 'mt-6'}>
@@ -427,7 +403,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           collapsed ? 'lg:w-[76px]' : 'lg:w-64'
         )}
       >
-        <div className="sticky top-4 ml-4 h-[calc(100dvh-2rem)]">{renderSidebar(collapsed, 'desktop')}</div>
+        <div className="sticky top-0 h-dvh">{renderSidebar(collapsed, 'desktop')}</div>
       </aside>
 
       {/* Mobile drawer */}

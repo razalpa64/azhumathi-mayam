@@ -16,9 +16,6 @@ import {
 import { requireStaffUser } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { Badge } from '@/components/ui/Badge';
-import { UploadsChart } from '@/components/admin/UploadsChart';
-import { RadialProgress } from '@/components/admin/RadialProgress';
-import { MiniCalendar } from '@/components/admin/MiniCalendar';
 import { formatDate, formatDateTime } from '@/lib/utils';
 
 export const metadata = {
@@ -29,16 +26,6 @@ export default async function AdminOverviewPage() {
   const profile = await requireStaffUser();
   const isMainAdmin = profile.role === 'admin';
   const adminClient = createSupabaseAdminClient();
-
-  const nowDate = new Date();
-  const sixMonthsAgoIso = new Date(
-    nowDate.getFullYear(),
-    nowDate.getMonth() - 5,
-    1
-  ).toISOString();
-  const thirtyDaysAgoIso = new Date(
-    nowDate.getTime() - 30 * 24 * 60 * 60 * 1000
-  ).toISOString();
 
   const [
     totalStudentsRes,
@@ -53,8 +40,6 @@ export default async function AdminOverviewPage() {
     recentStudentsRes,
     recentAuditRes,
     pendingRequestsRes,
-    uploadsTimelineRes,
-    active30Res,
   ] = await Promise.all([
     isMainAdmin
       ? adminClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'student')
@@ -109,90 +94,12 @@ export default async function AdminOverviewPage() {
       .from('resource_requests')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'pending'),
-    // Upload timeline for the Statistics chart + calendar dots.
-    adminClient
-      .from('resources')
-      .select('created_at')
-      .gte('created_at', sixMonthsAgoIso)
-      .order('created_at', { ascending: true })
-      .limit(2000),
-    isMainAdmin
-      ? adminClient
-          .from('profiles')
-          .select('id', { count: 'exact', head: true })
-          .eq('role', 'student')
-          .gte('last_login_at', thirtyDaysAgoIso)
-      : Promise.resolve({ count: 0 }),
   ]);
 
   const totalDownloads = (allDownloadCountsRes.data || []).reduce(
     (sum, r) => sum + Number(r.download_count || 0),
     0
   );
-
-  // ---- Statistics chart + calendar data (last six months) ----
-  const chartMonths: { label: string; uploads: number }[] = [];
-  const monthIndex = new Map<string, number>();
-  for (let i = 5; i >= 0; i -= 1) {
-    const d = new Date(nowDate.getFullYear(), nowDate.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    monthIndex.set(key, chartMonths.length);
-    chartMonths.push({
-      label: d.toLocaleDateString('en-IN', { month: 'short' }),
-      uploads: 0,
-    });
-  }
-  const uploadDaysByMonth: Record<string, number[]> = {};
-  for (const row of uploadsTimelineRes.data || []) {
-    const iso = row.created_at as string;
-    const key = iso.slice(0, 7);
-    const idx = monthIndex.get(key);
-    if (idx !== undefined) chartMonths[idx].uploads += 1;
-    const day = Number(iso.slice(8, 10));
-    if (!uploadDaysByMonth[key]) uploadDaysByMonth[key] = [];
-    if (!uploadDaysByMonth[key].includes(day)) uploadDaysByMonth[key].push(day);
-  }
-  const sixMonthUploads = chartMonths.reduce((s, m) => s + m.uploads, 0);
-  const thisMonthUploads = chartMonths[chartMonths.length - 1]?.uploads || 0;
-
-  const publishedCount = publishedResourcesRes.count || 0;
-  const draftCount = draftResourcesRes.count || 0;
-  const libraryTotal = publishedCount + draftCount;
-  const publishedPct = libraryTotal > 0 ? (publishedCount / libraryTotal) * 100 : 0;
-
-  const totalStudents = totalStudentsRes.count || 0;
-  const activeStudents = activeStudentsRes.count || 0;
-  const active30 = active30Res.count || 0;
-
-  const ringCards = isMainAdmin
-    ? [
-        {
-          title: 'Active students',
-          percent: totalStudents > 0 ? (activeStudents / totalStudents) * 100 : 0,
-          value: String(activeStudents),
-          sub: `of ${totalStudents} registered`,
-        },
-        {
-          title: 'Seen in 30 days',
-          percent: totalStudents > 0 ? (active30 / totalStudents) * 100 : 0,
-          value: String(active30),
-          sub: 'students signed in recently',
-        },
-      ]
-    : [
-        {
-          title: 'Uploads this month',
-          percent: sixMonthUploads > 0 ? (thisMonthUploads / sixMonthUploads) * 100 : 0,
-          value: String(thisMonthUploads),
-          sub: 'of the last 6 months',
-        },
-        {
-          title: 'Waiting to publish',
-          percent: libraryTotal > 0 ? (draftCount / libraryTotal) * 100 : 0,
-          value: String(draftCount),
-          sub: 'drafts in the library',
-        },
-      ];
 
   const statCards = isMainAdmin
     ? [
@@ -339,80 +246,6 @@ export default async function AdminOverviewPage() {
         </div>
       </div>
 
-      {/* Statistics + Library — the reference layout, in burgundy */}
-      <div className="anim-stagger grid gap-6 xl:grid-cols-3">
-        <section className="rounded-[24px] bg-white p-6 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05] xl:col-span-2">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="text-[15px] font-semibold text-charcoal">Statistics</h2>
-              <p className="mt-0.5 text-xs text-muted">
-                Study materials added, month by month
-              </p>
-            </div>
-            <span className="rounded-full bg-burgundy-tint px-3 py-1.5 text-[11px] font-semibold text-burgundy">
-              {sixMonthUploads} new in 6 months
-            </span>
-          </div>
-          <div className="mt-5">
-            <UploadsChart data={chartMonths} />
-          </div>
-        </section>
-
-        <section className="flex flex-col rounded-[24px] bg-white p-6 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05]">
-          <h2 className="text-[15px] font-semibold text-charcoal">Library at a glance</h2>
-          <div className="flex justify-center py-5">
-            <RadialProgress percent={publishedPct} size={148}>
-              <span className="text-[26px] font-extrabold leading-none text-charcoal">
-                {Math.round(publishedPct)}%
-              </span>
-              <span className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted">
-                published
-              </span>
-            </RadialProgress>
-          </div>
-          <dl className="mt-auto divide-y divide-line text-[13px]">
-            <div className="flex items-center justify-between py-2.5">
-              <dt className="text-muted">Published :</dt>
-              <dd className="font-mono font-semibold text-charcoal">{publishedCount}</dd>
-            </div>
-            <div className="flex items-center justify-between py-2.5">
-              <dt className="text-muted">In draft :</dt>
-              <dd className="font-mono font-semibold text-charcoal">{draftCount}</dd>
-            </div>
-            <div className="flex items-center justify-between py-2.5">
-              <dt className="text-muted">Downloads :</dt>
-              <dd className="font-mono font-semibold text-charcoal">{totalDownloads}</dd>
-            </div>
-          </dl>
-        </section>
-      </div>
-
-      {/* Rings + Calendar */}
-      <div className="anim-stagger grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {ringCards.map((card) => (
-          <section
-            key={card.title}
-            className="flex flex-col items-center rounded-[24px] bg-white p-6 text-center shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05]"
-          >
-            <h3 className="self-start text-[15px] font-semibold text-charcoal">{card.title}</h3>
-            <div className="py-4">
-              <RadialProgress percent={card.percent} size={126} stroke={11}>
-                <span className="text-[22px] font-extrabold leading-none text-charcoal">
-                  {card.value}
-                </span>
-              </RadialProgress>
-            </div>
-            <p className="text-sm font-bold text-burgundy">{Math.round(card.percent)}%</p>
-            <p className="mt-0.5 text-xs text-muted">{card.sub}</p>
-          </section>
-        ))}
-
-        <section className="rounded-[24px] bg-white p-6 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05] md:col-span-2">
-          <h3 className="mb-4 text-[15px] font-semibold text-charcoal">Calendar</h3>
-          <MiniCalendar uploadDaysByMonth={uploadDaysByMonth} />
-        </section>
-      </div>
-
       {/* Live Metrics Grid */}
       <section className="anim-stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat) => {
@@ -421,11 +254,11 @@ export default async function AdminOverviewPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="group rounded-[20px] bg-white p-5 shadow-[0_20px_40px_-28px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_26px_45px_-26px_rgba(36,7,7,0.45)]"
+              className="group rounded-xl border border-line bg-canvas p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-burgundy-border hover:shadow-[0_16px_30px_-22px_rgba(36,7,7,0.45)]"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-muted">{stat.label}</span>
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-burgundy-tint text-burgundy">
+                <div className="flex h-8 w-8 items-center justify-center rounded-md border border-line bg-neutral-soft text-burgundy">
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
@@ -440,7 +273,7 @@ export default async function AdminOverviewPage() {
       </section>
 
       {/* Storage Architecture Status Banner */}
-      <section className="anim-rise flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[24px] bg-white px-6 py-5 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05]" style={{ animationDelay: '200ms' }}>
+      <section className="anim-rise flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line bg-neutral-soft/75 px-5 py-4" style={{ animationDelay: '200ms' }}>
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line-strong bg-canvas text-burgundy">
             <HardDrive className="h-4 w-4" />
@@ -469,7 +302,7 @@ export default async function AdminOverviewPage() {
 
       {/* Two-Column Tables: Recent Uploads & Top Downloads */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="anim-rise rounded-[24px] bg-white p-6 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05] space-y-4" style={{ animationDelay: '260ms' }}>
+        <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">Recently added</h2>
             <Link href="/admin/resources" className="text-xs font-semibold text-burgundy hover:underline">
@@ -511,7 +344,7 @@ export default async function AdminOverviewPage() {
           )}
         </section>
 
-        <section className="anim-rise rounded-[24px] bg-white p-6 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05] space-y-4" style={{ animationDelay: '260ms' }}>
+        <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">Most downloaded</h2>
             <Link href="/admin/analytics" className="text-xs font-semibold text-burgundy hover:underline">
@@ -554,7 +387,7 @@ export default async function AdminOverviewPage() {
       {/* New students & Audit Trail — super admin only */}
       {isMainAdmin ? (
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="anim-rise rounded-[24px] bg-white p-6 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05] space-y-4" style={{ animationDelay: '260ms' }}>
+        <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">New students</h2>
             <Link href="/admin/students" className="text-xs font-semibold text-burgundy hover:underline">
@@ -590,7 +423,7 @@ export default async function AdminOverviewPage() {
           )}
         </section>
 
-        <section className="anim-rise rounded-[24px] bg-white p-6 shadow-[0_24px_45px_-30px_rgba(36,7,7,0.35)] ring-1 ring-burgundy/[0.05] space-y-4" style={{ animationDelay: '260ms' }}>
+        <section className="anim-rise rounded-xl border border-line bg-canvas p-5 space-y-4" style={{ animationDelay: '260ms' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-charcoal">Recent changes</h2>
             <Link href="/admin/analytics" className="text-xs font-semibold text-burgundy hover:underline">

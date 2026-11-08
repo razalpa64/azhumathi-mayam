@@ -239,35 +239,6 @@ body {
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
-/* Radial progress rings filling to their value (--ring-to). */
-@keyframes ring-fill {
-  from {
-    stroke-dashoffset: var(--ring-from);
-  }
-  to {
-    stroke-dashoffset: var(--ring-to);
-  }
-}
-
-.anim-ring {
-  animation: ring-fill 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s backwards;
-}
-
-/* Chart line drawing itself in (path uses pathLength={1}). */
-@keyframes draw-line {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.anim-draw {
-  stroke-dasharray: 1;
-  animation: draw-line 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .anim-rise,
   .anim-page,
@@ -276,8 +247,6 @@ body {
   .anim-drawer,
   .anim-fade,
   .anim-stagger > *,
-  .anim-ring,
-  .anim-draw,
   .skeleton,
   .skeleton-light {
     animation: none;
