@@ -1,20 +1,22 @@
+/** The live production address of the site. */
+export const PRODUCTION_SITE_URL = 'https://azhumathimayam.invytra.in';
+
 /**
  * Canonical site URL for SEO (metadataBase, sitemap, robots, JSON-LD).
  *
  * Priority:
- *  1. NEXT_PUBLIC_SITE_URL — set this to the production domain in Vercel
- *     (e.g. https://azhimathimayam.in). This is the one that matters.
- *  2. VERCEL_PROJECT_PRODUCTION_URL — Vercel injects this automatically.
- *  3. localhost — local development fallback.
+ *  1. NEXT_PUBLIC_SITE_URL — explicit override (set in Vercel if the
+ *     domain ever changes).
+ *  2. PRODUCTION_SITE_URL — the real subdomain the site is served from,
+ *     so canonical/sitemap/Open Graph URLs are correct out of the box.
+ *     (VERCEL_PROJECT_PRODUCTION_URL is deliberately not used: it points
+ *     at the *.vercel.app alias, not the public subdomain.)
  */
 export function getSiteUrl(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (configured) return configured.replace(/\/+$/, '');
 
-  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  if (vercel) return `https://${vercel.replace(/\/+$/, '')}`;
-
-  return 'http://localhost:3000';
+  return PRODUCTION_SITE_URL;
 }
 
 export const SITE_NAME = 'Azhimathi Mayam';

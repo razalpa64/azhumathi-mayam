@@ -71,14 +71,14 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/dashboard') || pathname.startsWith('/resources');
 
     if (!user) {
-      if (isAdminRoute || isStudentProtectedRoute || isRootPage) {
+      if (isAdminRoute || isStudentProtectedRoute) {
         const loginUrl = request.nextUrl.clone();
         loginUrl.pathname = '/login';
-        if (isStudentProtectedRoute || isAdminRoute) {
-          loginUrl.searchParams.set('next', pathname);
-        }
+        loginUrl.searchParams.set('next', pathname);
         return NextResponse.redirect(loginUrl);
       }
+      // Everything else (/, /login, /register, public files) is public:
+      // the root page renders the public landing page for visitors.
       return supabaseResponse;
     }
 
@@ -125,6 +125,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|brand/|icons/|sw.js|manifest.webmanifest|robots.txt|sitemap.xml).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|brand/|icons/|sw.js|manifest.webmanifest|robots.txt|sitemap.xml|google0af7705d1a99715a.html).*)',
   ],
 };
