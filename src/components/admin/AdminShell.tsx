@@ -48,8 +48,7 @@ interface NavItem {
 
 /**
  * Grouped so the console scans like a desk: daily content work first,
- * the curriculum tables together, people, then system. Fifteen loose
- * links in one flat list was the old sidebar's core problem.
+ * the curriculum tables together, people, then system.
  */
 const NAV_SECTIONS: { label: string | null; items: NavItem[] }[] = [
   {
@@ -162,30 +161,37 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
         aria-current={active ? 'page' : undefined}
         title={rail ? item.label : undefined}
         className={cn(
-          'group relative flex items-center gap-3 rounded-xl text-[13px] font-medium transition-all duration-200 active:scale-[0.98]',
-          rail ? 'justify-center px-0 py-2.5' : 'px-3 py-2.5',
+          'group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-[0.98]',
+          rail && 'justify-center px-0 py-2',
           active
-            ? 'bg-white/12 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-            : 'text-canvas/70 hover:bg-white/6 hover:text-white',
-          !rail && !active && 'hover:translate-x-0.5'
+            ? 'bg-white/10 font-semibold text-white shadow-[0_12px_24px_-12px_rgba(0,0,0,0.6)]'
+            : 'font-medium text-canvas/65 hover:bg-white/[0.06] hover:text-white'
         )}
       >
-        {/* Active marker: a small light bar on the leading edge */}
+        {/* Active marker: a soft-rose bar on the leading edge */}
         <span
           aria-hidden="true"
           className={cn(
-            'absolute top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-white transition-all duration-200',
-            rail ? '-left-3' : '-left-3',
+            'absolute -left-3 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-full bg-[#F4B8C1] shadow-[0_0_12px_rgba(244,184,193,0.55)] transition-opacity duration-200',
             active ? 'opacity-100' : 'opacity-0'
           )}
         />
-        <span className="relative shrink-0">
+        {/* Icon chip: glassy when idle, solid paper when active */}
+        <span
+          className={cn(
+            'relative flex shrink-0 items-center justify-center rounded-lg transition-all duration-200',
+            rail ? 'h-9 w-9' : 'h-8 w-8',
+            active
+              ? 'bg-white text-burgundy-deep shadow-[0_6px_14px_-6px_rgba(0,0,0,0.55)]'
+              : 'bg-white/[0.05] text-canvas/55 ring-1 ring-white/[0.06] group-hover:bg-white/10 group-hover:text-canvas'
+          )}
+        >
           <Icon
-            className={cn(rail ? 'h-5 w-5' : 'h-[18px] w-[18px]', !active && 'text-canvas/50 group-hover:text-canvas/80')}
+            className={rail ? 'h-[19px] w-[19px]' : 'h-[17px] w-[17px]'}
             strokeWidth={active ? 2.2 : 1.9}
           />
           {rail && showBadge ? (
-            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-canvas px-1 text-[9px] font-bold text-burgundy-deep ring-2 ring-burgundy-deep">
+            <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E5484D] px-1 text-[9px] font-bold text-white ring-2 ring-[#3d000a]">
               {pendingRequests > 99 ? '99+' : pendingRequests}
             </span>
           ) : null}
@@ -194,7 +200,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           <>
             <span className="flex-1 truncate">{item.label}</span>
             {showBadge ? (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-canvas px-1.5 text-[10px] font-bold text-burgundy-deep">
+              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#E5484D] px-1.5 text-[10px] font-bold text-white shadow-[0_4px_10px_-4px_rgba(229,72,77,0.9)]">
                 {pendingRequests > 99 ? '99+' : pendingRequests}
               </span>
             ) : null}
@@ -206,48 +212,88 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
     );
   }
 
+  function renderBrand(rail: boolean) {
+    if (rail) {
+      return (
+        <Link
+          href="/admin"
+          aria-label="Admin overview"
+          className="relative block h-10 w-10 overflow-hidden rounded-xl shadow-[0_8px_18px_-8px_rgba(0,0,0,0.7)] ring-1 ring-white/25 transition-transform duration-200 hover:scale-105"
+        >
+          <Image
+            src="/brand/logo.png"
+            alt="അഴിമതി മയം"
+            width={40}
+            height={40}
+            className="h-full w-full object-cover"
+          />
+        </Link>
+      );
+    }
+    return (
+      <Link
+        href="/admin"
+        className="flex min-w-0 items-center gap-3 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+      >
+        <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl shadow-[0_8px_18px_-8px_rgba(0,0,0,0.7)] ring-1 ring-white/25">
+          <Image
+            src="/brand/logo.png"
+            alt="അഴിമതി മയം"
+            width={40}
+            height={40}
+            className="h-full w-full object-cover"
+          />
+        </span>
+        <span className="min-w-0 leading-tight">
+          <span className="block truncate font-logo text-[17px] font-bold tracking-tight text-white">
+            അഴിമതി മയം
+          </span>
+          <span className="mt-0.5 block text-[9px] font-bold uppercase tracking-[0.24em] text-canvas/45">
+            Admin Console
+          </span>
+        </span>
+      </Link>
+    );
+  }
+
   function renderSidebar(rail: boolean, variant: 'desktop' | 'drawer') {
     return (
-      <div className="flex h-full min-h-0 flex-col bg-gradient-to-b from-burgundy-dark via-burgundy-deep to-burgundy-deep text-canvas">
+      <div className="relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-[linear-gradient(180deg,#6d0000_0%,#4a0008_46%,#33000a_100%)] text-canvas">
+        {/* Ambient light: a soft glow pooling at the top of the wine */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-48 bg-[radial-gradient(120%_100%_at_18%_0%,rgba(255,255,255,0.10),transparent_62%)]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-40 bg-[radial-gradient(120%_100%_at_85%_100%,rgba(244,184,193,0.07),transparent_60%)]"
+        />
+
         {/* Brand row */}
         <div
           className={cn(
-            'flex shrink-0 items-center pt-5',
-            rail ? 'flex-col gap-3 px-3' : 'justify-between px-5'
+            'flex shrink-0 items-center px-5',
+            variant === 'drawer' && 'pt-[max(1.25rem,env(safe-area-inset-top))]',
+            variant === 'desktop' && 'pt-5',
+            rail ? 'flex-col gap-3 px-3' : 'justify-between'
           )}
         >
-          {rail ? (
-            <Link
-              href="/admin"
-              aria-label="Admin overview"
-              className="relative block h-10 w-10 overflow-hidden rounded-xl ring-1 ring-white/20 transition-transform hover:scale-105"
-            >
-              <Image
-                src="/brand/logo.png"
-                alt="അഴിമതി മയം"
-                width={40}
-                height={40}
-                className="h-full w-full object-cover"
-              />
-            </Link>
-          ) : (
-            <BrandLogo href="/admin" size="sm" theme="dark" subtitle="Admin Console" />
-          )}
+          {renderBrand(rail)}
 
           {variant === 'drawer' ? (
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-canvas/70 transition-colors hover:bg-white/10 hover:text-canvas cursor-pointer"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-canvas/70 transition-colors hover:bg-white/10 hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer"
               aria-label="Close menu"
             >
-              <X className="h-4.5 w-4.5" />
+              <X className="h-[18px] w-[18px]" />
             </button>
           ) : (
             <button
               type="button"
               onClick={toggleCollapsed}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-canvas/60 transition-colors hover:bg-white/10 hover:text-canvas cursor-pointer"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-canvas/55 transition-all hover:bg-white/[0.07] hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer"
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
@@ -260,20 +306,23 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           )}
         </div>
 
-        {/* Grouped navigation — the scrollable middle */}
+        {/* Grouped navigation — scrolls with softened edges */}
         <nav
           aria-label="Administrator navigation"
-          className={cn('min-h-0 flex-1 overflow-y-auto pb-4', rail ? 'px-3' : 'px-3')}
+          className="mt-2 min-h-0 flex-1 overflow-y-auto px-3 pb-5 pt-2 [mask-image:linear-gradient(to_bottom,transparent,black_14px,black_calc(100%-14px),transparent)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15"
         >
           {sections.map((section, si) => (
-            <div key={section.label || `top-${si}`} className={si === 0 ? 'mt-4' : 'mt-6'}>
+            <div key={section.label || `top-${si}`} className={si === 0 ? 'mt-2' : 'mt-6'}>
               {section.label ? (
                 rail ? (
-                  <div aria-hidden="true" className="mx-2 mb-2 h-px bg-white/10" />
+                  <div aria-hidden="true" className="mx-2.5 mb-2 h-px bg-white/[0.08]" />
                 ) : (
-                  <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-canvas/40">
-                    {section.label}
-                  </p>
+                  <div className="mb-1.5 flex items-center gap-2 px-2.5">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-canvas/35">
+                      {section.label}
+                    </span>
+                    <span aria-hidden="true" className="h-px flex-1 bg-white/[0.06]" />
+                  </div>
                 )
               ) : null}
               <div className="space-y-0.5">
@@ -283,14 +332,18 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
           ))}
         </nav>
 
-        {/* Pinned footer: account + logout, always on screen */}
-        <div className="shrink-0 border-t border-white/10 p-3">
+        {/* Account footer: one glass card, always on screen */}
+        <div className="relative shrink-0 p-3">
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent"
+          />
           {rail ? (
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1.5 pt-1">
               <Link
                 href="/admin/account"
                 title={`${profile.full_name} (@${profile.username})`}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-[11px] font-bold text-canvas ring-1 ring-white/15 transition-colors hover:bg-white/15"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-white/25 to-white/5 text-[11px] font-bold text-canvas ring-1 ring-white/20 transition-all hover:from-white/30 hover:to-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
                 {getInitials(profile.full_name)}
               </Link>
@@ -300,26 +353,26 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                 disabled={loggingOut}
                 title="Logout"
                 aria-label="Logout"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-canvas/70 transition-colors hover:bg-white/10 hover:text-canvas cursor-pointer disabled:opacity-50"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-canvas/65 transition-colors hover:bg-[#C62F34] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
           ) : (
-            <>
+            <div className="flex items-center gap-2 rounded-2xl bg-white/[0.05] p-2 ring-1 ring-white/[0.07] backdrop-blur-sm transition-colors hover:bg-white/[0.07]">
               <Link
                 href="/admin/account"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-2.5 py-2 transition-colors hover:bg-white/6"
+                className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-1 py-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-bold text-canvas ring-1 ring-white/15">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white/25 to-white/5 text-[11px] font-bold text-canvas ring-1 ring-white/20">
                   {getInitials(profile.full_name)}
                 </span>
                 <span className="min-w-0 flex-1 leading-tight">
                   <span className="block truncate text-[13px] font-semibold text-canvas">
                     {profile.full_name}
                   </span>
-                  <span className="block truncate text-[11px] text-canvas/55">
+                  <span className="block truncate text-[11px] text-canvas/50">
                     @{profile.username} · {isMainAdmin ? 'Super Admin' : 'Sub-admin'}
                   </span>
                 </span>
@@ -328,12 +381,13 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                 type="button"
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-burgundy px-3 text-[13px] font-semibold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.22)] transition-all hover:bg-burgundy-dark active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 cursor-pointer disabled:opacity-50"
+                title="Logout"
+                aria-label="Logout"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-canvas/65 transition-all hover:bg-[#C62F34] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95 cursor-pointer disabled:opacity-50"
               >
-                <LogOut className="h-4 w-4 shrink-0" />
-                <span>{loggingOut ? 'Signing out…' : 'Logout'}</span>
+                <LogOut className="h-4 w-4" />
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -359,7 +413,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             className="anim-fade fixed inset-0 bg-black/50"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="anim-drawer relative z-10 h-full w-80 max-w-[86vw]">
+          <div className="anim-drawer relative z-10 h-full w-80 max-w-[86vw] shadow-2xl">
             {renderSidebar(false, 'drawer')}
           </div>
         </div>
@@ -374,7 +428,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
               type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open administrator navigation"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-canvas text-charcoal transition-colors hover:bg-neutral-soft active:scale-95 cursor-pointer"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-canvas text-charcoal transition-all hover:bg-neutral-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/50 active:scale-95 cursor-pointer"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -383,7 +437,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
 
           <Link
             href="/admin/upload"
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-burgundy px-3.5 text-xs font-semibold text-canvas shadow-[0_8px_16px_-8px_rgba(121,0,0,0.7)] transition-all hover:bg-burgundy-dark active:scale-95"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-burgundy px-3.5 text-xs font-semibold text-canvas shadow-[0_8px_16px_-8px_rgba(121,0,0,0.7)] transition-all hover:bg-burgundy-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/50 active:scale-95"
           >
             <FilePlus2 className="h-3.5 w-3.5" />
             <span>Upload</span>
@@ -401,7 +455,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
 
       {/* Mobile bottom bar — the daily tools, one thumb away */}
       <nav aria-label="Admin quick navigation" className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
-        <div className="grid grid-cols-5 border-t border-white/10 bg-burgundy-deep/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
+        <div className="grid grid-cols-5 border-t border-white/10 bg-[#3d000a]/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
           {MOBILE_NAV.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href, item.exact);
@@ -411,14 +465,14 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'relative flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-all active:scale-95',
+                  'relative flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95',
                   active ? 'bg-white/12 font-semibold text-white' : 'text-canvas/60 hover:text-canvas'
                 )}
               >
                 <span className="relative">
                   <Icon className="h-[21px] w-[21px]" strokeWidth={active ? 2.2 : 1.8} />
                   {item.badge === 'requests' && pendingRequests > 0 ? (
-                    <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-canvas px-1 text-[9px] font-bold text-burgundy-deep">
+                    <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#E5484D] px-1 text-[9px] font-bold text-white ring-2 ring-[#3d000a]">
                       {pendingRequests > 99 ? '99+' : pendingRequests}
                     </span>
                   ) : null}
@@ -431,7 +485,7 @@ export function AdminShell({ profile, pendingRequests = 0, children }: AdminShel
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open full administrator menu"
-            className="flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium text-canvas/60 transition-colors hover:text-canvas active:scale-95 cursor-pointer"
+            className="flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-medium text-canvas/60 transition-colors hover:text-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-95 cursor-pointer"
           >
             <Menu className="h-[21px] w-[21px]" strokeWidth={1.8} />
             <span className="leading-none">Menu</span>
