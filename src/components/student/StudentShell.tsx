@@ -106,12 +106,45 @@ export function StudentShell({
   // stranded half off-screen by browser chrome resizing the viewport and
   // they cannot float over content either.
   const mainRef = useRef<HTMLElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   // A new page always starts at the top: without this the previous page's
   // scroll offset leaks into the next page and everything looks shifted.
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0;
   }, [pathname]);
+
+  // Pin the shell to the height the phone actually shows. 100dvh is the
+  // CSS-only answer, but Android Chrome can report a viewport taller than
+  // the visible area while the address bar is out — which pushed the
+  // bottom bar just below the screen ("the menubar disappeared"). The
+  // visual viewport is the ground truth, so measure it and keep the
+  // shells exactly that tall.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    let last = 0;
+    const apply = () => {
+      const viewport = window.visualViewport;
+      const height = Math.round(viewport?.height ?? window.innerHeight);
+      if (height > 0 && Math.abs(height - last) >= 1) {
+        last = height;
+        el.style.setProperty('--app-h', `${height}px`);
+      }
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
+    const viewport = window.visualViewport;
+    viewport?.addEventListener('resize', apply);
+    viewport?.addEventListener('scroll', apply);
+    return () => {
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
+      viewport?.removeEventListener('resize', apply);
+      viewport?.removeEventListener('scroll', apply);
+    };
+  }, []);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -148,7 +181,10 @@ export function StudentShell({
     // are ordinary in-flow rows — they can never slide half off-screen or
     // scroll away when the browser chrome shows/hides mid-scroll. On
     // desktop the page itself scrolls as before (root grows with content).
-    <div className="desktop-ambient flex h-dvh flex-col overflow-hidden bg-canvas lg:h-auto lg:min-h-dvh lg:overflow-visible">
+    <div
+      ref={rootRef}
+      className="desktop-ambient flex h-[var(--app-h,100dvh)] flex-col overflow-hidden bg-canvas lg:h-auto lg:min-h-dvh lg:overflow-visible"
+    >
       {/* Burgundy wave header — pinned at the top of the shell on phones */}
       <div className="relative flex-none bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10">

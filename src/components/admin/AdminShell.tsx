@@ -117,10 +117,40 @@ export function AdminShell({
   // change only resets the scroll region to the top so pages don't open
   // mid-scroll.
   const mainRef = useRef<HTMLElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0;
   }, [pathname]);
+
+  // Same viewport pinning as the student shell: keep the column exactly as
+  // tall as the phone's visible area so the bottom bar can never slide
+  // off-screen.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    let last = 0;
+    const apply = () => {
+      const viewport = window.visualViewport;
+      const height = Math.round(viewport?.height ?? window.innerHeight);
+      if (height > 0 && Math.abs(height - last) >= 1) {
+        last = height;
+        el.style.setProperty('--app-h', `${height}px`);
+      }
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
+    const viewport = window.visualViewport;
+    viewport?.addEventListener('resize', apply);
+    viewport?.addEventListener('scroll', apply);
+    return () => {
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
+      viewport?.removeEventListener('resize', apply);
+      viewport?.removeEventListener('scroll', apply);
+    };
+  }, []);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -415,7 +445,10 @@ export function AdminShell({
     // App shell on phones (same rule as the student shell): fixed-height
     // column, only <main> scrolls, top/bottom bars are in-flow rows — the
     // browser chrome resizing the viewport mid-scroll can't strand them.
-    <div className="flex h-dvh overflow-hidden bg-canvas lg:h-auto lg:min-h-dvh lg:overflow-visible">
+    <div
+      ref={rootRef}
+      className="flex h-[var(--app-h,100dvh)] overflow-hidden bg-canvas lg:h-auto lg:min-h-dvh lg:overflow-visible"
+    >
       {/* Desktop sidebar (full or icon rail) */}
       <aside
         className={cn(
