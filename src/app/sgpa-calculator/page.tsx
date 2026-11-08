@@ -50,8 +50,8 @@ export default function SgpaCalculatorPage() {
   return (
     <div className="min-h-dvh bg-canvas text-charcoal">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-3">
-          <span className="relative h-10 w-10 overflow-hidden rounded-xl ring-1 ring-burgundy-border">
+        <Link href="/" className="flex min-w-0 items-center gap-3">
+          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl ring-1 ring-burgundy-border">
             <Image
               src="/brand/logo.png"
               alt="Azhimathi Mayam logo"
@@ -60,27 +60,21 @@ export default function SgpaCalculatorPage() {
               className="h-full w-full object-cover"
             />
           </span>
-          <span className="leading-tight">
-            <span className="block font-logo text-lg font-bold text-burgundy-deep">അഴിമതി മയം</span>
+          <span className="min-w-0 leading-tight">
+            <span className="block whitespace-nowrap font-logo text-lg font-bold text-burgundy-deep">
+              അഴിമതി മയം
+            </span>
             <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-muted">
               Azhimathi Mayam
             </span>
           </span>
         </Link>
-        <nav className="flex items-center gap-2 sm:gap-3" aria-label="Account">
-          <Link
-            href="/login"
-            className="rounded-full px-4 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/register"
-            className="rounded-full bg-burgundy px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(121,0,0,0.8)] transition-all hover:bg-burgundy-dark active:scale-95"
-          >
-            Create free account
-          </Link>
-        </nav>
+        <Link
+          href="/"
+          className="shrink-0 rounded-full px-3 py-2 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy-tint"
+        >
+          ← Home
+        </Link>
       </header>
 
       <main className="mx-auto max-w-6xl px-5 pb-16 sm:px-8">
