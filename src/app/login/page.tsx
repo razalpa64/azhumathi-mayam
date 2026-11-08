@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import '@fontsource-variable/fraunces';
 import '@fontsource-variable/baloo-chettan-2';
 import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
+import { InvytraCredit } from '@/components/InvytraCredit';
 import { LoginForm } from './LoginForm';
 import { LoginBrandPanel } from './LoginBrandPanel';
 
@@ -72,7 +73,7 @@ export default async function LoginPage() {
           className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(55%_50%_at_50%_42%,rgba(121,0,0,0.055),transparent_72%)] lg:block"
         />
 
-        <main className="relative z-10 mx-auto w-full max-w-[430px] px-5 sm:px-0 lg:py-8">
+        <main className="relative z-10 mx-auto w-full max-w-[430px] px-5 sm:px-0 lg:py-5">
           <section className="relative -mt-24 rounded-[28px] border border-[#F3E2DC] bg-white px-6 pb-7 pt-8 shadow-[0_24px_50px_-20px_rgba(74,4,4,0.35)] sm:-mt-28 sm:px-8 lg:mt-0 lg:rounded-[26px] lg:border-[#EFDAD3] lg:px-9 lg:pb-7 lg:pt-9 lg:shadow-[0_30px_60px_-32px_rgba(74,4,4,0.45)]">
             <h2 className="font-login-display text-center text-[30px] font-semibold leading-tight text-[#43060A]">
               Welcome Back
@@ -96,11 +97,14 @@ export default async function LoginPage() {
             </div>
           </section>
 
-          <p className="relative pb-40 pt-6 text-center text-xs text-[#A68F86] lg:pb-0 lg:pt-5">
-            © {new Date().getFullYear()}{' '}
-            <span className="font-logo font-semibold text-[#7A655E]">അഴിമതി മയം</span>
-            {' · '}Made for students
-          </p>
+          <div className="relative pb-40 pt-6 text-center lg:pb-0 lg:pt-5">
+            <p className="text-xs text-[#A68F86]">
+              © {new Date().getFullYear()}{' '}
+              <span className="font-logo font-semibold text-[#7A655E]">അഴിമതി മയം</span>
+              {' · '}Made for students
+            </p>
+            <InvytraCredit className="mt-1.5" />
+          </div>
         </main>
       </div>
 

@@ -6,6 +6,7 @@ import { getSiteUrl } from '@/lib/site';
 import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { StudentShell } from '@/components/student/StudentShell';
+import { InvytraCredit } from '@/components/InvytraCredit';
 
 const description =
   'Free SGPA & CGPA calculator for KTU, Calicut University, MG University, University of Kerala, Kannur University and CUSAT students. Pick your university, enter grades, and get SGPA, CGPA and the official percentage conversion instantly — no sign-up.';
@@ -250,6 +251,7 @@ export default async function SgpaCalculatorPage() {
             Free SGPA/CGPA calculator for KTU, Calicut, MG, Kerala, Kannur and CUSAT students.
             Results are indicative — your university result is final.
           </p>
+          <InvytraCredit />
         </div>
       </footer>
       )}

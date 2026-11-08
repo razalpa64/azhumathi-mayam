@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Layers,
 } from 'lucide-react';
+import { InvytraCredit } from '@/components/InvytraCredit';
 
 export type LandingStats = {
   universities: number;
@@ -336,24 +337,35 @@ export function LandingPage({
       </section>
 
       {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <p>
-          <span className="font-logo font-bold text-burgundy-deep">അഴിമതി മയം</span>{' '}
-          — study notes, question papers &amp; syllabus for Kerala students.
-        </p>
-        <p>
-          Help:{' '}
-          <a
-            href="mailto:help.azhimathimayam@gmail.com"
-            className="font-medium text-burgundy hover:underline"
-          >
-            help.azhimathimayam@gmail.com
-          </a>{' '}
-          · 86061 59002 ·{' '}
-          <Link href="/sgpa-calculator" className="font-medium text-burgundy hover:underline">
-            SGPA &amp; CGPA Calculator
-          </Link>
-        </p>
+      <footer className="mx-auto max-w-6xl px-5 pb-10 pt-9 text-sm text-muted sm:px-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            <span className="font-logo font-bold text-burgundy-deep">അഴിമതി മയം</span>{' '}
+            — study notes, question papers &amp; syllabus for Kerala students.
+          </p>
+          <p>
+            Help:{' '}
+            <a
+              href="mailto:help.azhimathimayam@gmail.com"
+              className="font-medium text-burgundy hover:underline"
+            >
+              help.azhimathimayam@gmail.com
+            </a>{' '}
+            · 86061 59002 ·{' '}
+            <Link href="/sgpa-calculator" className="font-medium text-burgundy hover:underline">
+              SGPA &amp; CGPA Calculator
+            </Link>
+          </p>
+        </div>
+
+        <div className="mt-7 flex flex-col items-start gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <InvytraCredit />
+          <p className="text-xs text-muted">
+            © {new Date().getFullYear()}{' '}
+            <span className="font-logo font-semibold text-burgundy-deep">അഴിമതി മയം</span>
+            {' · '}Made for students
+          </p>
+        </div>
       </footer>
     </div>
   );
