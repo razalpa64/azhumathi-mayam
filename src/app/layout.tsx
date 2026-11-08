@@ -113,6 +113,10 @@ export const viewport: Viewport = {
   themeColor: '#660000',
   width: 'device-width',
   initialScale: 1,
+  // 'cover' lets the app draw edge-to-edge; the shells then inset their
+  // top/bottom bars with env(safe-area-inset-*) so nothing hides under
+  // the notch or home indicator.
+  viewportFit: 'cover',
 };
 
 export default async function RootLayout({
