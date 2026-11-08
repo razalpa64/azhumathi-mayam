@@ -95,15 +95,27 @@ export function RegisterForm({
   const ownSchemes = filteredRegulations.filter(
     (r) => r.university_id && r.university_id === universityId
   );
-  const sharedSchemes = filteredRegulations.filter((r) => !r.university_id);
-  // Until a university is picked we still list everything — just under one
-  // heading instead of pretending to know which university it belongs to.
-  const regulationGroups = universityId
-    ? [
-        { label: `${selectedUniversity?.short_name ?? 'University'} schemes`, items: ownSchemes },
-        { label: 'Common to Kerala universities', items: sharedSchemes },
-      ]
-    : [{ label: 'All schemes', items: filteredRegulations }];
+
+  // One flat, short list. Native Android renders <optgroup> headings as
+  // full-size rows and wraps any long label onto two lines, which turned
+  // this picker into an unreadable block — so the grouping is carried by
+  // a short prefix instead, and the batch range moves out of the option
+  // into the caption underneath.
+  const SCHEME_SHORT_LABELS: Record<string, string> = {
+    'KTU-2024': '2024 scheme',
+    'KTU-2019': '2019 scheme',
+    'FYUGP-2024': 'FYUGP 2024',
+    'CBCSS-UG': 'CBCSS UG',
+    'CSS-PG': 'CSS (PG)',
+  };
+  const schemeOptions = filteredRegulations.map((reg) => {
+    const short = SCHEME_SHORT_LABELS[reg.code] || reg.name;
+    const prefix = reg.university_id
+      ? (universities.find((u) => u.id === reg.university_id)?.short_name ?? 'Own')
+      : 'Common';
+    return { reg, label: `${prefix} · ${short}` };
+  });
+  const selectedScheme = filteredRegulations.find((r) => r.id === regulationId);
 
   const loginHref =
     nextParam &&
@@ -443,19 +455,17 @@ export function RegisterForm({
               className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
             >
               <option value="">Select Scheme (Optional)</option>
-              {regulationGroups.map((group) =>
-                group.items.length > 0 ? (
-                  <optgroup key={group.label} label={group.label}>
-                    {group.items.map((reg) => (
-                      <option key={reg.id} value={reg.id}>
-                        {reg.name}
-                        {reg.batch_range ? ` · ${reg.batch_range}` : ''}
-                      </option>
-                    ))}
-                  </optgroup>
-                ) : null
-              )}
+              {schemeOptions.map(({ reg, label }) => (
+                <option key={reg.id} value={reg.id}>
+                  {label}
+                </option>
+              ))}
             </select>
+            {selectedScheme?.batch_range ? (
+              <p className="mt-1 text-[11px] text-muted">
+                {selectedScheme.name} · Admissions: {selectedScheme.batch_range}
+              </p>
+            ) : null}
             {universityId && ownSchemes.length === 0 ? (
               <p className="mt-1 text-[11px] text-muted">
                 No {selectedUniversity?.short_name}-only scheme yet — pick the common regulation that
