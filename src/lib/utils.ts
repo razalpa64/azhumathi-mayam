@@ -42,6 +42,21 @@ export function getGreetingByHour(): string {
   return 'Good evening';
 }
 
+/**
+ * The name to show a student in their own greeting.
+ *
+ * Drops the old habit of printing only the first token: "Muhammed Yasen"
+ * is one person's name, and greeting them as "Muhammed" reads as if the
+ * page had cut them off. Whitespace is collapsed so a stray double space
+ * cannot push a heading around, and the username is the fallback for the
+ * (rare) profile that has no name at all.
+ */
+export function getDisplayName(fullName: string | null | undefined, username?: string | null): string {
+  const cleaned = (fullName || '').replace(/\s+/g, ' ').trim();
+  if (cleaned) return cleaned;
+  return (username || '').trim();
+}
+
 export function getInitials(name: string): string {
   return name
     .trim()
