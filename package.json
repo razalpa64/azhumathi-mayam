@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "db:provision": "tsx scripts/provision.ts",
     "test:e2e": "tsx scripts/verify-platform.ts",
-    "test:schemes": "tsx scripts/verify-regulation-scope.ts"
+    "test:schemes": "tsx scripts/verify-regulation-scope.ts",
+    "test:taxonomy": "tsx scripts/verify-taxonomy.ts"
   },
   "dependencies": {
     "@fontsource-variable/baloo-chettan-2": "^5.3.0",

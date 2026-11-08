@@ -61,7 +61,7 @@ const loadTaxonomy = unstable_cache(
     const admin = createSupabaseAdminClient();
     const [
       { data: universities },
-      { data: programmes },
+      { data: activeProgrammes },
       { data: specializations },
       { data: regulations },
       { data: semesters },
@@ -81,9 +81,26 @@ const loadTaxonomy = unstable_cache(
           .range(from, to)
       ),
     ]);
+    // A registration form with no programme in it is a dead end. If every
+    // programme row reads as inactive, that is far more likely a bad flag
+    // than a site with no degrees, so fall back to the full list and shout
+    // about it in the logs instead of showing a student an empty picker.
+    let programmes = (activeProgrammes || []) as Programme[];
+    if (programmes.length === 0) {
+      const { data: allProgrammes } = await admin
+        .from('programmes')
+        .select('*')
+        .order('display_order')
+        .order('name');
+      programmes = (allProgrammes || []) as Programme[];
+      console.warn(
+        `[register] no active programmes in taxonomy — offering ${programmes.length} unfiltered instead`
+      );
+    }
+
     return {
       universities: (universities || []) as University[],
-      programmes: (programmes || []) as Programme[],
+      programmes,
       specializations: (specializations || []) as Specialization[],
       regulations: (regulations || []) as AcademicRegulation[],
       semesters: (semesters || []) as Semester[],

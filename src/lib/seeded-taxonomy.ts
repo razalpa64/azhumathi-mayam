@@ -42,6 +42,19 @@ export function filterTaxonomyToSeeded(
   programmes: Programme[];
   specializations: Specialization[];
 } {
+  // "No subject rows came back" is NOT "nothing has content behind it".
+  // A scan that failed silently, a cache entry that came back short, or a
+  // cold database would otherwise empty every picker — and an empty
+  // programme picker is a dead end: a new student cannot register at all.
+  // Only ever narrow the list when subject data actually arrived.
+  if (subjects.length === 0) {
+    return {
+      universities: taxonomy.universities,
+      programmes: taxonomy.programmes,
+      specializations: taxonomy.specializations,
+    };
+  }
+
   const { programmeIds, specializationIds } = seededIdSets(subjects);
   const programmes = taxonomy.programmes.filter((p) => programmeIds.has(p.id));
   const specializations = taxonomy.specializations.filter((s) =>

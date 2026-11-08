@@ -393,6 +393,12 @@ export function RegisterForm({
                 </option>
               ))}
             </select>
+            {programmes.length === 0 ? (
+              <p className="mt-1 text-[11px] font-medium text-burgundy">
+                No programmes are set up yet, so registration cannot finish. Please message us on
+                WhatsApp and we will fix it.
+              </p>
+            ) : null}
           </div>
 
           <div>

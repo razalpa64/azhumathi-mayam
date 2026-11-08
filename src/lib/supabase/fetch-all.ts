@@ -29,7 +29,17 @@ export async function fetchAllRows<T>(
   for (let page = 0; page < MAX_PAGES; page++) {
     const from = page * pageSize;
     const { data, error } = await buildPage(from, from + pageSize - 1);
-    if (error || !data || data.length === 0) break;
+    if (error) {
+      // Never swallow this: the caller cannot tell a short list from a
+      // failed query, and an empty result quietly emptied the programme
+      // picker on the sign-up page. Keep the rows we have, but say so.
+      console.error('[fetchAllRows] page request failed; returning the rows fetched so far', {
+        from,
+        error,
+      });
+      break;
+    }
+    if (!data || data.length === 0) break;
     rows.push(...data);
     if (data.length < pageSize) break;
   }

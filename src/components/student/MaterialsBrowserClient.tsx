@@ -213,23 +213,30 @@ export function MaterialsBrowserClient({
   // an unseeded branch can only ever produce an empty list. A
   // selection already in force (e.g. from a dashboard link) stays.
   const seeded = useMemo(() => seededIdSets(taxonomy.subjects), [taxonomy.subjects]);
+  // Only narrow the filter to programmes/branches that have subjects when
+  // the subject list actually loaded. An empty list means "we could not
+  // read them", not "nothing exists" — the same rule the sign-up pickers
+  // follow, so a failed scan can never leave a filter with no options.
+  const subjectDataKnown = taxonomy.subjects.length > 0;
   const programmeOptions = useMemo(() => {
-    const list = taxonomy.programmes.filter((pr) => seeded.programmeIds.has(pr.id));
+    const list = subjectDataKnown
+      ? taxonomy.programmes.filter((pr) => seeded.programmeIds.has(pr.id))
+      : taxonomy.programmes;
     return programmeId && !list.some((pr) => pr.id === programmeId)
       ? [...list, ...taxonomy.programmes.filter((pr) => pr.id === programmeId)]
       : list;
-  }, [taxonomy.programmes, seeded, programmeId]);
+  }, [taxonomy.programmes, seeded, programmeId, subjectDataKnown]);
   const specializationOptions = useMemo(() => {
-    const list = filteredSpecializations.filter((sp) =>
-      seeded.specializationIds.has(sp.id)
-    );
+    const list = subjectDataKnown
+      ? filteredSpecializations.filter((sp) => seeded.specializationIds.has(sp.id))
+      : filteredSpecializations;
     return specializationId && !list.some((sp) => sp.id === specializationId)
       ? [
           ...list,
           ...filteredSpecializations.filter((sp) => sp.id === specializationId),
         ]
       : list;
-  }, [filteredSpecializations, seeded, specializationId]);
+  }, [filteredSpecializations, seeded, specializationId, subjectDataKnown]);
 
   const filteredSemesters = useMemo(
     () =>
