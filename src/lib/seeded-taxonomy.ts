@@ -47,13 +47,12 @@ export function filterTaxonomyToSeeded(
   const specializations = taxonomy.specializations.filter((s) =>
     specializationIds.has(s.id)
   );
-  const universityIds = new Set(
-    programmes
-      .map((p) => p.university_id)
-      .filter((id): id is string => Boolean(id))
-  );
-  const universities = taxonomy.universities.filter((u) =>
-    universityIds.has(u.id)
-  );
-  return { universities, programmes, specializations };
+  // Universities are NEVER filtered by seeded content. Programmes in this
+  // schema are university-agnostic (one B.Tech/B.Sc/BA row is shared by
+  // every university), so `programmes.university_id` is null almost
+  // everywhere. Deriving the university list from it emptied the picker
+  // entirely — students saw an empty "Select University" dropdown. All
+  // six universities the app supports must always be offered; the
+  // university is what selects the right regulation/scheme.
+  return { universities: taxonomy.universities, programmes, specializations };
 }

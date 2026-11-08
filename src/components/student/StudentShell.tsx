@@ -101,40 +101,17 @@ export function StudentShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // Auto-hiding chrome (phones): the tab strip and bottom bar slide away
-  // while you scroll DOWN into content and come back the moment you
-  // scroll up — fully gone or fully back, never stranded half-way. The
-  // burgundy brand header always stays (logo, alerts, menu). Desktop
-  // keeps its sticky strip and doesn't hide anything.
-  const [chromeHidden, setChromeHidden] = useState(false);
-  const lastScrollY = useRef(0);
+  // Both bars are permanent — they never hide, fade or move. The strip and
+  // the bottom bar are ordinary rows of the shell, so they cannot be
+  // stranded half off-screen by browser chrome resizing the viewport and
+  // they cannot float over content either.
   const mainRef = useRef<HTMLElement | null>(null);
 
-  // A new page always starts at the top with the chrome visible —
-  // otherwise the scroll position of the previous page leaks into the
-  // next one and everything looks shifted/overlapped.
+  // A new page always starts at the top: without this the previous page's
+  // scroll offset leaks into the next page and everything looks shifted.
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0;
-    lastScrollY.current = 0;
-    setChromeHidden(false);
   }, [pathname]);
-
-  function handleMainScroll(event: React.UIEvent<HTMLElement>) {
-    const y = event.currentTarget.scrollTop;
-    const dy = y - lastScrollY.current;
-    if (y <= 64) {
-      if (chromeHidden) setChromeHidden(false);
-    } else if (dy > 8) {
-      if (!chromeHidden) setChromeHidden(true);
-    } else if (dy < -8) {
-      if (chromeHidden) setChromeHidden(false);
-    }
-    lastScrollY.current = y;
-  }
-
-  // The mobile menu sheet lives inside the strip — never hide the strip
-  // out from under an open menu.
-  const stripHidden = chromeHidden && !mobileOpen;
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -285,22 +262,12 @@ export function StudentShell({
         </svg>
       </div>
 
-      {/* Pill strip — a row of the shell on phones that auto-hides while
-          scrolling down and returns on scroll-up (grid-rows collapse, so
-          it truly leaves the layout instead of overlapping content); on
-          desktop the page scrolls and the strip sticks to the top and
-          never hides. Hidden in the chat room; the menu sheet is not. */}
-      <div
-        className={cn(
-          'grid flex-none transition-[grid-template-rows,opacity] duration-300 ease-out',
-          stripHidden
-            ? 'grid-rows-[0fr] opacity-0 lg:grid-rows-[1fr] lg:opacity-100'
-            : 'grid-rows-[1fr] opacity-100'
-        )}
-        aria-hidden={stripHidden || undefined}
-      >
-        <div className="min-h-0 overflow-hidden lg:overflow-visible">
-      <div className="sticky top-0 z-40 border-b border-line/70 bg-canvas/90 backdrop-blur-md">
+      {/* Pill strip — a permanent row of the shell on phones (solid, no
+          blur: blurred layers over an inner scroll container made Chrome
+          mis-paint other elements). On desktop the page scrolls, so the
+          strip sticks to the top instead. Hidden in the chat room; the
+          menu sheet is not. */}
+      <div className="flex-none border-b border-line/70 bg-canvas lg:sticky lg:top-0 lg:z-40 lg:bg-canvas/90 lg:backdrop-blur-md">
         <div
           className={cn(
             'mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10',
@@ -411,8 +378,6 @@ export function StudentShell({
           </div>
         ) : null}
       </div>
-        </div>
-      </div>
 
       {/* Main Content — the shell's one scroll region on phones (on
           desktop it is a plain block and the page scrolls instead).
@@ -421,19 +386,18 @@ export function StudentShell({
           longer pages simply grow the scroll area. */}
       <main
         ref={mainRef}
-        onScroll={handleMainScroll}
-        className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overscroll-contain px-4 pt-6 sm:px-6 lg:overflow-visible lg:px-10 lg:pt-6 xl:max-w-[1440px]"
+        className="relative isolate mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-canvas px-4 pt-6 sm:px-6 lg:overflow-visible lg:px-10 lg:pt-6 xl:max-w-[1440px]"
       >
         <div key={pathname} className="anim-page flex min-h-full flex-col pb-10 lg:pb-16">
           {children}
         </div>
 
-      {/* Footer — the last thing inside the scroll region, so on phones it
-          only appears at the very end of the page (steps aside in the chat
-          room, like the tab strip). Negative margins bleed the band to the
-          shell's edges; the inner container re-applies the page padding. */}
+      {/* Footer — desktop only. On phones this band sat inside the scroll
+          region and Chrome painted it over the notices card; every link it
+          carries is already in the menu sheet, so the phone layout simply
+          has no footer (the way real app shells don't). */}
       {!isChat ? (
-      <footer className="-mx-4 mt-6 border-t border-line bg-neutral-soft/60 sm:-mx-6 lg:-mx-10">
+      <footer className="mt-6 hidden border-t border-line bg-neutral-soft/60 lg:-mx-10 lg:block">
         <div className="mx-auto flex max-w-7xl xl:max-w-[1440px] flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row lg:py-7 lg:text-[13px] sm:px-6 lg:px-10">
           <div className="flex items-center gap-2.5">
             <span className="font-logo text-base font-bold text-burgundy">അഴിമതി മയം</span>
@@ -472,21 +436,12 @@ export function StudentShell({
       </main>
 
       {/* Mobile bottom navigation — a full-width row of the shell on the
-          bottom edge (messaging-app style); the active tab sits on a
-          soft pill. In-flow, not fixed: it cannot be stranded half
-          off-screen by browser chrome resizing the viewport. It shares
-          the strip's auto-hide: gone while scrolling down, back on
-          scroll-up (grid-rows collapse = fully out of the layout). */}
-      <div
-        className={cn(
-          'grid flex-none transition-[grid-template-rows,opacity] duration-300 ease-out lg:hidden',
-          chromeHidden ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
-        )}
-        aria-hidden={chromeHidden || undefined}
-      >
-        <div className="min-h-0 overflow-hidden">
-      <nav aria-label="Bottom">
-        <div className="grid grid-cols-5 border-t border-line bg-canvas/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
+          bottom edge (messaging-app style); the active tab sits on a soft
+          pill. In-flow, not fixed: it cannot be stranded half off-screen
+          by browser chrome resizing the viewport — and it is always
+          visible, never hidden while scrolling. */}
+      <nav aria-label="Bottom" className="flex-none lg:hidden">
+        <div className="grid grid-cols-5 border-t border-line bg-canvas px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2">
           {BOTTOM_NAV.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href, item.exact);
@@ -509,8 +464,6 @@ export function StudentShell({
           })}
         </div>
       </nav>
-        </div>
-      </div>
 
       {/* Friendly one-time install invitation — Home screen only */}
       {pathname === '/dashboard' ? <InstallPromptCard /> : null}

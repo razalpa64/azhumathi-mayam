@@ -43,7 +43,7 @@ export function NoticeBoard({ notices, noticesEnabled }: NoticeBoardProps) {
               className={cn(
                 'rounded-lg border p-4 transition-colors lg:rounded-[22px] lg:p-5',
                 isHighPriority
-                  ? 'border-burgundy-border bg-burgundy-tint/65'
+                  ? 'border-burgundy-border bg-burgundy-tint'
                   : 'border-line bg-canvas'
               )}
             >
