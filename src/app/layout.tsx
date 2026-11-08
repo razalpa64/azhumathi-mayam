@@ -113,10 +113,11 @@ export const viewport: Viewport = {
   themeColor: '#660000',
   width: 'device-width',
   initialScale: 1,
-  // 'cover' lets the app draw edge-to-edge; the shells then inset their
-  // top/bottom bars with env(safe-area-inset-*) so nothing hides under
-  // the notch or home indicator.
-  viewportFit: 'cover',
+  // No viewportFit: 'cover' — edge-to-edge drawing slid the app header
+  // under the status bar on Android Chrome (safe-area-inset-top does not
+  // reliably include the status bar there). The default keeps the layout
+  // below the status bar; the bottom bars still pad with
+  // env(safe-area-inset-bottom) where a browser reports it.
 };
 
 export default async function RootLayout({

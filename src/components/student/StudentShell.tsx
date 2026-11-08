@@ -138,7 +138,7 @@ export function StudentShell({
     // desktop the page itself scrolls as before (root grows with content).
     <div className="desktop-ambient flex h-dvh flex-col overflow-hidden bg-canvas lg:h-auto lg:min-h-dvh lg:overflow-visible">
       {/* Burgundy wave header — pinned at the top of the shell on phones */}
-      <div className="relative flex-none bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas [padding-top:env(safe-area-inset-top)]">
+      <div className="relative flex-none bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10">
           <div className="flex items-center justify-between gap-3 pb-10 pt-3.5 sm:pb-11 sm:pt-4 lg:pb-10 lg:pt-4">
             {/* Brand */}
