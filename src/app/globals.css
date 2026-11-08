@@ -66,32 +66,67 @@ body {
 }
 
 /*
-  Overflow guard. File names, subject codes and pasted Drive URLs are
-  long unbroken strings ("KTU_DATA_STRUCTURES_LAB_ALGORITHM_AND_PROGRAMS").
+  Overflow guards for long unbroken strings: file names, subject codes and
+  pasted Drive URLs ("KTU_DATA_STRUCTURES_LAB_ALGORITHM_AND_PROGRAMS").
 
-  This must be `anywhere`, not `break-word`. Both wrap a too-long word the
-  same way on screen, but only `anywhere` also shrinks the element's
-  *intrinsic minimum* — and that minimum is what a grid's `auto` track and
-  a flex item's `min-width: auto` are built from. With `break-word`, one
-  such title stretched a single-column grid past the screen: the card grew
-  wider than the phone, its buttons and date were clipped, and the title
-  itself never wrapped because its box had grown to fit it.
+  `break-word` is the default because it wraps a too-long word exactly the
+  way you would want without touching the element's *intrinsic* width. That
+  matters for controls: a button whose minimum width collapses to a single
+  character gets crushed by flexbox, and its label stacks one letter per
+  line — which is exactly what an app-wide `overflow-wrap: anywhere` did to
+  every button label in a row.
 
-  `anywhere` only changes sizing, never normal text: a word is still broken
-  only when it genuinely cannot fit on its line.
+  Prose gets the stronger `anywhere` below, because there it is the word
+  that should give way, never the layout.
 */
 body {
+  overflow-wrap: break-word;
+}
+
+/*
+  Headings, paragraphs and list text may break a word anywhere: that also
+  shrinks their intrinsic minimum, so a 40-character file name can no
+  longer stretch a grid track or a flex line past its container.
+*/
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li,
+dd,
+dt,
+blockquote,
+figcaption {
   overflow-wrap: anywhere;
 }
 
 /*
-  Carve-out: table cells keep the gentler rule. Admin tables live inside
-  their own horizontal scrollers and rely on their columns not collapsing
-  to a single character, which is what `anywhere` would allow.
+  Table cells keep the gentler rule: admin tables live inside their own
+  horizontal scrollers and rely on their columns not collapsing.
 */
 th,
 td {
   overflow-wrap: break-word;
+}
+
+/*
+  Chrome paints autofilled fields pale blue, which lands as a foreign block
+  of colour in the middle of the burgundy-and-cream palette. Keep the
+  field's own background and text colour instead.
+*/
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface-base) inset;
+  box-shadow: 0 0 0 1000px var(--surface-base) inset;
+  caret-color: var(--text-primary);
+  transition: background-color 9999s ease-out 0s;
 }
 
 /* Nothing may exceed its container, whatever gets pasted in */

@@ -25,8 +25,8 @@ export default async function LoginPage() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_90%_at_85%_0%,rgba(255,255,255,0.13),transparent_65%)]"
         />
-        <div className="relative mx-auto flex max-w-2xl flex-col items-center px-6 pb-36 pt-14 text-center sm:pb-40 sm:pt-20">
-          <h1 className="font-logo text-[44px] font-extrabold leading-[1.45] tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] sm:text-6xl sm:leading-[1.4]">
+        <div className="relative mx-auto flex max-w-2xl flex-col items-center px-6 pb-36 pt-14 text-center sm:pb-40 sm:pt-20 lg:pb-24 lg:pt-12">
+          <h1 className="font-logo text-[44px] font-extrabold leading-[1.45] tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] sm:text-6xl sm:leading-[1.4] lg:text-[52px] lg:leading-[1.45]">
             അഴിമതി
             <br />
             മയം
@@ -57,7 +57,7 @@ export default async function LoginPage() {
 
       {/* ── Sign-in card, tucked into the wave ───────────────── */}
       <main className="relative z-10 mx-auto w-full max-w-[430px] px-5 sm:px-0">
-        <section className="-mt-24 rounded-[28px] border border-[#F3E2DC] bg-white px-6 pb-7 pt-8 shadow-[0_24px_50px_-20px_rgba(74,4,4,0.35)] sm:-mt-28 sm:px-8">
+        <section className="-mt-24 rounded-[28px] border border-[#F3E2DC] bg-white px-6 pb-7 pt-8 shadow-[0_24px_50px_-20px_rgba(74,4,4,0.35)] sm:-mt-28 sm:px-8 lg:-mt-20 lg:pb-6 lg:pt-7">
           <h2 className="font-login-display text-center text-[30px] font-semibold leading-tight text-[#43060A]">
             Welcome Back
           </h2>
@@ -80,7 +80,7 @@ export default async function LoginPage() {
           </div>
         </section>
 
-        <p className="pb-40 pt-6 text-center text-xs text-[#A68F86]">
+        <p className="pb-40 pt-6 text-center text-xs text-[#A68F86] lg:pb-24">
           © {new Date().getFullYear()}{' '}
           <span className="font-logo font-semibold text-[#7A655E]">അഴിമതി മയം</span>
           {' · '}Made for students
@@ -92,7 +92,7 @@ export default async function LoginPage() {
         aria-hidden="true"
         viewBox="0 0 1440 220"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute bottom-0 left-0 h-[150px] w-full sm:h-[190px]"
+        className="pointer-events-none absolute bottom-0 left-0 h-[150px] w-full sm:h-[190px] lg:h-[150px]"
       >
         <path
           d="M0,110 C240,60 480,40 760,78 C1040,116 1220,140 1440,96 L1440,220 L0,220 Z"

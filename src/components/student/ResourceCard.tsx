@@ -190,10 +190,18 @@ export function ResourceCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/*
+          Action row. Labels never break mid-word (`whitespace-nowrap`) and
+          the two secondary buttons never shrink below their content
+          (`shrink-0`); when the card is too narrow for all three — a
+          4-across grid on a laptop — the row wraps and the primary button
+          takes the full first line. Crushing them instead is what broke
+          this row on desktop.
+        */}
+        <div className="flex flex-wrap items-center gap-2">
           <Link
             href={`/resources/${resource.id}`}
-            className="inline-flex flex-1 h-9 items-center justify-center gap-1.5 rounded-full bg-burgundy px-3 text-xs font-semibold text-canvas hover:bg-burgundy-dark transition-colors lg:h-10 lg:text-[13px]"
+            className="inline-flex h-9 min-w-0 grow items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-burgundy px-3 text-xs font-semibold text-canvas transition-colors hover:bg-burgundy-dark lg:h-10 lg:text-[13px]"
           >
             {resource.file_type === 'PDF' ? (
               <>
@@ -212,7 +220,7 @@ export function ResourceCard({
             type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft transition-colors cursor-pointer disabled:opacity-50 lg:h-10 lg:text-[13px]"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-line-strong bg-canvas px-3.5 text-xs font-semibold text-charcoal hover:bg-neutral-soft transition-colors cursor-pointer disabled:opacity-50 lg:h-10 lg:text-[13px]"
           >
             {downloading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -223,6 +231,7 @@ export function ResourceCard({
           </button>
 
           <ShareMenu
+            className="shrink-0"
             path={`/resources/${resource.id}`}
             title={resource.title}
             subjectLabel={
