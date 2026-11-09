@@ -26,6 +26,25 @@ const PROFILE_SELECT = `
 export const getAuthenticatedProfile = cache(fetchAuthenticatedProfile);
 
 async function fetchAuthenticatedProfile(): Promise<Profile | null> {
+  try {
+    return await readAuthenticatedProfile();
+  } catch {
+    // A network blip between the server and Supabase (or a cold project
+    // waking up) rejects the auth call. That used to throw out of every page
+    // and land the visitor on the full-page error screen. One quick retry
+    // covers the blip; after that the visitor is simply treated as signed
+    // out, which sends them to /login — a page that still works when the
+    // database does not.
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      return await readAuthenticatedProfile();
+    } catch {
+      return null;
+    }
+  }
+}
+
+async function readAuthenticatedProfile(): Promise<Profile | null> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -194,15 +213,22 @@ export const getWebsiteSettings = cache(
 );
 
 async function fetchWebsiteSettings(): Promise<WebsiteSettings> {
-  const admin = createSupabaseAdminClient();
-  const { data } = await admin
-    .from('website_settings')
-    .select('*')
-    .eq('id', 1)
-    .maybeSingle();
+  try {
+    const admin = createSupabaseAdminClient();
+    const { data } = await admin
+      .from('website_settings')
+      .select('*')
+      .eq('id', 1)
+      .maybeSingle();
 
-  if (data) {
-    return data as WebsiteSettings;
+    if (data) {
+      return data as WebsiteSettings;
+    }
+  } catch {
+    // Settings are decoration: support address, ad switches, platform name.
+    // A page must never fail because the row could not be read. The defaults
+    // below get cached for the same five minutes as a real read, so a blip
+    // can hide the settings briefly — far better than a blank page.
   }
 
   return {

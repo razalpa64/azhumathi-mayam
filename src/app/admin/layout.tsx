@@ -1,5 +1,6 @@
 import { requireStaffUser } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { safeCount } from '@/lib/supabase/safe-count';
 import { AdminShell } from '@/components/admin/AdminShell';
 
 export const metadata = {
@@ -17,22 +18,26 @@ export default async function AdminLayout({
 }) {
   const profile = await requireStaffUser();
   const adminClient = createSupabaseAdminClient();
-  const { count: pendingRequests } = await adminClient
-    .from('resource_requests')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'pending');
+  const pendingRequests = await safeCount(
+    adminClient
+      .from('resource_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending')
+  );
 
   // Student-upload moderation queue (table may not exist yet → 0).
-  const { count: pendingSubmissions } = await adminClient
-    .from('material_submissions')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'pending');
+  const pendingSubmissions = await safeCount(
+    adminClient
+      .from('material_submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending')
+  );
 
   return (
     <AdminShell
       profile={profile}
-      pendingRequests={pendingRequests || 0}
-      pendingSubmissions={pendingSubmissions || 0}
+      pendingRequests={pendingRequests}
+      pendingSubmissions={pendingSubmissions}
     >
       {children}
     </AdminShell>
