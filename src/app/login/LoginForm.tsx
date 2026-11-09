@@ -35,12 +35,19 @@ export function LoginForm() {
       : null
   );
 
-  const registerHref =
-    nextParam &&
-    (nextParam.startsWith('/dashboard') || nextParam.startsWith('/resources')) &&
-    !nextParam.startsWith('//')
-      ? `/register?next=${encodeURIComponent(nextParam)}`
-      : '/register';
+  // Where the middleware bounced them from. Only these shapes are honoured —
+  // anything else (absolute URLs, protocol-relative paths) is ignored, so
+  // `?next=` can never be used to send someone off-site after signing in.
+  const nextPath = nextParam || '';
+  const isSafeNext = !nextPath.startsWith('//');
+  const isStudentPath =
+    isSafeNext && (nextPath.startsWith('/dashboard') || nextPath.startsWith('/resources'));
+  const isAdminPath =
+    isSafeNext && (nextPath === '/admin' || nextPath.startsWith('/admin/'));
+
+  const registerHref = isStudentPath
+    ? `/register?next=${encodeURIComponent(nextPath)}`
+    : '/register';
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -76,16 +83,16 @@ export function LoginForm() {
         return;
       }
 
-      if (
-        data.role === 'student' &&
-        nextParam &&
-        (nextParam.startsWith('/dashboard') || nextParam.startsWith('/resources')) &&
-        !nextParam.startsWith('//')
-      ) {
-        router.replace(nextParam);
-      } else {
-        router.replace(data.redirectTo || '/dashboard');
-      }
+      // Staff dropped mid-task by an expired session return to the exact admin
+      // page they were on, instead of being dumped on the console home.
+      const backTo =
+        data.role === 'student' && isStudentPath
+          ? nextPath
+          : (data.role === 'admin' || data.role === 'sub_admin') && isAdminPath
+            ? nextPath
+            : null;
+
+      router.replace(backTo || data.redirectTo || '/dashboard');
       router.refresh();
     } catch {
       setError('Couldn’t reach the server. Check your connection and try again.');
