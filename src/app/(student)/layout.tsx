@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { requireStudentAppUser } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { safeCount } from '@/lib/supabase/safe-count';
 import { StudentShell } from '@/components/student/StudentShell';
 
 // Signed-in student pages must never be indexed (the public landing
@@ -17,14 +18,16 @@ export default async function StudentLayout({
   const profile = await requireStudentAppUser();
   const supabase = await createSupabaseServerClient();
 
-  const { count: unreadCount } = await supabase
-    .from('notifications')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', profile.id)
-    .eq('is_read', false);
+  const unreadCount = await safeCount(
+    supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', profile.id)
+      .eq('is_read', false)
+  );
 
   return (
-    <StudentShell profile={profile} unreadNotifications={unreadCount || 0}>
+    <StudentShell profile={profile} unreadNotifications={unreadCount}>
       {children}
     </StudentShell>
   );
