@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react';
 import type { Profile } from '@/types/database';
+import { InvytraCredit } from '@/components/InvytraCredit';
 import { InstallAppButton } from '@/components/pwa/InstallAppButton';
 import { InstallPromptCard } from '@/components/pwa/InstallPromptCard';
 import { cn, getInitials } from '@/lib/utils';
@@ -502,37 +503,43 @@ export function StudentShell({
           has no footer (the way real app shells don't). */}
       {!isChat ? (
       <footer className="mt-6 hidden border-t border-line bg-neutral-soft/60 lg:-mx-10 lg:block">
-        <div className="mx-auto flex max-w-7xl xl:max-w-[1440px] flex-col items-center justify-between gap-4 px-4 py-7 text-xs text-muted sm:flex-row lg:py-7 lg:text-[13px] sm:px-6 lg:px-10">
-          <div className="flex items-center gap-2.5">
-            <span className="font-logo text-base font-bold text-burgundy">അഴിമതി മയം</span>
-            <span aria-hidden="true">•</span>
-            <span>notes, syllabus &amp; question papers</span>
+        <div className="mx-auto max-w-7xl px-4 py-7 text-xs text-muted sm:px-6 lg:px-10 lg:text-[13px] xl:max-w-[1440px]">
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div className="flex items-center gap-2.5">
+              <span className="font-logo text-base font-bold text-burgundy">അഴിമതി മയം</span>
+              <span aria-hidden="true">•</span>
+              <span>notes, syllabus &amp; question papers</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+              <Link href="/dashboard/materials" className="hover:text-charcoal">
+                Library
+              </Link>
+              <Link href="/dashboard/question-papers" className="hover:text-charcoal">
+                Question Papers
+              </Link>
+              <Link href="/dashboard/short-notes" className="hover:text-charcoal">
+                Short Notes
+              </Link>
+              <Link href="/dashboard/requests" className="hover:text-charcoal">
+                Requests
+              </Link>
+              <Link href="/dashboard/help" className="hover:text-charcoal">
+                Help
+              </Link>
+              <Link href="/dashboard/profile" className="hover:text-charcoal">
+                Academic Profile
+              </Link>
+              <Link href="/dashboard/settings" className="hover:text-charcoal">
+                Security
+              </Link>
+              <span className="empty:hidden">
+                <InstallAppButton className="h-8 px-3 text-xs shadow-none" />
+              </span>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-            <Link href="/dashboard/materials" className="hover:text-charcoal">
-              Library
-            </Link>
-            <Link href="/dashboard/question-papers" className="hover:text-charcoal">
-              Question Papers
-            </Link>
-            <Link href="/dashboard/short-notes" className="hover:text-charcoal">
-              Short Notes
-            </Link>
-            <Link href="/dashboard/requests" className="hover:text-charcoal">
-              Requests
-            </Link>
-            <Link href="/dashboard/help" className="hover:text-charcoal">
-              Help
-            </Link>
-            <Link href="/dashboard/profile" className="hover:text-charcoal">
-              Academic Profile
-            </Link>
-            <Link href="/dashboard/settings" className="hover:text-charcoal">
-              Security
-            </Link>
-            <span className="empty:hidden">
-              <InstallAppButton className="h-8 px-3 text-xs shadow-none" />
-            </span>
+
+          <div className="mt-5 flex justify-center border-t border-line/70 pt-4 sm:justify-start">
+            <InvytraCredit />
           </div>
         </div>
       </footer>

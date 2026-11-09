@@ -7,6 +7,7 @@ import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { unstable_cache } from 'next/cache';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import { InvytraCredit } from '@/components/InvytraCredit';
 import { programmesWithSemesters } from '@/lib/register-options';
 import { RegisterForm } from './RegisterForm';
 import type {
@@ -235,13 +236,18 @@ export default async function RegisterPage() {
           </Suspense>
         </div>
 
-        <footer className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-line pt-5 text-xs text-muted">
-          <span>
-            © {new Date().getFullYear()}{' '}
-            <span className="font-malayalam font-semibold text-charcoal">അഴിമതി മയം</span>. All
-            rights reserved.
-          </span>
-          <span>Student study portal</span>
+        <footer className="border-t border-line pt-5 text-xs text-muted">
+          <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
+            <span>
+              © {new Date().getFullYear()}{' '}
+              <span className="font-malayalam font-semibold text-charcoal">അഴിമതി മയം</span>. All
+              rights reserved.
+            </span>
+            <span>Student study portal</span>
+          </div>
+          <div className="mt-3 flex justify-center sm:justify-end">
+            <InvytraCredit />
+          </div>
         </footer>
       </main>
     </div>
