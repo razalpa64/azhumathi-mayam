@@ -7,6 +7,8 @@ import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { StudentShell } from '@/components/student/StudentShell';
 import { InvytraCredit } from '@/components/InvytraCredit';
+import { AdSlot } from '@/components/ads/AdSlot';
+import { getPublicAd } from '@/lib/ads';
 
 const description =
   'Free SGPA & CGPA calculator for KTU, Calicut University, MG University, University of Kerala, Kannur University and CUSAT students. Pick your university, enter grades, and get SGPA, CGPA and the official percentage conversion instantly — no sign-up.';
@@ -72,6 +74,12 @@ export default async function SgpaCalculatorPage() {
   // standalone, search-indexed marketing page.
   const profile = await getAuthenticatedProfile().catch(() => null);
   const insideApp = Boolean(profile && !isStaffRole(profile.role));
+
+  // Signed-in students already have the shell's own placements; the public
+  // page is the one Google's crawler can actually reach.
+  const adConfig = insideApp
+    ? null
+    : await getPublicAd('homepage_banner');
 
   let unreadNotifications = 0;
   if (insideApp && profile) {
@@ -236,6 +244,16 @@ export default async function SgpaCalculatorPage() {
       ) : (
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
         {calculatorBody}
+        {/* Renders nothing unless an advertisement is enabled. */}
+        {adConfig ? (
+          <div className="mt-12">
+            <AdSlot
+              ad={adConfig.ad}
+              adsEnabled={adConfig.adsEnabled}
+              requireConsent={adConfig.requireConsent}
+            />
+          </div>
+        ) : null}
       </main>
       )}
       {insideApp ? null : (

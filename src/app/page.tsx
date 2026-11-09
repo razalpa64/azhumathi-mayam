@@ -10,6 +10,7 @@ import {
   type LandingStats,
 } from '@/components/landing/LandingPage';
 import { SITE_DESCRIPTION } from '@/lib/site';
+import { getPublicAd } from '@/lib/ads';
 import { UNIVERSITY_SCALES } from '@/lib/university-grades';
 
 export const metadata: Metadata = {
@@ -116,6 +117,8 @@ export default async function RootPage() {
   }
 
   const { stats, universities } = await loadPublicStats();
+  // Public pages are the only ones Google's AdSense crawler can reach.
+  const adConfig = await getPublicAd('homepage_banner');
 
   // FAQ rich results — the same questions a visitor reads on the page.
   const faqJsonLd = {
@@ -135,7 +138,13 @@ export default async function RootPage() {
         // Server-rendered constant — no user input flows in here.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <LandingPage stats={stats} universities={universities} />
+      <LandingPage
+        stats={stats}
+        universities={universities}
+        ad={adConfig.ad}
+        adsEnabled={adConfig.adsEnabled}
+        requireAdConsent={adConfig.requireConsent}
+      />
     </>
   );
 }

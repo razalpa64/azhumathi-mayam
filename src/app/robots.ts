@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         // Public, indexable pages: the landing page and account entry.
-        allow: ['/', '/login', '/register'],
+        allow: ['/', '/login', '/register', '/sgpa-calculator'],
         // Signed-in app areas and file delivery are not for search engines.
         disallow: ['/dashboard/', '/admin/', '/api/', '/resources/', '/offline'],
       },
