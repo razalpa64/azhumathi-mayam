@@ -11,6 +11,8 @@ import {
   Layers,
 } from 'lucide-react';
 import { InvytraCredit } from '@/components/InvytraCredit';
+import { AdSlot } from '@/components/ads/AdSlot';
+import type { Advertisement } from '@/types/database';
 
 export type LandingStats = {
   universities: number;
@@ -74,9 +76,16 @@ export const LANDING_FAQS = [
 export function LandingPage({
   stats,
   universities,
+  ad = null,
+  adsEnabled = false,
+  requireAdConsent = false,
 }: {
   stats: LandingStats | null;
   universities: string[];
+  /** Ad for the public homepage banner. Renders nothing when ads are off. */
+  ad?: Advertisement | null;
+  adsEnabled?: boolean;
+  requireAdConsent?: boolean;
 }) {
   return (
     <div className="min-h-dvh bg-canvas text-charcoal">
@@ -335,6 +344,16 @@ export function LandingPage({
           </div>
         </div>
       </section>
+
+      {/* ── Sponsored band ─────────────────────────────────────
+          Sits between the FAQ and the footer. While ads are switched off —
+          or no advertisement is enabled for this placement — not even the
+          wrapper is rendered, so the public page is pixel-identical. */}
+      {adsEnabled && ad ? (
+        <section className="mx-auto max-w-6xl px-5 pt-4 sm:px-8">
+          <AdSlot ad={ad} adsEnabled={adsEnabled} requireConsent={requireAdConsent} />
+        </section>
+      ) : null}
 
       {/* ── Footer ─────────────────────────────────────────── */}
       <footer className="mx-auto max-w-6xl px-5 pb-10 pt-9 text-sm text-muted sm:px-8">
