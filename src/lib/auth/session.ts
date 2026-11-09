@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { isTransientAuthError } from '@/lib/auth/transient';
 import type { Profile, WebsiteSettings } from '@/types/database';
 
 /** Cache tag for website settings — reused by the admin save route. */
@@ -46,22 +47,44 @@ async function fetchAuthenticatedProfile(): Promise<Profile | null> {
 
 async function readAuthenticatedProfile(): Promise<Profile | null> {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authErr,
-  } = await supabase.auth.getUser();
+  const first = await supabase.auth.getUser();
+
+  let user = first.data.user;
+  let authErr = first.error;
+
+  if (authErr && isTransientAuthError(authErr)) {
+    // A timeout, a rate limit or a 5xx from the auth server is not a verdict.
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const retry = await supabase.auth.getUser();
+    user = retry.data.user;
+    authErr = retry.error;
+  }
 
   if (authErr || !user) {
     return null;
   }
 
-  const { data: profile, error: profileErr } = await supabase
+  let profileResult = await supabase
     .from('profiles')
     .select(PROFILE_SELECT)
     .eq('id', user.id)
     .maybeSingle();
 
-  if (profileErr || !profile) {
+  if (profileResult.error) {
+    // A failed read looks exactly like "no profile" from here, and "no
+    // profile" means "bounce to /login". One retry keeps a blip from
+    // interrupting a signed-in admin mid-task.
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    profileResult = await supabase
+      .from('profiles')
+      .select(PROFILE_SELECT)
+      .eq('id', user.id)
+      .maybeSingle();
+  }
+
+  const profile = profileResult.data;
+
+  if (profileResult.error || !profile) {
     return null;
   }
 

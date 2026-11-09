@@ -1,5 +1,23 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isTransientAuthError } from '@/lib/auth/transient';
+
+/**
+ * A redirect that keeps the session cookies the request just refreshed.
+ *
+ * `supabase.auth.getUser()` rotates the refresh token and writes the new
+ * cookies onto the carrier response. Building a bare redirect throws them
+ * away, so the browser keeps a token the server has already retired — and the
+ * next refresh fails. To the person using the console, that looks like being
+ * logged out at random, a while after signing in.
+ */
+function redirectKeepingSession(url: URL, carrier: NextResponse) {
+  const response = NextResponse.redirect(url);
+  for (const cookie of carrier.cookies.getAll()) {
+    response.cookies.set(cookie);
+  }
+  return response;
+}
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -60,23 +78,19 @@ export async function middleware(request: NextRequest) {
       return supabaseResponse;
     }
 
-    // Public pages that check the session themselves: the landing page
-    // redirects signed-in users, the calculator renders inside the app
-    // shell when signed in, and a shared material link decides between
-    // the public preview and the full viewer. Running the middleware's
-    // own getUser() + profile query first meant three or four database
-    // round trips before the first byte of a public page.
-    const isSelfCheckingPublicPage =
-      pathname === '/' ||
-      pathname === '/sgpa-calculator' ||
-      pathname.startsWith('/resources');
-    if (isSelfCheckingPublicPage) {
-      return supabaseResponse;
-    }
-
+    // Refresh the session here, on every page request — public ones included.
+    //
+    // A Server Component cannot write cookies, so if the refresh happens
+    // while rendering, the new cookies are dropped on the floor and the
+    // refresh token that was just rotated is lost with them. Only the
+    // middleware (and route handlers) can persist it, which makes this call
+    // the thing that keeps an admin signed in past the first hour.
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
+
+    const authUnreachable = isTransientAuthError(authError);
 
     const isAuthPage = pathname === '/login' || pathname === '/register';
     const isRootPage = pathname === '/';
@@ -88,7 +102,25 @@ export async function middleware(request: NextRequest) {
     // login wall. The page itself serves the preview when logged out and
     // the full viewer when signed in.
 
+    // Public pages that check the session themselves: the landing page
+    // redirects signed-in users, the calculator renders inside the app
+    // shell when signed in, and a shared material link decides between
+    // the public preview and the full viewer. Their first byte should not
+    // wait for the profile query below — the refresh above still happens.
+    const isSelfCheckingPublicPage =
+      isRootPage || pathname === '/sgpa-calculator' || pathname.startsWith('/resources');
+    if (isSelfCheckingPublicPage) {
+      return supabaseResponse;
+    }
+
     if (!user) {
+      // "The auth server did not answer" is not the same as "you are signed
+      // out". Bouncing someone to /login over a blip is how a session looks
+      // like it ended on its own; the page behind this request checks again.
+      if (authUnreachable) {
+        return supabaseResponse;
+      }
+
       if (isAdminRoute || isStudentProtectedRoute) {
         const loginUrl = request.nextUrl.clone();
         loginUrl.pathname = '/login';
@@ -96,7 +128,7 @@ export async function middleware(request: NextRequest) {
         // /dashboard/materials?subjectId=… from a WhatsApp forward)
         // land exactly where they were meant to after signing in.
         loginUrl.searchParams.set('next', pathname + request.nextUrl.search);
-        return NextResponse.redirect(loginUrl);
+        return redirectKeepingSession(loginUrl, supabaseResponse);
       }
       // Everything else (/, /login, /register, public files) is public:
       // the root page renders the public landing page for visitors.
@@ -116,18 +148,26 @@ export async function middleware(request: NextRequest) {
       return supabaseResponse;
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role, is_active')
       .eq('id', user.id)
       .maybeSingle();
+
+    // A failed read is not a verdict about the account. This used to fall
+    // through to signOut() below, so one flaky query ended an admin's session
+    // for good and asked for the password again. Let the page decide instead;
+    // every admin page re-checks the profile through its own layout.
+    if (profileError) {
+      return supabaseResponse;
+    }
 
     if (!profile || !profile.is_active) {
       await supabase.auth.signOut();
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = '/login';
       loginUrl.searchParams.set('reason', 'deactivated');
-      return NextResponse.redirect(loginUrl);
+      return redirectKeepingSession(loginUrl, supabaseResponse);
     }
 
     // Staff = super admin + sub-admins; both belong in the console.
@@ -138,7 +178,7 @@ export async function middleware(request: NextRequest) {
       const dest = request.nextUrl.clone();
       dest.pathname = isStaff ? '/admin' : '/dashboard';
       dest.search = '';
-      return NextResponse.redirect(dest);
+      return redirectKeepingSession(dest, supabaseResponse);
     }
 
     // Strictly block students from /admin/*
@@ -146,7 +186,7 @@ export async function middleware(request: NextRequest) {
       const dest = request.nextUrl.clone();
       dest.pathname = '/dashboard';
       dest.search = '';
-      return NextResponse.redirect(dest);
+      return redirectKeepingSession(dest, supabaseResponse);
     }
 
     return supabaseResponse;
