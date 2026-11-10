@@ -155,3 +155,45 @@ export const DEFAULT_SCALE_ID = 'ktu';
 export function getUniversityScale(id: string | null | undefined): UniversityScale {
   return UNIVERSITY_SCALES.find((s) => s.id === id) || UNIVERSITY_SCALES[0];
 }
+
+/**
+ * Which grade scale belongs to a student's university profile.
+ *
+ * Used to open the calculator on the student's own scale instead of asking a
+ * KTU student to pick KTU out of six universities — and to keep Calicut's
+ * grade table off a KTU student's page.
+ *
+ * `short_name` is the reliable key (KTU, KU, MGU, CU, KNU, CUSAT); the full
+ * name is the fallback for a university added through the admin panel.
+ */
+const SCALE_BY_SHORT_NAME: Record<string, string> = {
+  KTU: 'ktu',
+  KU: 'kerala',
+  MGU: 'mgu',
+  CU: 'calicut',
+  KNU: 'kannur',
+  CUSAT: 'cusat',
+};
+
+export function scaleIdForUniversity(
+  university?: { short_name?: string | null; name?: string | null } | null
+): string | null {
+  if (!university) return null;
+
+  const short = (university.short_name || '').trim().toUpperCase();
+  if (SCALE_BY_SHORT_NAME[short]) return SCALE_BY_SHORT_NAME[short];
+
+  const hay = (university.name || '').toLowerCase();
+  if (!hay) return null;
+
+  // CUSAT before "technological": its full name is "Cochin University of
+  // Science and Technology".
+  if (hay.includes('cusat') || hay.includes('cochin')) return 'cusat';
+  if (hay.includes('kalam') || hay.includes('technological')) return 'ktu';
+  if (hay.includes('calicut')) return 'calicut';
+  if (hay.includes('mahatma') || hay.includes('gandhi')) return 'mgu';
+  if (hay.includes('kannur')) return 'kannur';
+  if (hay.includes('kerala')) return 'kerala';
+
+  return null;
+}
