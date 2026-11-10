@@ -202,6 +202,20 @@ async function main() {
     );
     await pg.query(contributionsSql);
 
+    console.log('3u. Applying 0025_degrees_without_branches.sql (degrees with no branches)...');
+    const degreesWithoutBranchesSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0025_degrees_without_branches.sql'),
+      'utf8'
+    );
+    await pg.query(degreesWithoutBranchesSql);
+
+    console.log('3v. Applying 0026_llb_calicut_subjects.sql (Calicut LL.B. programme + papers)...');
+    const llbSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0026_llb_calicut_subjects.sql'),
+      'utf8'
+    );
+    await pg.query(llbSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
