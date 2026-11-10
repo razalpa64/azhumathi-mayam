@@ -230,6 +230,13 @@ async function main() {
     );
     await pg.query(bbaLlbSql);
 
+    console.log('3y. Applying 0029_law_elective_groups_calicut.sql (B.A. LL.B. honours groups)...');
+    const lawGroupsSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0029_law_elective_groups_calicut.sql'),
+      'utf8'
+    );
+    await pg.query(lawGroupsSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
