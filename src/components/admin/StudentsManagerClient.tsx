@@ -27,6 +27,8 @@ import type {
 import { formatDate, formatDateTime } from '@/lib/utils';
 
 interface StudentsManagerClientProps {
+  /** Pre-filled search when the page is opened from the ⌘K palette. */
+  initialQuery?: string;
   universities: University[];
   programmes: Programme[];
   specializations: Specialization[];
@@ -52,6 +54,7 @@ function generateTempPassword(): string {
 }
 
 export function StudentsManagerClient({
+  initialQuery = '',
   universities,
   programmes,
   specializations,
@@ -64,7 +67,7 @@ export function StudentsManagerClient({
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState(initialQuery);
   const [programmeFilter, setProgrammeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
