@@ -3,6 +3,7 @@ import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { sanitizeSpecializationId } from '@/lib/programme-branches-server';
 
 const updateStudentSchema = z.object({
   full_name: z.string().trim().min(2).max(100).optional(),
@@ -85,7 +86,7 @@ export async function PATCH(
   const adminClient = createSupabaseAdminClient();
   const { data: existing } = await adminClient
     .from('profiles')
-    .select('id, username, full_name, role, is_active')
+    .select('id, username, full_name, role, is_active, programme_id, specialization_id')
     .eq('id', id)
     .maybeSingle();
 
@@ -121,8 +122,23 @@ export async function PATCH(
   if (payload.full_name !== undefined) profileUpdates.full_name = payload.full_name;
   if (payload.university_id !== undefined) profileUpdates.university_id = payload.university_id;
   if (payload.programme_id !== undefined) profileUpdates.programme_id = payload.programme_id;
-  if (payload.specialization_id !== undefined)
-    profileUpdates.specialization_id = payload.specialization_id;
+  if (payload.specialization_id !== undefined || payload.programme_id !== undefined) {
+    // Changing the programme drops the old branch; a degree with no branches
+    // (BBA, BCA, LLB, …) can never keep one.
+    const effectiveProgrammeId =
+      payload.programme_id !== undefined ? payload.programme_id : (existing.programme_id as string | null);
+    const requestedSpecId =
+      payload.specialization_id !== undefined
+        ? payload.specialization_id
+        : payload.programme_id !== undefined
+          ? null
+          : undefined;
+    profileUpdates.specialization_id = await sanitizeSpecializationId(
+      adminClient,
+      effectiveProgrammeId,
+      requestedSpecId
+    );
+  }
   if (payload.regulation_id !== undefined) profileUpdates.regulation_id = payload.regulation_id;
   if (payload.semester_id !== undefined) profileUpdates.semester_id = payload.semester_id;
   if (payload.is_active !== undefined) profileUpdates.is_active = payload.is_active;

@@ -32,6 +32,7 @@ import type {
   Subject,
   University,
 } from '@/types/database';
+import { branchesForProgramme, programmeHasBranches } from '@/lib/programme-branches';
 
 interface TaxonomyBundle {
   universities: University[];
@@ -181,12 +182,21 @@ export function MaterialsBrowserClient({
     });
   }
 
+  const browseProgramme = useMemo(
+    () => taxonomy.programmes.find((pr) => pr.id === programmeId) ?? null,
+    [taxonomy.programmes, programmeId]
+  );
+  // A single-course degree (BBA, BCA, LLB, …) has no branches, so its
+  // specialization filter is meaningless — hide it once that programme is
+  // chosen. "Any programme" still offers the cross-programme list.
+  const showSpecializationFilter = !programmeId || programmeHasBranches(browseProgramme);
+
   const filteredSpecializations = useMemo(
     () =>
       programmeId
-        ? taxonomy.specializations.filter((s) => s.programme_id === programmeId)
+        ? branchesForProgramme(taxonomy.specializations, browseProgramme)
         : taxonomy.specializations,
-    [programmeId, taxonomy.specializations]
+    [programmeId, taxonomy.specializations, browseProgramme]
   );
 
   // A scheme belongs to a university. Browsing everything (no university
@@ -575,21 +585,23 @@ export function MaterialsBrowserClient({
                   </select>
                 </div>
 
-                <div>
-                  <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Specialization</label>
-                  <select
-                    value={specializationId}
-                    onChange={(e) => { setSpecializationId(e.target.value); setSubjectId(''); setPage(1); }}
-                    className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
-                  >
-                    <option value="">Any specialization</option>
-                    {specializationOptions.map((sp) => (
-                      <option key={sp.id} value={sp.id}>
-                        {sp.code} — {sp.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {showSpecializationFilter ? (
+                  <div>
+                    <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Specialization</label>
+                    <select
+                      value={specializationId}
+                      onChange={(e) => { setSpecializationId(e.target.value); setSubjectId(''); setPage(1); }}
+                      className="h-10 w-full rounded-full border border-line-strong bg-canvas px-3.5 text-xs text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:px-4 lg:text-[13px]"
+                    >
+                      <option value="">Any specialization</option>
+                      {specializationOptions.map((sp) => (
+                        <option key={sp.id} value={sp.id}>
+                          {sp.code} — {sp.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
 
                 <div>
                   <label className="mb-1.5 block pl-1 text-[11px] font-medium text-muted">Semester</label>

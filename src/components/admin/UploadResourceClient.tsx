@@ -28,6 +28,7 @@ import type {
   Subject,
   University,
 } from '@/types/database';
+import { branchesForProgramme, programmeHasBranches } from '@/lib/programme-branches';
 
 interface UploadResourceClientProps {
   universities: University[];
@@ -86,10 +87,18 @@ export function UploadResourceClient({
   const [formError, setFormError] = useState<string | null>(null);
   const [createdResourceId, setCreatedResourceId] = useState<string | null>(null);
 
-  const filteredSpecializations = useMemo(
-    () => specializations.filter((s) => s.programme_id === programmeId),
-    [programmeId, specializations]
+  const selectedProgramme = useMemo(
+    () => programmes.find((programme) => programme.id === programmeId) ?? null,
+    [programmes, programmeId]
   );
+
+  // A degree without branches never asks for one.
+  const filteredSpecializations = useMemo(
+    () => branchesForProgramme(specializations, selectedProgramme),
+    [specializations, selectedProgramme]
+  );
+
+  const showBranchField = programmeHasBranches(selectedProgramme);
 
   const filteredSemesters = useMemo(
     () => semesters.filter((s) => s.programme_id === programmeId),
@@ -500,27 +509,29 @@ export function UploadResourceClient({
                 </select>
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-charcoal">
-                  Specialization / Branch
-                </label>
-                <select
-                  value={specializationId}
-                  disabled={filteredSpecializations.length === 0}
-                  onChange={(e) => {
-                    setSpecializationId(e.target.value);
-                    setSubjectId('');
-                  }}
-                  className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-xs text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
-                >
-                  <option value="">Common / All Branches</option>
-                  {filteredSpecializations.map((sp) => (
-                    <option key={sp.id} value={sp.id}>
-                      {sp.code} — {sp.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {showBranchField ? (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-charcoal">
+                    Specialization / Branch
+                  </label>
+                  <select
+                    value={specializationId}
+                    disabled={filteredSpecializations.length === 0}
+                    onChange={(e) => {
+                      setSpecializationId(e.target.value);
+                      setSubjectId('');
+                    }}
+                    className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-xs text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
+                  >
+                    <option value="">Common / All Branches</option>
+                    {filteredSpecializations.map((sp) => (
+                      <option key={sp.id} value={sp.id}>
+                        {sp.code} — {sp.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-charcoal">

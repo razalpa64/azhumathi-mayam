@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { isTransientAuthError } from '@/lib/auth/transient';
 import type { Profile, WebsiteSettings } from '@/types/database';
+import { programmeHasBranches } from '@/lib/programme-branches';
 
 /** Cache tag for website settings — reused by the admin save route. */
 export const SETTINGS_CACHE_TAG = 'website-settings';
@@ -92,7 +93,19 @@ async function readAuthenticatedProfile(): Promise<Profile | null> {
     return null;
   }
 
-  return profile as unknown as Profile;
+  const typedProfile = profile as unknown as Profile;
+
+  // A single-course degree (BBA, BCA, LLB, …) has no branches, so it must
+  // never carry one. Rows saved while the picker was still shown can hold a
+  // stray branch, and a stale branch silently narrows every dashboard query
+  // down to nothing. Clearing it here fixes all student screens at once;
+  // the API also refuses to store one (see programme-branches-server.ts).
+  if (typedProfile.programme && !programmeHasBranches(typedProfile.programme)) {
+    typedProfile.specialization_id = null;
+    typedProfile.specialization = null;
+  }
+
+  return typedProfile;
 }
 
 /** The super administrator (admin@invytra) — the only account tier that

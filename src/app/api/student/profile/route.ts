@@ -3,6 +3,7 @@ import { friendlyDbError } from '@/lib/db-errors';
 import { z } from 'zod';
 import { requireApiAuth } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { sanitizeSpecializationId } from '@/lib/programme-branches-server';
 
 const updateProfileSchema = z.object({
   full_name: z.string().trim().min(2, 'Full name must be at least 2 characters.').max(100),
@@ -78,13 +79,22 @@ export async function PATCH(request: NextRequest) {
   }
 
   // Strictly update only permitted student profile columns
+  // A degree without branches must never keep a stored branch (see
+  // programme-branches-server.ts) — the profile update is the other place a
+  // specialization can sneak in.
+  const specializationId = await sanitizeSpecializationId(
+    supabase,
+    payload.programme_id,
+    payload.specialization_id
+  );
+
   const { error } = await supabase
     .from('profiles')
     .update({
       full_name: payload.full_name,
       university_id: payload.university_id ?? null,
       programme_id: payload.programme_id ?? null,
-      specialization_id: payload.programme_id ? payload.specialization_id ?? null : null,
+      specialization_id: specializationId,
       regulation_id: regulationId,
       semester_id: payload.programme_id ? payload.semester_id ?? null : null,
     })

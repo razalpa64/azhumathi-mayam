@@ -4,6 +4,7 @@ import { requireStudentAppUser, getWebsiteSettings } from '@/lib/auth/session';
 import { getPublishedTaxonomyBundle } from '@/lib/taxonomy';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { branchesForProgramme } from '@/lib/programme-branches';
 
 export const metadata = {
   title: 'Courses',
@@ -159,7 +160,7 @@ export default async function CoursesPage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {otherProgrammes.map((prog) => {
-              const specs = taxonomy.specializations.filter((sp) => sp.programme_id === prog.id);
+              const specs = branchesForProgramme(taxonomy.specializations, prog);
               const sems = taxonomy.semesters.filter((sm) => sm.programme_id === prog.id);
               return (
                 <div

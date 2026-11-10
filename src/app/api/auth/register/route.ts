@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { normalizeUsername, usernameToAuthEmail, validateUsernameFormat } from '@/lib/auth/username';
 import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit';
+import { sanitizeSpecializationId } from '@/lib/programme-branches-server';
 
 const RESERVED_USERNAMES = new Set([
   'admin@invytra',
@@ -141,6 +142,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Single-course degrees (BBA, BCA, LLB, …) have no branches; anything a
+    // stale client sends for them is dropped rather than stored.
+    const specializationId = await sanitizeSpecializationId(
+      adminClient,
+      parsed.data.programme_id,
+      parsed.data.specialization_id
+    );
+
     const nowIso = new Date().toISOString();
 
     // Create student profile strictly with role = 'student'
@@ -154,7 +163,7 @@ export async function POST(request: NextRequest) {
         role: 'student',
         university_id: parsed.data.university_id || null,
         programme_id: parsed.data.programme_id || null,
-        specialization_id: parsed.data.specialization_id || null,
+        specialization_id: specializationId,
         regulation_id: parsed.data.regulation_id || null,
         semester_id: parsed.data.semester_id || null,
         is_active: true,

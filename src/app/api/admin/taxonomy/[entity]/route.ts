@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { friendlyDbError } from '@/lib/db-errors';
 import { requireApiStaff, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { programmeAllowsBranches } from '@/lib/programme-branches-server';
 
 const ALLOWED_ENTITIES = new Set([
   'universities',
@@ -95,6 +96,18 @@ export async function POST(
     if (!programmeId || !name || !code) {
       return NextResponse.json(
         { error: 'Programme, specialization name, and code are required.' },
+        { status: 400 }
+      );
+    }
+    // BBA / BCA / LLB and friends are single-course degrees: they are flagged
+    // `has_specializations = false`, so a branch filed under one would never
+    // be offered anywhere — refuse it instead of creating dead taxonomy.
+    if (!(await programmeAllowsBranches(adminClient, programmeId))) {
+      return NextResponse.json(
+        {
+          error:
+            'This programme is marked as having no branches, so it cannot have specializations. Enable “Has specializations” for it under Courses & Universities first.',
+        },
         { status: 400 }
       );
     }
