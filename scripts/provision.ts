@@ -216,6 +216,13 @@ async function main() {
     );
     await pg.query(llbSql);
 
+    console.log('3w. Applying 0027_bba_specialisations_calicut.sql (BBA streams: Finance/Marketing/HRM)...');
+    const bbaBranchesSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0027_bba_specialisations_calicut.sql'),
+      'utf8'
+    );
+    await pg.query(bbaBranchesSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
