@@ -54,12 +54,20 @@ const btech = programme('btech', 'BTECH', true);
 const bba = programme('bba', 'BBA', false);
 const bca = programme('bca', 'BCA', false);
 
+// BBA once 0027 has run: the flag on, and the three Calicut streams filed
+// under it. This is the shape the sign-up form must accept — the "no branches"
+// answer for BBA was correct only for as long as the data said so.
+const bbaWithStreams = programme('bba-streams', 'BBA', true);
+
 const specializations = [
   specialization('cse', 'btech', 'CSE'),
   specialization('ece', 'btech', 'ECE'),
   // A stray row filed under BBA while the flag was never read — this is what
   // made BBA show a "specialization" picker full of engineering branches.
   specialization('stray', 'bba', 'CSE'),
+  specialization('fin', 'bba-streams', 'FIN'),
+  specialization('mkt', 'bba-streams', 'MKT'),
+  specialization('hrm', 'bba-streams', 'HRM'),
 ];
 
 const cases: { label: string; run: () => unknown; expected: unknown }[] = [
@@ -109,6 +117,21 @@ const cases: { label: string; run: () => unknown; expected: unknown }[] = [
       branchesForProgramme(specializations, { id: 'ghost', has_specializations: true } as Programme).map(
         (s) => s.code
       ),
+    expected: [],
+  },
+  {
+    label: 'BBA with the Calicut streams is asked for a branch',
+    run: () => programmeHasBranches(bbaWithStreams),
+    expected: true,
+  },
+  {
+    label: 'BBA offers exactly Finance, Marketing and HRM',
+    run: () => branchesForProgramme(specializations, bbaWithStreams).map((s) => s.code),
+    expected: ['FIN', 'MKT', 'HRM'],
+  },
+  {
+    label: 'BBA is asked for a branch only once it has one of its own',
+    run: () => branchesForProgramme(specializations, bba).map((s) => s.code),
     expected: [],
   },
   {
