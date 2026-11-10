@@ -21,6 +21,11 @@
 -- If you have never run 0001-0024 on this project, run those first - this file
 -- only assumes the normal schema and the seeded taxonomy (universities,
 -- programmes, schemes, semesters, categories) already exist.
+--
+-- AFTER RUNNING IT: the sign-up page keeps a five-minute copy of the
+-- programme list, and a SQL change is invisible to the app. Either wait five
+-- minutes, or go to Admin -> Courses & Universities and press
+-- "Refresh public lists" - that is exactly what the button is for.
 -- ============================================================================
 
 -- =====================================================================
