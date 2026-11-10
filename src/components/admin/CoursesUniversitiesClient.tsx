@@ -145,6 +145,25 @@ export function CoursesUniversitiesClient({
     router.refresh();
   }
 
+  // BBA, BCA, LLB … have no branches; BTech, BCom … do. The flag decides
+  // whether any branch picker is ever shown (src/lib/programme-branches.ts),
+  // so staff need to be able to flip it here without a SQL editor.
+  async function toggleBranches(id: string, current: boolean) {
+    setError(null);
+    const res = await fetch('/api/admin/taxonomy/programmes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ id, has_specializations: !current }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(data.error || 'Could not update the branches setting.');
+      return;
+    }
+    router.refresh();
+  }
+
   async function toggleHub(
     id: string,
     field: 'is_question_paper' | 'is_short_note',
@@ -310,6 +329,7 @@ export function CoursesUniversitiesClient({
                   <th className="p-3.5">Programme</th>
                   <th className="p-3.5">Level</th>
                   <th className="p-3.5">Semesters</th>
+                  <th className="p-3.5">Branches</th>
                   <th className="p-3.5">Status</th>
                   <th className="p-3.5 text-right">Actions</th>
                 </tr>
@@ -326,6 +346,25 @@ export function CoursesUniversitiesClient({
                     </td>
                     <td className="p-3.5">{p.degree_level}</td>
                     <td className="p-3.5 font-mono">{p.total_semesters}</td>
+                    <td className="p-3.5">
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant={p.has_specializations ? 'neutral' : 'muted'}>
+                          {p.has_specializations ? 'Yes' : 'No'}
+                        </Badge>
+                        <button
+                          type="button"
+                          onClick={() => toggleBranches(p.id, p.has_specializations)}
+                          className="rounded border border-line px-2 py-1 text-[11px] font-medium hover:bg-neutral-soft cursor-pointer"
+                          title={
+                            p.has_specializations
+                              ? 'This degree has branches. Turn off to stop asking students for one.'
+                              : 'Single-course degree: students are never asked for a branch. Turn on only if it really has branches.'
+                          }
+                        >
+                          {p.has_specializations ? 'Turn off' : 'Turn on'}
+                        </button>
+                      </div>
+                    </td>
                     <td className="p-3.5">
                       <Badge variant={p.is_active ? 'success' : 'muted'}>
                         {p.is_active ? 'Active' : 'Hidden'}

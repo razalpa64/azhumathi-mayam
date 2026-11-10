@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { SUPPORT_WHATSAPP_URL } from '@/lib/support';
+import { branchesForProgramme, programmeHasBranches } from '@/lib/programme-branches';
 import { applicableSchemes, keepValidSchemeId } from '@/lib/regulation-scope';
 import { semestersForProgramme } from '@/lib/register-options';
 import type {
@@ -61,13 +62,22 @@ export function RegisterForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const filteredSpecializations = useMemo(
-    () =>
-      programmeId
-        ? specializations.filter((s) => s.programme_id === programmeId)
-        : [],
-    [specializations, programmeId]
+  const selectedProgramme = useMemo(
+    () => programmes.find((programme) => programme.id === programmeId) ?? null,
+    [programmes, programmeId]
   );
+
+  // A degree without branches (BBA, BCA, LLB…) never offers one. The flag on
+  // the programme decides, so a row filed under the wrong programme cannot
+  // leak into this picker.
+  const filteredSpecializations = useMemo(
+    () => branchesForProgramme(specializations, selectedProgramme),
+    [specializations, selectedProgramme]
+  );
+
+  // Shown until a programme is picked ("choose programme first"), hidden once
+  // we know the course has no branches at all.
+  const showBranchField = !programmeId || programmeHasBranches(selectedProgramme);
 
   const filteredSemesters = useMemo(
     () => semestersForProgramme(semesters, programmeId),
@@ -444,30 +454,39 @@ export function RegisterForm({
             ) : null}
           </div>
 
-          <div>
-            <label htmlFor="specialization" className="mb-1 block text-xs font-medium text-charcoal">
-              Branch / Specialization
-            </label>
-            <Select
-              id="specialization"
-              value={specializationId}
-              onChange={setSpecializationId}
-              options={filteredSpecializations.map((sp) => ({
-                value: sp.id,
-                label: `${sp.code} — ${sp.name}`,
-              }))}
-              placeholder={
-                !programmeId
-                  ? 'Choose Programme first'
-                  : filteredSpecializations.length === 0
-                    ? 'General / No branch'
-                    : 'Select Branch'
-              }
-              disabled={loading || filteredSpecializations.length === 0}
-              ariaLabel="Branch or specialization"
-              emptyLabel={!programmeId ? 'Choose Programme first' : 'General / No branch'}
-            />
-          </div>
+          {showBranchField ? (
+            <div>
+              <label htmlFor="specialization" className="mb-1 block text-xs font-medium text-charcoal">
+                Branch / Specialization
+              </label>
+              <Select
+                id="specialization"
+                value={specializationId}
+                onChange={setSpecializationId}
+                options={filteredSpecializations.map((sp) => ({
+                  value: sp.id,
+                  label: `${sp.code} — ${sp.name}`,
+                }))}
+                placeholder={
+                  !programmeId
+                    ? 'Choose Programme first'
+                    : filteredSpecializations.length === 0
+                      ? 'General / No branch'
+                      : 'Select Branch'
+                }
+                disabled={loading || filteredSpecializations.length === 0}
+                ariaLabel="Branch or specialization"
+                emptyLabel={!programmeId ? 'Choose Programme first' : 'General / No branch'}
+              />
+            </div>
+          ) : (
+            // Nothing to ask: BBA, BCA, LLB and friends are a single course.
+            // Say so, instead of silently removing a field the student may
+            // have been told to expect.
+            <p className="text-[11px] leading-relaxed text-muted">
+              {selectedProgramme?.name} has no branches — nothing to pick here.
+            </p>
+          )}
 
           <div>
             <label htmlFor="regulation" className="mb-1 block text-xs font-medium text-charcoal">

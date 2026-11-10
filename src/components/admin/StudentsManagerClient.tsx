@@ -26,6 +26,7 @@ import type {
   Specialization,
   University,
 } from '@/types/database';
+import { branchesForProgramme, programmeHasBranches } from '@/lib/programme-branches';
 import { formatDate, formatDateTime } from '@/lib/utils';
 
 interface StudentsManagerClientProps {
@@ -130,18 +131,30 @@ export function StudentsManagerClient({
     loadStudents();
   }, [loadStudents]);
 
-  const createSpecs = useMemo(
-    () => specializations.filter((s) => s.programme_id === newProgrammeId),
-    [newProgrammeId, specializations]
+  const createProgramme = useMemo(
+    () => programmes.find((programme) => programme.id === newProgrammeId) ?? null,
+    [programmes, newProgrammeId]
   );
+  const editProgramme = useMemo(
+    () => programmes.find((programme) => programme.id === editProgrammeId) ?? null,
+    [programmes, editProgrammeId]
+  );
+
+  // Degrees without branches (BBA, BCA, LLB, …) never get a specialization picker.
+  const createSpecs = useMemo(
+    () => branchesForProgramme(specializations, createProgramme),
+    [createProgramme, specializations]
+  );
+  const showCreateSpecField = programmeHasBranches(createProgramme);
+  const showEditSpecField = programmeHasBranches(editProgramme);
   const createSems = useMemo(
     () => semesters.filter((s) => s.programme_id === newProgrammeId),
     [newProgrammeId, semesters]
   );
 
   const editSpecs = useMemo(
-    () => specializations.filter((s) => s.programme_id === editProgrammeId),
-    [editProgrammeId, specializations]
+    () => branchesForProgramme(specializations, editProgramme),
+    [editProgramme, specializations]
   );
   const editSems = useMemo(
     () => semesters.filter((s) => s.programme_id === editProgrammeId),
@@ -591,24 +604,26 @@ export function StudentsManagerClient({
                 </select>
               </div>
 
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-charcoal">
-                  Specialization
-                </label>
-                <select
-                  value={newSpecId}
-                  disabled={createSpecs.length === 0}
-                  onChange={(e) => setNewSpecId(e.target.value)}
-                  className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs disabled:opacity-55"
-                >
-                  <option value="">None / General</option>
-                  {createSpecs.map((sp) => (
-                    <option key={sp.id} value={sp.id}>
-                      {sp.code} — {sp.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {showCreateSpecField ? (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-charcoal">
+                    Specialization
+                  </label>
+                  <select
+                    value={newSpecId}
+                    disabled={createSpecs.length === 0}
+                    onChange={(e) => setNewSpecId(e.target.value)}
+                    className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs disabled:opacity-55"
+                  >
+                    <option value="">None / General</option>
+                    {createSpecs.map((sp) => (
+                      <option key={sp.id} value={sp.id}>
+                        {sp.code} — {sp.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
 
               <div>
                 <label className="mb-1 block text-xs font-semibold text-charcoal">Semester</label>
@@ -748,23 +763,25 @@ export function StudentsManagerClient({
                 </select>
               </div>
 
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-charcoal">
-                  Specialization
-                </label>
-                <select
-                  value={editSpecId}
-                  onChange={(e) => setEditSpecId(e.target.value)}
-                  className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs"
-                >
-                  <option value="">None</option>
-                  {editSpecs.map((sp) => (
-                    <option key={sp.id} value={sp.id}>
-                      {sp.code} — {sp.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {showEditSpecField ? (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-charcoal">
+                    Specialization
+                  </label>
+                  <select
+                    value={editSpecId}
+                    onChange={(e) => setEditSpecId(e.target.value)}
+                    className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs"
+                  >
+                    <option value="">None</option>
+                    {editSpecs.map((sp) => (
+                      <option key={sp.id} value={sp.id}>
+                        {sp.code} — {sp.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
 
               <div>
                 <label className="mb-1 block text-xs font-semibold text-charcoal">Semester</label>

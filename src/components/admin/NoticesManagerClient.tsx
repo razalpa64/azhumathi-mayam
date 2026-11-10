@@ -23,6 +23,7 @@ import type {
   Specialization,
 } from '@/types/database';
 import { formatDate } from '@/lib/utils';
+import { branchesForProgramme, programmeHasBranches } from '@/lib/programme-branches';
 
 interface NoticesManagerClientProps {
   initialNotices: Notice[];
@@ -58,9 +59,10 @@ export function NoticesManagerClient({
   const programmeSemesters = semesters.filter(
     (s) => s.programme_id === targetProgrammeId
   );
-  const programmeBranches = specializations.filter(
-    (s) => s.programme_id === targetProgrammeId
-  );
+  const targetProgramme = programmes.find((p) => p.id === targetProgrammeId) ?? null;
+  // Only offer a branch when the chosen programme actually has branches.
+  const programmeBranches = branchesForProgramme(specializations, targetProgramme);
+  const showBranchTarget = !targetProgrammeId || programmeHasBranches(targetProgramme);
 
   function handleProgrammeChange(programmeId: string) {
     setTargetProgrammeId(programmeId);
@@ -370,24 +372,26 @@ export function NoticesManagerClient({
               </select>
             </div>
 
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-charcoal">
-                Branch <span className="font-normal text-muted">(optional)</span>
-              </label>
-              <select
-                value={targetSpecializationId}
-                onChange={(e) => setTargetSpecializationId(e.target.value)}
-                disabled={!targetProgrammeId}
-                className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">All branches</option>
-                {programmeBranches.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.code})
-                  </option>
-                ))}
-              </select>
-            </div>
+            {showBranchTarget ? (
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-charcoal">
+                  Branch <span className="font-normal text-muted">(optional)</span>
+                </label>
+                <select
+                  value={targetSpecializationId}
+                  onChange={(e) => setTargetSpecializationId(e.target.value)}
+                  disabled={!targetProgrammeId}
+                  className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">All branches</option>
+                  {programmeBranches.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
           </div>
           <p className="-mt-1 text-[11px] leading-relaxed text-muted">
             {targetProgrammeId

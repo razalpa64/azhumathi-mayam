@@ -13,6 +13,7 @@ import type {
   Subject,
   University,
 } from '@/types/database';
+import { branchesForProgramme, programmeHasBranches } from '@/lib/programme-branches';
 
 interface SubjectsClientProps {
   initialQuery?: string;
@@ -54,10 +55,18 @@ export function SubjectsClient({
   const semMap = new Map(semesters.map((s) => [s.id, s]));
   const specMap = new Map(specializations.map((s) => [s.id, s]));
 
-  const formSpecs = useMemo(
-    () => specializations.filter((s) => s.programme_id === programmeId),
-    [programmeId, specializations]
+  const formProgramme = useMemo(
+    () => programmes.find((programme) => programme.id === programmeId) ?? null,
+    [programmes, programmeId]
   );
+
+  // A subject belongs to a branch only when the programme has branches.
+  const formSpecs = useMemo(
+    () => branchesForProgramme(specializations, formProgramme),
+    [specializations, formProgramme]
+  );
+
+  const showBranchField = programmeHasBranches(formProgramme);
   const formSems = useMemo(
     () => semesters.filter((s) => s.programme_id === programmeId),
     [programmeId, semesters]
@@ -243,24 +252,26 @@ export function SubjectsClient({
             </select>
           </div>
 
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-charcoal">
-              Specialization / Branch
-            </label>
-            <select
-              value={specializationId}
-              disabled={formSpecs.length === 0}
-              onChange={(e) => setSpecializationId(e.target.value)}
-              className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs disabled:opacity-55"
-            >
-              <option value="">Common to All Branches</option>
-              {formSpecs.map((sp) => (
-                <option key={sp.id} value={sp.id}>
-                  {sp.code} — {sp.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {showBranchField ? (
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-charcoal">
+                Specialization / Branch
+              </label>
+              <select
+                value={specializationId}
+                disabled={formSpecs.length === 0}
+                onChange={(e) => setSpecializationId(e.target.value)}
+                className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs disabled:opacity-55"
+              >
+                <option value="">Common to All Branches</option>
+                {formSpecs.map((sp) => (
+                  <option key={sp.id} value={sp.id}>
+                    {sp.code} — {sp.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-2 gap-2.5">
             <div>

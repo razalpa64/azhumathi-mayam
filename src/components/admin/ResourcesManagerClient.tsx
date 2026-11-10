@@ -29,6 +29,7 @@ import type {
   Subject,
 } from '@/types/database';
 import { formatDate } from '@/lib/utils';
+import { branchesForProgramme, programmeHasBranches } from '@/lib/programme-branches';
 
 interface ResourcesManagerClientProps {
   /** Pre-filled search when the page is opened from the ⌘K palette. */
@@ -125,10 +126,17 @@ export function ResourcesManagerClient({
     [editProgrammeId, semesters]
   );
 
-  const editSpecs = useMemo(
-    () => specializations.filter((s) => s.programme_id === editProgrammeId),
-    [editProgrammeId, specializations]
+  const editProgramme = useMemo(
+    () => programmes.find((programme) => programme.id === editProgrammeId) ?? null,
+    [programmes, editProgrammeId]
   );
+
+  // Degrees with no branches (BBA, BCA, LLB, …) never ask for one.
+  const editSpecs = useMemo(
+    () => branchesForProgramme(specializations, editProgramme),
+    [editProgramme, specializations]
+  );
+  const showEditSpecField = programmeHasBranches(editProgramme);
 
   const editSubjects = useMemo(
     () =>
@@ -669,23 +677,25 @@ export function ResourcesManagerClient({
                   </select>
                 </div>
 
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-charcoal">
-                    Specialization
-                  </label>
-                  <select
-                    value={editSpecId}
-                    onChange={(e) => setEditSpecId(e.target.value)}
-                    className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs"
-                  >
-                    <option value="">All / Common</option>
-                    {editSpecs.map((sp) => (
-                      <option key={sp.id} value={sp.id}>
-                        {sp.code} — {sp.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {showEditSpecField ? (
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-charcoal">
+                      Specialization
+                    </label>
+                    <select
+                      value={editSpecId}
+                      onChange={(e) => setEditSpecId(e.target.value)}
+                      className="h-9 w-full rounded-md border border-line-strong bg-canvas px-2.5 text-xs"
+                    >
+                      <option value="">All / Common</option>
+                      {editSpecs.map((sp) => (
+                        <option key={sp.id} value={sp.id}>
+                          {sp.code} — {sp.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
 
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-charcoal">Semester</label>

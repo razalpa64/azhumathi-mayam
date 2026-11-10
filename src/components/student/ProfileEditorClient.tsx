@@ -15,6 +15,7 @@ import type {
   University,
 } from '@/types/database';
 import { formatDate, getInitials } from '@/lib/utils';
+import { branchesForProgramme, programmeHasBranches } from '@/lib/programme-branches';
 
 interface ProfileEditorClientProps {
   profile: Profile;
@@ -47,10 +48,19 @@ export function ProfileEditorClient({
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const availableSpecializations = useMemo(
-    () => specializations.filter((s) => s.programme_id === programmeId),
-    [programmeId, specializations]
+  const selectedProgramme = useMemo(
+    () => programmes.find((programme) => programme.id === programmeId) ?? null,
+    [programmes, programmeId]
   );
+
+  // BBA, BCA, LLB and the like have no branches at all — the flag on the
+  // programme decides, so the picker (and the field itself) disappears.
+  const availableSpecializations = useMemo(
+    () => branchesForProgramme(specializations, selectedProgramme),
+    [specializations, selectedProgramme]
+  );
+
+  const showBranchField = !programmeId || programmeHasBranches(selectedProgramme);
 
   const availableSemesters = useMemo(
     () => semesters.filter((s) => s.programme_id === programmeId),
@@ -305,32 +315,40 @@ export function ProfileEditorClient({
             </select>
           </div>
 
-          <div>
-            <label
-              htmlFor="specialization"
-              className="mb-1.5 block text-xs font-semibold text-charcoal"
-            >
-              Specialization / Branch
-            </label>
-            <select
-              id="specialization"
-              value={specializationId}
-              disabled={!programmeId || availableSpecializations.length === 0}
-              onChange={(e) => setSpecializationId(e.target.value)}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5 disabled:opacity-55"
-            >
-              <option value="">
-                {availableSpecializations.length === 0
-                  ? 'Not applicable / General'
-                  : 'Select Specialization'}
-              </option>
-              {availableSpecializations.map((sp) => (
-                <option key={sp.id} value={sp.id}>
-                  {sp.code} — {sp.name}
+          {showBranchField ? (
+            <div>
+              <label
+                htmlFor="specialization"
+                className="mb-1.5 block text-xs font-semibold text-charcoal"
+              >
+                Specialization / Branch
+              </label>
+              <select
+                id="specialization"
+                value={specializationId}
+                disabled={!programmeId || availableSpecializations.length === 0}
+                onChange={(e) => setSpecializationId(e.target.value)}
+                className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none lg:h-11 lg:rounded-xl lg:px-3.5 disabled:opacity-55"
+              >
+                <option value="">
+                  {availableSpecializations.length === 0
+                    ? 'Not applicable / General'
+                    : 'Select Specialization'}
                 </option>
-              ))}
-            </select>
-          </div>
+                {availableSpecializations.map((sp) => (
+                  <option key={sp.id} value={sp.id}>
+                    {sp.code} — {sp.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <p className="text-[11px] leading-relaxed text-muted sm:col-span-2">
+              {programmeId
+                ? 'This course has no branches, so there is nothing to pick here.'
+                : 'Choose your programme first — a branch is only asked for when the course has one.'}
+            </p>
+          )}
 
           <div>
             <label htmlFor="semester" className="mb-1.5 block text-xs font-semibold text-charcoal">

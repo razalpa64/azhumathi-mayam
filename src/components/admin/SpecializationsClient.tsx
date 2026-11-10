@@ -6,6 +6,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import type { Programme, Specialization } from '@/types/database';
+import { programmeHasBranches } from '@/lib/programme-branches';
 
 interface SpecializationsClientProps {
   programmes: Programme[];
@@ -25,6 +26,9 @@ export function SpecializationsClient({
   const [error, setError] = useState<string | null>(null);
 
   const progMap = new Map(programmes.map((p) => [p.id, p]));
+  const selectedProgramme = progMap.get(programmeId) ?? null;
+  // A programme flagged as having no branches (BBA, BCA, LLB, …) cannot own specializations.
+  const canAddBranch = programmeHasBranches(selectedProgramme);
   const visible = filterProgrammeId
     ? specializations.filter((s) => s.programme_id === filterProgrammeId)
     : specializations;
@@ -129,10 +133,21 @@ export function SpecializationsClient({
               {programmes.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
+                  {programmeHasBranches(p) ? '' : ' · no branches'}
                 </option>
               ))}
             </select>
           </div>
+          {canAddBranch ? null : (
+            <p className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-[11px] leading-relaxed text-[#92400E]">
+              {selectedProgramme?.name || 'This programme'} is marked as a single-course degree with no
+              branches, so it cannot have specializations. Turn on “Has specializations” for it in{' '}
+              <a href="/admin/courses-universities" className="font-semibold underline">
+                Courses &amp; Universities
+              </a>{' '}
+              first if that is wrong.
+            </p>
+          )}
           <div>
             <label className="mb-1 block text-xs font-semibold text-charcoal">Branch Code *</label>
             <input
@@ -155,7 +170,7 @@ export function SpecializationsClient({
               className="h-9 w-full rounded-md border border-line-strong bg-canvas px-3 text-xs"
             />
           </div>
-          <Button type="submit" size="sm" disabled={busy} className="w-full">
+          <Button type="submit" size="sm" disabled={busy || !canAddBranch} className="w-full">
             <Plus className="h-3.5 w-3.5" />
             <span>Add Specialization</span>
           </Button>
@@ -177,6 +192,11 @@ export function SpecializationsClient({
                 <tr key={sp.id}>
                   <td className="p-3.5 font-medium text-charcoal">
                     {progMap.get(sp.programme_id)?.name || '—'}
+                    {programmeHasBranches(progMap.get(sp.programme_id) ?? null) ? null : (
+                      <span className="ml-1.5 rounded bg-[#FEF3C7] px-1.5 py-0.5 text-[10px] font-semibold text-[#92400E]">
+                        programme has no branches
+                      </span>
+                    )}
                   </td>
                   <td className="p-3.5 font-mono font-semibold text-burgundy">{sp.code}</td>
                   <td className="p-3.5 text-charcoal">{sp.name}</td>

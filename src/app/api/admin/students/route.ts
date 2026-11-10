@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { requireApiAdmin, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { normalizeUsername, usernameToAuthEmail, validateUsernameFormat } from '@/lib/auth/username';
+import { sanitizeSpecializationId } from '@/lib/programme-branches-server';
 
 const createStudentSchema = z.object({
   username: z.string().min(3).max(64),
@@ -140,7 +141,11 @@ export async function POST(request: NextRequest) {
       role: 'student',
       university_id: parsed.data.university_id || null,
       programme_id: parsed.data.programme_id || null,
-      specialization_id: parsed.data.specialization_id || null,
+      specialization_id: await sanitizeSpecializationId(
+        adminClient,
+        parsed.data.programme_id,
+        parsed.data.specialization_id
+      ),
       regulation_id: parsed.data.regulation_id || null,
       semester_id: parsed.data.semester_id || null,
       is_active: parsed.data.is_active,
