@@ -10,11 +10,13 @@ import {
   HardDrive,
   Inbox,
   Megaphone,
+  UploadCloud,
   UserPlus,
   Users,
 } from 'lucide-react';
 import { requireStaffUser } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { safeCount } from '@/lib/supabase/safe-count';
 import { Badge } from '@/components/ui/Badge';
 import { formatDate, formatDateTime } from '@/lib/utils';
 
@@ -40,6 +42,7 @@ export default async function AdminOverviewPage() {
     recentStudentsRes,
     recentAuditRes,
     pendingRequestsRes,
+    pendingSubmissionsRes,
   ] = await Promise.all([
     isMainAdmin
       ? adminClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'student')
@@ -94,6 +97,12 @@ export default async function AdminOverviewPage() {
       .from('resource_requests')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'pending'),
+    safeCount(
+      adminClient
+        .from('material_submissions')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending')
+    ),
   ]);
 
   const totalDownloads = (allDownloadCountsRes.data || []).reduce(
@@ -139,6 +148,13 @@ export default async function AdminOverviewPage() {
           href: '/admin/resources',
         },
         {
+          label: 'Uploads to Review',
+          value: pendingSubmissionsRes,
+          sub: 'Student contributions waiting',
+          icon: UploadCloud,
+          href: '/admin/submissions',
+        },
+        {
           label: 'Total Downloads',
           value: totalDownloads,
           sub: 'Deduplicated student downloads',
@@ -181,6 +197,13 @@ export default async function AdminOverviewPage() {
           sub: 'Students asked for materials',
           icon: Inbox,
           href: '/admin/requests',
+        },
+        {
+          label: 'Uploads to Review',
+          value: pendingSubmissionsRes,
+          sub: 'Student contributions waiting',
+          icon: UploadCloud,
+          href: '/admin/submissions',
         },
         {
           label: 'Total Downloads',

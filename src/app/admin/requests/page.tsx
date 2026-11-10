@@ -1,7 +1,6 @@
 import { requireStaffUser } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { RequestsManagerClient } from '@/components/admin/RequestsManagerClient';
-import type { ResourceRequest } from '@/types/database';
 
 export const metadata = {
   title: 'Student Requests',
@@ -10,14 +9,14 @@ export const metadata = {
 export default async function AdminRequestsPage() {
   await requireStaffUser();
   const adminClient = createSupabaseAdminClient();
-  const { data, error } = await adminClient
+  // The list itself is paged by the client through /api/admin/requests; this
+  // page only needs the waiting count and to know the table exists.
+  const { count, error } = await adminClient
     .from('resource_requests')
-    .select('*, student:profiles!student_id(id, full_name, username)')
-    .order('created_at', { ascending: false })
-    .limit(200);
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending');
 
-  const items = (data || []) as unknown as ResourceRequest[];
-  const pending = items.filter((i) => i.status === 'pending').length;
+  const pending = count || 0;
 
   return (
     <div className="space-y-6">
@@ -49,7 +48,7 @@ export default async function AdminRequestsPage() {
         </div>
       ) : null}
 
-      <RequestsManagerClient initialItems={items} />
+      <RequestsManagerClient initialPending={pending} />
     </div>
   );
 }

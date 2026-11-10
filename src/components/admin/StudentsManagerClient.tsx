@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Download,
   Eye,
   KeyRound,
   Loader2,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { CopyButton } from '@/components/admin/CopyButton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type {
   AcademicRegulation,
@@ -257,6 +259,15 @@ export function StudentsManagerClient({
     }
   }
 
+  const exportHref = (() => {
+    const sp = new URLSearchParams();
+    if (q.trim()) sp.set('q', q.trim());
+    if (programmeFilter) sp.set('programmeId', programmeFilter);
+    if (statusFilter) sp.set('status', statusFilter);
+    const qs = sp.toString();
+    return `/api/admin/students/export${qs ? `?${qs}` : ''}`;
+  })();
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -270,15 +281,25 @@ export function StudentsManagerClient({
           </p>
         </div>
 
-        <Button
-          onClick={() => {
-            setCreateError(null);
-            setShowCreate(true);
-          }}
-        >
-          <UserPlus className="h-4 w-4" />
-          <span>Create Student Account</span>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Hand a filtered list to a colleague — same filters as the table. */}
+          <a
+            href={exportHref}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line-strong bg-canvas px-3 text-xs font-semibold text-charcoal transition-colors hover:border-burgundy-border hover:text-burgundy"
+          >
+            <Download className="h-3.5 w-3.5" aria-hidden="true" />
+            Export CSV
+          </a>
+          <Button
+            onClick={() => {
+              setCreateError(null);
+              setShowCreate(true);
+            }}
+          >
+            <UserPlus className="h-4 w-4" />
+            <span>Create Student Account</span>
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -359,7 +380,12 @@ export function StudentsManagerClient({
               {items.map((st) => (
                 <tr key={st.id} className="hover:bg-neutral-soft/45">
                   <td className="p-3.5 font-semibold text-charcoal">{st.full_name}</td>
-                  <td className="p-3.5 font-mono text-burgundy">{st.username}</td>
+                  <td className="p-3.5">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="font-mono text-burgundy">{st.username}</span>
+                      <CopyButton value={st.username} label="username" />
+                    </span>
+                  </td>
                   <td className="p-3.5">
                     <span className="font-medium text-charcoal">
                       {st.programme?.name || 'Unassigned'}
@@ -507,14 +533,17 @@ export function StudentsManagerClient({
                   <span>
                     Temporary Password <span className="text-burgundy">*</span>
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setNewPassword(generateTempPassword())}
-                    className="inline-flex items-center gap-1 text-[11px] text-burgundy hover:underline cursor-pointer"
-                  >
-                    <Sparkles className="h-3 w-3" />
-                    <span>Regenerate</span>
-                  </button>
+                  <span className="flex items-center gap-1">
+                    <CopyButton value={newPassword} label="temporary password" />
+                    <button
+                      type="button"
+                      onClick={() => setNewPassword(generateTempPassword())}
+                      className="inline-flex items-center gap-1 text-[11px] text-burgundy hover:underline cursor-pointer"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      <span>Regenerate</span>
+                    </button>
+                  </span>
                 </label>
                 <input
                   type="text"
