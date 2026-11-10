@@ -11,6 +11,14 @@ import type {
   University,
 } from '@/types/database';
 
+/**
+ * Cache tag for the long-lived copies of the taxonomy (the sign-up pickers
+ * are cached across requests). Every admin write to programmes, semesters,
+ * specializations, regulations or universities drops it, so staff edits show
+ * up on the next page load instead of five minutes later.
+ */
+export const TAXONOMY_CACHE_TAG = 'taxonomy';
+
 async function fetchPublishedTaxonomyBundle() {
   const supabase = await createSupabaseServerClient();
 

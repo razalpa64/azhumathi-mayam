@@ -6,6 +6,7 @@ import { BookOpen, FileText, GraduationCap, Layers } from 'lucide-react';
 import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { unstable_cache } from 'next/cache';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { TAXONOMY_CACHE_TAG } from '@/lib/taxonomy';
 import { BrandLogo } from '@/components/brand/BrandLogo';
 import { InvytraCredit } from '@/components/InvytraCredit';
 import { programmesWithSemesters } from '@/lib/register-options';
@@ -182,9 +183,11 @@ const loadTaxonomy = unstable_cache(
     if (!taxonomy) throw new Error('[register] taxonomy unavailable');
     return taxonomy;
   },
-  // v3: drops any entry v2 may already hold with empty pickers.
-  ['register-taxonomy-v3'],
-  { revalidate: 300, tags: ['taxonomy'] }
+  // v4: drops any entry v3 may already hold from before a taxonomy migration
+  // (e.g. a degree added straight in SQL) — a bump is the only way to evict a
+  // cached copy that no admin write has invalidated.
+  ['register-taxonomy-v4'],
+  { revalidate: 300, tags: [TAXONOMY_CACHE_TAG] }
 );
 
 async function getTaxonomy(): Promise<RegistrationTaxonomy> {

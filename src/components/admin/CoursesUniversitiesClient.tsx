@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, GraduationCap, Layers, Plus, Trash2 } from 'lucide-react';
+import { Building2, GraduationCap, Layers, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import type { Programme, ResourceCategory, University } from '@/types/database';
@@ -22,6 +22,8 @@ export function CoursesUniversitiesClient({
   const [tab, setTab] = useState<'programmes' | 'universities' | 'categories'>('programmes');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
 
   // Programme form
   const [progCode, setProgCode] = useState('');
@@ -164,6 +166,32 @@ export function CoursesUniversitiesClient({
     router.refresh();
   }
 
+  /**
+   * The sign-up pickers are cached for five minutes. An edit made here clears
+   * them automatically, but a change made straight in the database (a SQL
+   * migration, a Supabase table edit) has nothing to clear it — this is that
+   * missing button.
+   */
+  async function refreshPublicLists() {
+    setError(null);
+    setRefreshing(true);
+    try {
+      const res = await fetch('/api/admin/revalidate', {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Could not refresh the public lists.');
+        return;
+      }
+      setRefreshedAt(new Date().toLocaleTimeString());
+      router.refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   async function toggleHub(
     id: string,
     field: 'is_question_paper' | 'is_short_note',
@@ -203,6 +231,18 @@ export function CoursesUniversitiesClient({
         <p className="mt-1 text-sm text-muted">
           Dynamically manage degree programmes, affiliated universities, and library categories without code changes.
         </p>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[11px] text-muted">
+          {refreshedAt
+            ? `Public lists refreshed at ${refreshedAt}.`
+            : 'Added a course in the database? Refresh so sign-up sees it immediately.'}
+        </p>
+        <Button size="sm" variant="secondary" onClick={refreshPublicLists} disabled={refreshing}>
+          <RefreshCw className={refreshing ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />
+          <span>{refreshing ? 'Refreshing…' : 'Refresh public lists'}</span>
+        </Button>
       </div>
 
       {/* Section Tabs */}

@@ -3,6 +3,8 @@ import { friendlyDbError } from '@/lib/db-errors';
 import { requireApiStaff, logAdminActivity } from '@/lib/auth/session';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { programmeAllowsBranches } from '@/lib/programme-branches-server';
+import { revalidateTag } from 'next/cache';
+import { TAXONOMY_CACHE_TAG } from '@/lib/taxonomy';
 
 const ALLOWED_ENTITIES = new Set([
   'universities',
@@ -13,6 +15,16 @@ const ALLOWED_ENTITIES = new Set([
   'subjects',
   'resource_categories',
 ]);
+
+/**
+ * The sign-up pickers are cached across requests under TAXONOMY_CACHE_TAG.
+ * Nothing else evicts that copy, so without this a programme staff create (or
+ * hide) reached students up to five minutes late — or, worse, never within the
+ * same deployment. Every successful taxonomy write drops it.
+ */
+function dropTaxonomyCache() {
+  revalidateTag(TAXONOMY_CACHE_TAG);
+}
 
 function slugify(value: string): string {
   return value
@@ -231,6 +243,8 @@ export async function POST(
     summary: `Created ${entity.replace('_', ' ')}: ${summaryLabel}.`,
   });
 
+  dropTaxonomyCache();
+
   return NextResponse.json({ ok: true, item: created }, { status: 201 });
 }
 
@@ -294,6 +308,8 @@ export async function PATCH(
     summary: `Updated ${entity.replace('_', ' ')} (${updated.name || updated.label || id}).`,
   });
 
+  dropTaxonomyCache();
+
   return NextResponse.json({ ok: true, item: updated });
 }
 
@@ -336,6 +352,8 @@ export async function DELETE(
     entityId: id,
     summary: `Deleted record from ${entity.replace('_', ' ')}.`,
   });
+
+  dropTaxonomyCache();
 
   return NextResponse.json({ ok: true });
 }
