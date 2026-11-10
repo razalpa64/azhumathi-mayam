@@ -71,16 +71,35 @@ const REGISTRATION_BENEFITS = [
   Cached across requests for five minutes — it changes only when staff
   edit the taxonomy, and it is identical for every visitor.
 */
-const loadTaxonomy = unstable_cache(
-  async () => {
-    const admin = createSupabaseAdminClient();
-    const [
-      { data: activeProgrammes },
-      { data: universities },
-      { data: specializations },
-      { data: regulations },
-      { data: semesters },
-    ] = await Promise.all([
+interface RegistrationTaxonomy {
+  universities: University[];
+  programmes: Programme[];
+  specializations: Specialization[];
+  regulations: AcademicRegulation[];
+  semesters: Semester[];
+}
+
+const EMPTY_TAXONOMY: RegistrationTaxonomy = {
+  universities: [],
+  programmes: [],
+  specializations: [],
+  regulations: [],
+  semesters: [],
+};
+
+/**
+ * One read of the whole taxonomy.
+ *
+ * Returns null when any of the five queries failed. That matters: a failed
+ * read used to come back as "no rows" and get stored by unstable_cache, which
+ * then served an empty University picker to every visitor for five minutes —
+ * a form that cannot be completed, from one blip. Nothing partial is ever
+ * returned, so nothing partial is ever cached.
+ */
+async function readTaxonomy(): Promise<RegistrationTaxonomy | null> {
+  const admin = createSupabaseAdminClient();
+  const [programmesRes, universitiesRes, specializationsRes, regulationsRes, semestersRes] =
+    await Promise.all([
       admin.from('programmes').select('*').eq('is_active', true).order('display_order').order('name'),
       admin.from('universities').select('*').eq('is_active', true).order('display_order').order('name'),
       admin.from('specializations').select('*').eq('is_active', true).order('display_order').order('name'),
@@ -88,39 +107,93 @@ const loadTaxonomy = unstable_cache(
       admin.from('semesters').select('*').eq('is_active', true).order('semester_number'),
     ]);
 
-    let programmes = (activeProgrammes || []) as Programme[];
+  const failed = [
+    ['programmes', programmesRes.error],
+    ['universities', universitiesRes.error],
+    ['specializations', specializationsRes.error],
+    ['regulations', regulationsRes.error],
+    ['semesters', semestersRes.error],
+  ].filter(([, error]) => Boolean(error));
 
-    // Every programme switched off is far more likely a bad flag than a
-    // site with no degrees — retry unfiltered rather than show a dead form.
-    if (programmes.length === 0) {
-      const { data: allProgrammes } = await admin
-        .from('programmes')
-        .select('*')
-        .order('display_order')
-        .order('name');
-      programmes = (allProgrammes || []) as Programme[];
-      console.warn(
-        `[register] no active programmes — offering ${programmes.length} unfiltered instead`
-      );
-    }
+  if (failed.length > 0) {
+    console.warn(
+      `[register] taxonomy read failed (${failed.map(([name]) => name).join(', ')}) — not caching this`
+    );
+    return null;
+  }
 
-    const semesterRows = (semesters || []) as Semester[];
+  let programmes = (programmesRes.data || []) as Programme[];
+  let universities = (universitiesRes.data || []) as University[];
+  let semesterRows = (semestersRes.data || []) as Semester[];
 
-    // Only programmes whose semester picker can actually be filled — the
-    // rest of the form hangs off that choice. See programmesWithSemesters().
-    programmes = programmesWithSemesters(programmes, semesterRows);
+  // Everything switched off is far more likely a bad flag than a site with no
+  // degrees (or no universities) — retry unfiltered rather than show a form
+  // whose first picker has nothing in it and a student who cannot sign up.
+  if (programmes.length === 0) {
+    const { data: allProgrammes } = await admin
+      .from('programmes')
+      .select('*')
+      .order('display_order')
+      .order('name');
+    programmes = (allProgrammes || []) as Programme[];
+    console.warn(
+      `[register] no active programmes — offering ${programmes.length} unfiltered instead`
+    );
+  }
 
-    return {
-      universities: (universities || []) as University[],
-      programmes,
-      specializations: (specializations || []) as Specialization[],
-      regulations: (regulations || []) as AcademicRegulation[],
-      semesters: semesterRows,
-    };
+  if (universities.length === 0) {
+    const { data: allUniversities } = await admin
+      .from('universities')
+      .select('*')
+      .order('display_order')
+      .order('name');
+    universities = (allUniversities || []) as University[];
+    console.warn(
+      `[register] no active universities — offering ${universities.length} unfiltered instead`
+    );
+  }
+
+  if (semesterRows.length === 0) {
+    const { data: allSemesters } = await admin
+      .from('semesters')
+      .select('*')
+      .order('semester_number');
+    semesterRows = (allSemesters || []) as Semester[];
+  }
+
+  // Only programmes whose semester picker can actually be filled — the rest of
+  // the form hangs off that choice. See programmesWithSemesters().
+  const usableProgrammes = programmesWithSemesters(programmes, semesterRows);
+
+  return {
+    universities,
+    programmes: usableProgrammes,
+    specializations: (specializationsRes.data || []) as Specialization[],
+    regulations: (regulationsRes.data || []) as AcademicRegulation[],
+    semesters: semesterRows,
+  };
+}
+
+const loadTaxonomy = unstable_cache(
+  async () => {
+    const taxonomy = await readTaxonomy();
+    // Throwing keeps a broken read out of the cache; the page below falls back
+    // to a live read for this request instead.
+    if (!taxonomy) throw new Error('[register] taxonomy unavailable');
+    return taxonomy;
   },
-  ['register-taxonomy-v2'],
+  // v3: drops any entry v2 may already hold with empty pickers.
+  ['register-taxonomy-v3'],
   { revalidate: 300, tags: ['taxonomy'] }
 );
+
+async function getTaxonomy(): Promise<RegistrationTaxonomy> {
+  try {
+    return await loadTaxonomy();
+  } catch {
+    return (await readTaxonomy()) ?? EMPTY_TAXONOMY;
+  }
+}
 
 export default async function RegisterPage() {
   const profile = await getAuthenticatedProfile();
@@ -128,8 +201,7 @@ export default async function RegisterPage() {
     redirect(isStaffRole(profile.role) ? '/admin' : '/dashboard');
   }
 
-  const { universities, programmes, specializations, regulations, semesters } =
-    await loadTaxonomy();
+  const { universities, programmes, specializations, regulations, semesters } = await getTaxonomy();
 
   return (
     <div className="min-h-screen grid lg:grid-cols-12 bg-canvas">
