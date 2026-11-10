@@ -51,14 +51,27 @@ export function Select({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const [query, setQuery] = useState('');
 
   const selectedIndex = options.findIndex((option) => option.value === value);
   const selected = selectedIndex >= 0 ? options[selectedIndex] : null;
+
+  // Long lists get a filter box. A thirteen-item panel capped at 64 units of
+  // height scrolls, and the entry people are looking for is often the last
+  // one (“where is LL.B?”). Phones keep the native picker, which has
+  // type-ahead built in, so this lives only in the panel we draw.
+  const searchable = options.length > 8;
+  const normalisedQuery = query.trim().toLowerCase();
+  const filtered = normalisedQuery
+    ? options.filter((option) => option.label.toLowerCase().includes(normalisedQuery))
+    : options;
 
   function openPanel() {
     if (disabled || options.length === 0) return;
     const rect = triggerRef.current?.getBoundingClientRect();
     if (rect) setDropUp(rect.top > 320 && window.innerHeight - rect.bottom < 300);
+    setQuery('');
     setActive(selectedIndex >= 0 ? selectedIndex : 0);
     setOpen(true);
   }
@@ -68,8 +81,7 @@ export function Select({
     if (refocus) triggerRef.current?.focus();
   }
 
-  function commit(index: number) {
-    const option = options[index];
+  function commit(option: SelectOption | undefined) {
     if (!option) return;
     onChange(option.value);
     closePanel(true);
@@ -97,6 +109,19 @@ export function Select({
     };
   }, [open]);
 
+  // The filter box takes focus so a long list can be typed into immediately;
+  // Escape still closes the panel (handled globally below).
+  useEffect(() => {
+    if (!open || !searchable) return;
+    const timer = window.setTimeout(() => searchRef.current?.focus(), 0);
+    return () => window.clearTimeout(timer);
+  }, [open, searchable]);
+
+  // A new search term means a new list: start at the top of it.
+  useEffect(() => {
+    setActive(0);
+  }, [normalisedQuery]);
+
   // Keep the highlighted row visible while arrowing through a long list.
   useEffect(() => {
     if (!open) return;
@@ -120,21 +145,41 @@ export function Select({
       const step = event.key === 'ArrowDown' ? 1 : -1;
       setActive((index) => {
         const next = index + step;
-        if (next < 0) return options.length - 1;
-        if (next >= options.length) return 0;
+        if (next < 0) return Math.max(filtered.length - 1, 0);
+        if (next >= filtered.length) return 0;
         return next;
       });
       return;
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      if (open) commit(active);
+      if (open) commit(filtered[active]);
       else openPanel();
       return;
     }
     if (event.key === 'Escape' && open) {
       event.preventDefault();
       closePanel();
+    }
+    if (event.key === 'Tab') setOpen(false);
+  }
+
+  function onSearchKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      setActive((index) => {
+        const next = index + step;
+        if (next < 0) return Math.max(filtered.length - 1, 0);
+        if (next >= filtered.length) return 0;
+        return next;
+      });
+      return;
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      commit(filtered[active]);
+      return;
     }
     if (event.key === 'Tab') setOpen(false);
   }
@@ -195,17 +240,35 @@ export function Select({
         </button>
 
         {open ? (
-          <ul
-            ref={listRef}
-            role="listbox"
-            aria-label={ariaLabel}
-            tabIndex={-1}
+          <div
             className={cn(
-              'absolute left-0 right-0 z-40 max-h-64 overflow-y-auto rounded-lg border border-line bg-canvas p-1 shadow-[0_18px_40px_-18px_rgba(36,7,7,0.4)]',
+              'absolute left-0 right-0 z-40 rounded-lg border border-line bg-canvas p-1 shadow-[0_18px_40px_-18px_rgba(36,7,7,0.4)]',
               dropUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
             )}
           >
-            {options.map((option, index) => {
+            {searchable ? (
+              <div className="p-1 pb-1.5">
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  onKeyDown={onSearchKeyDown}
+                  placeholder="Type to find…"
+                  aria-label={`Filter ${ariaLabel}`}
+                  autoComplete="off"
+                  className="h-8 w-full rounded-md border border-line-strong bg-canvas px-2 text-xs text-charcoal placeholder:text-muted/70 focus:border-burgundy focus:outline-none"
+                />
+              </div>
+            ) : null}
+            <ul
+              ref={listRef}
+              role="listbox"
+              aria-label={ariaLabel}
+              tabIndex={-1}
+              className="max-h-64 overflow-y-auto"
+            >
+              {filtered.map((option, index) => {
               const isSelected = option.value === value;
               return (
                 <li key={option.value} role="none">
@@ -215,7 +278,7 @@ export function Select({
                     aria-selected={isSelected}
                     data-index={index}
                     onMouseEnter={() => setActive(index)}
-                    onClick={() => commit(index)}
+                    onClick={() => commit(option)}
                     className={cn(
                       'flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors',
                       index === active ? 'bg-burgundy-tint text-burgundy' : 'text-charcoal',
@@ -230,7 +293,13 @@ export function Select({
                 </li>
               );
             })}
-          </ul>
+              {filtered.length === 0 ? (
+                <li className="px-2.5 py-2 text-xs text-muted">
+                  No match for “{query.trim()}”
+                </li>
+              ) : null}
+            </ul>
+          </div>
         ) : null}
       </div>
     </>
