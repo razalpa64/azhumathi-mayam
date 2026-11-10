@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SgpaCalculatorClient } from '@/components/calculator/SgpaCalculatorClient';
-import { UNIVERSITY_SCALES } from '@/lib/university-grades';
+import { UNIVERSITY_SCALES, scaleIdForUniversity } from '@/lib/university-grades';
 import { getSiteUrl } from '@/lib/site';
 import { getAuthenticatedProfile, isStaffRole } from '@/lib/auth/session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -75,6 +75,11 @@ export default async function SgpaCalculatorPage() {
   const profile = await getAuthenticatedProfile().catch(() => null);
   const insideApp = Boolean(profile && !isStaffRole(profile.role));
 
+  // A signed-in KTU student should open this on the KTU scale, not be asked to
+  // hunt for it among six universities — and should not be reading Calicut's
+  // grade table either. Public visitors still get the full picker.
+  const ownScaleId = insideApp ? scaleIdForUniversity(profile?.university) : null;
+
   // Signed-in students already have the shell's own placements; the public
   // page is the one Google's crawler can actually reach.
   const adConfig = insideApp
@@ -94,35 +99,44 @@ export default async function SgpaCalculatorPage() {
 
   const calculatorBody = (
     <>
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-bold tracking-[0.18em] text-burgundy uppercase">
+        <div className="mx-auto max-w-2xl text-center lg:max-w-3xl">
+          {/* "No sign-up" is the pitch for a visitor, not for someone who is
+              already signed in — and on a laptop it is also wasted height. */}
+          <p
+            className={`text-xs font-bold tracking-[0.18em] text-burgundy uppercase${
+              insideApp ? ' lg:hidden' : ''
+            }`}
+          >
             Free tool · No sign-up
           </p>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">
             SGPA &amp; CGPA Calculator
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-pretty text-neutral-600 sm:text-base">
-            For KTU, Calicut, MG, Kerala, Kannur and CUSAT students. Pick your university, enter
-            your grades, and get your SGPA, CGPA and percentage — calculated with your
-            university&rsquo;s official grade scale.
+            {ownScaleId
+              ? 'Your subjects, your credits, your university’s official grade scale — SGPA, CGPA and the percentage your university converts them to.'
+              : 'For KTU, Calicut, MG, Kerala, Kannur and CUSAT students. Pick your university, enter your grades, and get your SGPA, CGPA and percentage — calculated with your university’s official grade scale.'}
           </p>
         </div>
 
-        <div className="mx-auto mt-8 max-w-2xl">
-          <SgpaCalculatorClient />
+        {/* Wide enough on a laptop for the form and the answer to sit side by
+            side; phones keep the single 2xl column they have always had. */}
+        <div className="mx-auto mt-8 w-full max-w-2xl lg:max-w-5xl">
+          <SgpaCalculatorClient ownScaleId={ownScaleId} />
         </div>
 
         {/* Grade scales */}
         <section className="mx-auto mt-14 max-w-3xl">
           <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Grade points &amp; percentage formulas by university
+            {ownScaleId ? 'Your grade points & percentage formula' : 'Grade points & percentage formulas by university'}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-            Every university assigns its own points and conversion formula. These are the scales
-            used above, straight from each university&rsquo;s regulations.
+            {ownScaleId
+              ? 'Straight from your university’s regulations. The points printed on your grade card always win.'
+              : 'Every university assigns its own points and conversion formula. These are the scales used above, straight from each university’s regulations.'}
           </p>
           <div className="mt-5 space-y-4">
-            {UNIVERSITY_SCALES.map((s) => (
+            {UNIVERSITY_SCALES.filter((s) => !ownScaleId || s.id === ownScaleId).map((s) => (
               <div key={s.id} className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
                 <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-neutral-100 px-4 py-3 sm:px-5">
                   <h3 className="text-sm font-bold text-neutral-900">
@@ -177,7 +191,8 @@ export default async function SgpaCalculatorPage() {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* CTA — for visitors only; a signed-in student is already here. */}
+        {insideApp ? null : (
         <section className="mx-auto mt-14 max-w-3xl rounded-3xl bg-burgundy px-5 py-8 text-center sm:px-10">
           <h2 className="text-xl font-extrabold text-white text-balance sm:text-2xl">
             Notes and question papers for your subjects
@@ -201,6 +216,7 @@ export default async function SgpaCalculatorPage() {
             </Link>
           </div>
         </section>
+        )}
     </>
   );
 
@@ -238,7 +254,7 @@ export default async function SgpaCalculatorPage() {
       {/* Inside the app the shell already provides the <main> landmark —
           nesting a second one confuses screen readers. */}
       {insideApp ? (
-        <div className="w-full max-w-5xl">
+        <div className="mx-auto w-full max-w-5xl">
           {calculatorBody}
         </div>
       ) : (

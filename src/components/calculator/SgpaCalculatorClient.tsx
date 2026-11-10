@@ -39,8 +39,11 @@ function parseStored(value: unknown): { scaleId?: string; subjects?: SubjectRow[
   };
 }
 
-export function SgpaCalculatorClient() {
-  const [scaleId, setScaleId] = useState(DEFAULT_SCALE_ID);
+export function SgpaCalculatorClient({ ownScaleId = null }: { ownScaleId?: string | null }) {
+  const [scaleId, setScaleId] = useState(ownScaleId || DEFAULT_SCALE_ID);
+  // Signed-in students land on their own university; "Change" opens the full
+  // list for anyone helping a friend or sitting another university's paper.
+  const [showAllScales, setShowAllScales] = useState(false);
   const [mode, setMode] = useState<'subjects' | 'semesters'>('subjects');
   const [subjects, setSubjects] = useState<SubjectRow[]>(emptySubjects);
   const [sems, setSems] = useState<SemRow[]>(emptySems);
@@ -51,7 +54,7 @@ export function SgpaCalculatorClient() {
   useEffect(() => {
     try {
       const parsed = parseStored(JSON.parse(window.localStorage.getItem(STORAGE_KEY) || 'null'));
-      if (parsed?.scaleId && UNIVERSITY_SCALES.some((s) => s.id === parsed.scaleId)) {
+      if (!ownScaleId && parsed?.scaleId && UNIVERSITY_SCALES.some((s) => s.id === parsed.scaleId)) {
         setScaleId(parsed.scaleId);
       }
       if (parsed?.subjects?.length) setSubjects(parsed.subjects);
@@ -60,7 +63,7 @@ export function SgpaCalculatorClient() {
       /* ignore */
     }
     setHydrated(true);
-  }, []);
+  }, [ownScaleId]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -127,24 +130,52 @@ export function SgpaCalculatorClient() {
   };
 
   return (
-    <div className="space-y-4">
+    // Phones: one column, exactly as before. Desktop: the form on the left and
+    // the answer pinned to the right, so the SGPA updates in view instead of
+    // three scrolls below the fields.
+    <div className="space-y-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] lg:items-start lg:gap-6 lg:space-y-0">
+      <div className="space-y-4">
       {/* University picker */}
       <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
-        <label htmlFor="calc-university" className="text-sm font-bold text-neutral-900">
-          Your university
-        </label>
-        <select
-          id="calc-university"
-          value={scaleId}
-          onChange={(e) => changeUniversity(e.target.value)}
-          className="mt-2 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm font-semibold text-neutral-900 outline-none focus:border-burgundy focus-visible:ring-2 focus-visible:ring-burgundy/30"
-        >
-          {UNIVERSITY_SCALES.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.shortName} — {s.name}
-            </option>
-          ))}
-        </select>
+        {ownScaleId && !showAllScales ? (
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-neutral-900">Your university</p>
+              <p className="mt-1 text-sm font-semibold text-neutral-900">
+                {scale.shortName}{' '}
+                <span className="font-normal text-neutral-500">— {scale.name}</span>
+              </p>
+              <p className="mt-0.5 text-xs text-neutral-500">
+                {scale.system} · from your profile
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowAllScales(true)}
+              className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-burgundy hover:bg-burgundy-tint cursor-pointer"
+            >
+              Change
+            </button>
+          </div>
+        ) : (
+          <>
+            <label htmlFor="calc-university" className="text-sm font-bold text-neutral-900">
+              Your university
+            </label>
+            <select
+              id="calc-university"
+              value={scaleId}
+              onChange={(e) => changeUniversity(e.target.value)}
+              className="mt-2 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2.5 text-sm font-semibold text-neutral-900 outline-none focus:border-burgundy focus-visible:ring-2 focus-visible:ring-burgundy/30"
+            >
+              {UNIVERSITY_SCALES.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.shortName} — {s.name}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
         <p className="mt-2 text-xs leading-relaxed text-neutral-600">
           {scale.system}. Grade scale and percentage formula below follow {scale.shortName}
           &rsquo;s official regulations. The points printed on your grade card always win.
@@ -322,6 +353,9 @@ export function SgpaCalculatorClient() {
         </div>
       )}
 
+      </div>
+
+      <div className="space-y-4 lg:sticky lg:top-24">
       {/* Live grade scale for the chosen university */}
       <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-wrap items-center gap-2">
@@ -390,6 +424,7 @@ export function SgpaCalculatorClient() {
             Clear everything
           </Button>
         </div>
+      </div>
       </div>
     </div>
   );
