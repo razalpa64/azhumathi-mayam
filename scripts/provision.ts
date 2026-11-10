@@ -223,6 +223,13 @@ async function main() {
     );
     await pg.query(bbaBranchesSql);
 
+    console.log('3x. Applying 0028_bba_llb_calicut_subjects.sql (Calicut B.B.A. LL.B. 5-year, 61 papers)...');
+    const bbaLlbSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0028_bba_llb_calicut_subjects.sql'),
+      'utf8'
+    );
+    await pg.query(bbaLlbSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
