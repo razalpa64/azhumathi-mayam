@@ -31,6 +31,7 @@ import type { Profile } from '@/types/database';
 import { InvytraCredit } from '@/components/InvytraCredit';
 import { InstallAppButton } from '@/components/pwa/InstallAppButton';
 import { InstallPromptCard } from '@/components/pwa/InstallPromptCard';
+import { DesktopNav } from '@/components/student/DesktopNav';
 import { cn, getInitials } from '@/lib/utils';
 
 interface StudentShellProps {
@@ -65,17 +66,24 @@ const ALL_SECTIONS = [
  * The pill strip keeps the everyday study destinations. Everything else
  * (Group Chat, Saved, History, Help...) lives one tap away in the bottom
  * nav or the menu sheet, so the strip stays short and quiet.
+ *
+ * `desktop: true` marks the seven tabs that stay in the header strip on a
+ * laptop. The other four are phone-only in the strip: together with the
+ * context line they needed ~1830px inside a 944–1440px row, so the strip
+ * always scrolled sideways behind a hidden scrollbar and the last tabs could
+ * not be reached. On a laptop those four now live in the Menu panel / ⌘K,
+ * which lists every section in the app.
  */
 const STRIP_TABS = [
-  { href: '/dashboard', label: 'Overview', icon: Home, exact: true },
+  { href: '/dashboard', label: 'Overview', icon: Home, exact: true, desktop: true },
   { href: '/dashboard/semester', label: 'My Semester', icon: Layers },
   { href: '/dashboard/courses', label: 'My Courses', icon: GraduationCap },
-  { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen },
-  { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion },
-  { href: '/dashboard/important-questions', label: 'Important Qs', icon: Flame },
-  { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen },
-  { href: '/dashboard/study-planner', label: 'Study Planner', icon: CalendarClock },
-  { href: '/sgpa-calculator', label: 'SGPA Calculator', icon: Calculator },
+  { href: '/dashboard/materials', label: 'Study Materials', icon: BookOpen, desktop: true },
+  { href: '/dashboard/question-papers', label: 'Question Papers', icon: FileQuestion, desktop: true },
+  { href: '/dashboard/important-questions', label: 'Important Qs', icon: Flame, desktop: true },
+  { href: '/dashboard/short-notes', label: 'Short Notes', icon: NotebookPen, desktop: true },
+  { href: '/dashboard/study-planner', label: 'Study Planner', icon: CalendarClock, desktop: true },
+  { href: '/sgpa-calculator', label: 'SGPA Calculator', icon: Calculator, desktop: true },
   { href: '/dashboard/contribute', label: 'Contribute', icon: UploadCloud },
   { href: '/dashboard/requests', label: 'Requests', icon: Inbox },
 ];
@@ -234,6 +242,13 @@ export function StudentShell({
       ref={rootRef}
       className="desktop-ambient flex h-[var(--app-h,100dvh)] flex-col overflow-hidden bg-canvas lg:h-auto lg:min-h-dvh lg:overflow-visible"
     >
+      {/* Keyboard users can jump the whole chrome. Hidden until focused. */}
+      <a
+        href="#app-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-xl focus:bg-burgundy focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      >
+        Skip to content
+      </a>
       {/* Burgundy wave header — pinned at the top of the shell on phones */}
       <div className="relative flex-none bg-gradient-to-br from-burgundy-logo via-burgundy-dark to-burgundy-deep text-canvas">
         <div className="mx-auto max-w-7xl xl:max-w-[1440px] px-4 sm:px-6 lg:px-10">
@@ -260,18 +275,27 @@ export function StudentShell({
                 {!isChat ? (
                   <span className="mt-0.5 block truncate text-[11px] font-medium tracking-wide text-white/60 lg:text-xs">
                     {contextLine || 'Notes, syllabus & question papers'}
+                    {/* The strip used to repeat this on the right; it is the
+                        header's job now. Phones never rendered that strip
+                        line, so this stays desktop-only. */}
+                    {profile.semester ? (
+                      <span className="hidden lg:inline"> · {profile.semester.label}</span>
+                    ) : null}
                   </span>
                 ) : null}
               </span>
             </Link>
 
             <div className="flex shrink-0 items-center gap-2">
+              {/* Every section, grouped and searchable — desktop only */}
+              <DesktopNav sections={ALL_SECTIONS} unreadNotifications={unreadNotifications} />
+
               {/* Notifications */}
               <Link
                 href="/dashboard/notifications"
                 aria-label="Notifications"
                 className={cn(
-                  'relative inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors lg:h-10 lg:w-10',
+                  'relative inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition-colors focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none lg:h-10 lg:w-10',
                   pathname === '/dashboard/notifications'
                     ? 'bg-white text-burgundy ring-white'
                     : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
@@ -289,7 +313,7 @@ export function StudentShell({
               <Link
                 href="/dashboard/profile"
                 className={cn(
-                  'hidden items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-xs font-medium ring-1 transition-colors md:inline-flex lg:py-1.5 lg:pl-1.5 lg:pr-3.5 lg:text-[13px]',
+                  'hidden items-center gap-2.5 rounded-full py-1.5 pl-1.5 pr-3.5 text-xs font-medium ring-1 transition-colors focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none md:inline-flex lg:py-1.5 lg:pl-1.5 lg:pr-3.5 lg:text-[13px]',
                   pathname === '/dashboard/profile'
                     ? 'bg-white text-burgundy ring-white'
                     : 'bg-white/10 text-white ring-white/20 hover:bg-white/20'
@@ -317,7 +341,7 @@ export function StudentShell({
                 disabled={loggingOut}
                 aria-label="Logout"
                 title="Logout"
-                className="hidden h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 cursor-pointer disabled:opacity-50 md:inline-flex lg:h-10 lg:w-10"
+                className="hidden h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20 transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none disabled:opacity-50 md:inline-flex lg:h-10 lg:w-10"
               >
                 <LogOut className="h-[18px] w-[18px]" />
               </button>
@@ -385,24 +409,24 @@ export function StudentShell({
                   href={tab.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 lg:gap-2 lg:px-3.5 lg:py-1.5 lg:text-[13px]',
+                    'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-burgundy/50 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas focus-visible:outline-none lg:gap-2 lg:px-3.5 lg:py-1.5 lg:text-[13px]',
+                    // Phone-only strip tabs step out on a laptop instead of
+                    // pushing the row into a hidden sideways scroll.
+                    !tab.desktop && 'lg:hidden',
                     active
                       ? 'bg-burgundy font-semibold text-white'
                       : 'text-charcoal/70 hover:bg-burgundy-tint hover:text-burgundy'
                   )}
                 >
-                  <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
+                  {/* Between lg and xl the row is text-only, so seven tabs fit
+                      without scrolling; icons come back on wide screens. */}
+                  <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4 lg:hidden xl:block" />
                   <span>{tab.label}</span>
                 </Link>
               );
             })}
-            {contextLine ? (
-              <span className="ml-auto hidden shrink-0 items-center gap-1.5 pl-4 text-xs font-medium text-muted lg:inline-flex">
-                <GraduationCap className="h-3.5 w-3.5 text-burgundy/70" />
-                {contextLine}
-                {profile.semester ? ` · ${profile.semester.label}` : ''}
-              </span>
-            ) : null}
+            {/* The course line used to sit here, squeezing the tabs. It is
+                already the header subtitle on every screen size. */}
           </nav>
         </div>
 
@@ -489,6 +513,7 @@ export function StudentShell({
         // frame, then snapped it up — the most visible "the layout moved".
         key={pathname}
         id="app-main"
+        tabIndex={-1}
         ref={mainRef}
         onScroll={handleMainScroll}
         className="relative isolate mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-canvas px-4 pt-6 sm:px-6 lg:overflow-visible lg:px-10 lg:pt-6 xl:max-w-[1440px]"
