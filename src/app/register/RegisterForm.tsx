@@ -15,6 +15,8 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
+import { SUPPORT_WHATSAPP_URL } from '@/lib/support';
 import { applicableSchemes, keepValidSchemeId } from '@/lib/regulation-scope';
 import { semestersForProgramme } from '@/lib/register-options';
 import type {
@@ -352,45 +354,66 @@ export function RegisterForm({
             <label htmlFor="university" className="mb-1 block text-xs font-medium text-charcoal">
               University
             </label>
-            <select
+            <Select
               id="university"
               value={universityId}
-              onChange={(e) => handleUniversityChange(e.target.value)}
-              disabled={loading}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
-            >
-              <option value="">Select your university</option>
-              {universities.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.short_name} — {u.name}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-[11px] text-muted">
-              {selectedUniversity
-                ? `Showing ${selectedUniversity.short_name} schemes below.`
-                : 'Pick yours so we show the right scheme.'}
-            </p>
+              onChange={handleUniversityChange}
+              options={universities.map((u) => ({
+                value: u.id,
+                label: `${u.short_name} — ${u.name}`,
+              }))}
+              placeholder="Select your university"
+              disabled={loading || universities.length === 0}
+              ariaLabel="University"
+              emptyLabel="No universities loaded"
+            />
+            {universities.length === 0 ? (
+              <p className="mt-1 flex items-start gap-1.5 text-[11px] font-medium text-burgundy">
+                <AlertCircle className="mt-px h-3 w-3 shrink-0" />
+                <span>
+                  The university list didn’t load, so this form can’t be finished.{' '}
+                  <button
+                    type="button"
+                    onClick={() => router.refresh()}
+                    className="underline underline-offset-2 hover:text-burgundy-dark"
+                  >
+                    Reload the list
+                  </button>
+                  , or{' '}
+                  <a
+                    href={SUPPORT_WHATSAPP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-burgundy-dark"
+                  >
+                    message us on WhatsApp
+                  </a>{' '}
+                  and we’ll fix it today.
+                </span>
+              </p>
+            ) : (
+              <p className="mt-1 text-[11px] text-muted">
+                {selectedUniversity
+                  ? `Showing ${selectedUniversity.short_name} schemes below.`
+                  : 'Pick yours so we show the right scheme.'}
+              </p>
+            )}
           </div>
 
           <div>
             <label htmlFor="programme" className="mb-1 block text-xs font-medium text-charcoal">
               Degree Programme
             </label>
-            <select
+            <Select
               id="programme"
               value={programmeId}
-              onChange={(e) => handleProgrammeChange(e.target.value)}
-              disabled={loading}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none"
-            >
-              <option value="">Select Programme</option>
-              {programmes.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              onChange={handleProgrammeChange}
+              options={programmes.map((p) => ({ value: p.id, label: p.name }))}
+              placeholder="Select Programme"
+              disabled={loading || programmes.length === 0}
+              ariaLabel="Degree programme"
+              emptyLabel="No programmes available"
+            />
             {programmes.length === 0 ? (
               <p className="mt-1 text-[11px] font-medium text-burgundy">
                 No programmes are set up yet, so registration cannot finish. Please message us on
@@ -403,22 +426,16 @@ export function RegisterForm({
             <label htmlFor="semester" className="mb-1 block text-xs font-medium text-charcoal">
               Current Semester
             </label>
-            <select
+            <Select
               id="semester"
               value={semesterId}
-              onChange={(e) => setSemesterId(e.target.value)}
+              onChange={setSemesterId}
+              options={filteredSemesters.map((sem) => ({ value: sem.id, label: sem.label }))}
+              placeholder={programmeId ? 'Select Semester' : 'Choose Programme first'}
               disabled={loading || !programmeId}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
-            >
-              <option value="">
-                {programmeId ? 'Select Semester' : 'Choose Programme first'}
-              </option>
-              {filteredSemesters.map((sem) => (
-                <option key={sem.id} value={sem.id}>
-                  {sem.label}
-                </option>
-              ))}
-            </select>
+              ariaLabel="Current semester"
+              emptyLabel={programmeId ? 'No semesters listed' : 'Choose Programme first'}
+            />
             {programmeId && filteredSemesters.length === 0 ? (
               <p className="mt-1 text-[11px] text-burgundy">
                 No semesters are set up for this programme yet — you can add yours later from your
@@ -431,52 +448,49 @@ export function RegisterForm({
             <label htmlFor="specialization" className="mb-1 block text-xs font-medium text-charcoal">
               Branch / Specialization
             </label>
-            <select
+            <Select
               id="specialization"
               value={specializationId}
-              onChange={(e) => setSpecializationId(e.target.value)}
-              disabled={loading || filteredSpecializations.length === 0}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
-            >
-              <option value="">
-                {!programmeId
+              onChange={setSpecializationId}
+              options={filteredSpecializations.map((sp) => ({
+                value: sp.id,
+                label: `${sp.code} — ${sp.name}`,
+              }))}
+              placeholder={
+                !programmeId
                   ? 'Choose Programme first'
                   : filteredSpecializations.length === 0
                     ? 'General / No branch'
-                    : 'Select Branch'}
-              </option>
-              {filteredSpecializations.map((sp) => (
-                <option key={sp.id} value={sp.id}>
-                  {sp.code} — {sp.name}
-                </option>
-              ))}
-            </select>
+                    : 'Select Branch'
+              }
+              disabled={loading || filteredSpecializations.length === 0}
+              ariaLabel="Branch or specialization"
+              emptyLabel={!programmeId ? 'Choose Programme first' : 'General / No branch'}
+            />
           </div>
 
           <div>
             <label htmlFor="regulation" className="mb-1 block text-xs font-medium text-charcoal">
               Regulation / Scheme
             </label>
-            <select
+            <Select
               id="regulation"
               value={regulationId}
-              onChange={(e) => setRegulationId(e.target.value)}
-              disabled={loading || !universityId || filteredRegulations.length === 0}
-              className="h-10 w-full rounded-md border border-line-strong bg-canvas px-3 text-sm text-charcoal focus:border-burgundy focus:outline-none disabled:opacity-55"
-            >
-              <option value="">
-                {!universityId
+              onChange={setRegulationId}
+              options={schemeOptions.map(({ reg, label }) => ({ value: reg.id, label }))}
+              placeholder={
+                !universityId
                   ? 'Choose your university first'
                   : filteredRegulations.length === 0
                     ? 'No scheme listed for this course yet'
-                    : 'Select Scheme (Optional)'}
-              </option>
-              {schemeOptions.map(({ reg, label }) => (
-                <option key={reg.id} value={reg.id}>
-                  {label}
-                </option>
-              ))}
-            </select>
+                    : 'Select Scheme (Optional)'
+              }
+              disabled={loading || !universityId || filteredRegulations.length === 0}
+              ariaLabel="Regulation or scheme"
+              emptyLabel={
+                !universityId ? 'Choose your university first' : 'No scheme listed yet'
+              }
+            />
             {selectedScheme?.batch_range ? (
               <p className="mt-1 text-[11px] text-muted">
                 {selectedScheme.name} · Admissions: {selectedScheme.batch_range}
