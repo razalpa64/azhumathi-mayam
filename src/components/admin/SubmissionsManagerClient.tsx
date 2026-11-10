@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import {
   Check,
+  CheckCheck,
   ExternalLink,
   FileText,
   Loader2,
@@ -10,6 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { cn, formatDate } from '@/lib/utils';
 import type { MaterialSubmission } from '@/types/database';
 
@@ -33,6 +35,12 @@ export function SubmissionsManagerClient({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
+
+  // One approval publishes a material, so reviewing a whole batch one card at
+  // a time was the slowest thing in the console.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const needle = text.trim().toLowerCase();
   const visible = useMemo(
@@ -99,6 +107,107 @@ export function SubmissionsManagerClient({
     }
   }
 
+  const selectableIds = visible.filter((item) => item.status === 'pending').map((item) => item.id);
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selected.has(id));
+
+  function toggle(id: string) {
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelected(allSelected ? new Set() : new Set(selectableIds));
+  }
+
+  async function moderateBulk(action: 'approve' | 'reject') {
+    if (selected.size === 0 || bulkBusy) return;
+    const ids = Array.from(selected);
+    const verb = action === 'approve' ? 'Approve' : 'Reject';
+    if (
+      !window.confirm(
+        `${verb} ${ids.length} upload${ids.length === 1 ? '' : 's'}?${
+          action === 'approve' ? ' Each one is published straight away.' : ''
+        }`
+      )
+    ) {
+      return;
+    }
+
+    setBulkBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      // Ten at a time: every approval validates a Drive link and publishes a
+      // resource, so a long batch would outlive the request.
+      const batches: string[][] = [];
+      for (let i = 0; i < ids.length; i += 10) batches.push(ids.slice(i, i + 10));
+
+      let approved = 0;
+      let rejected = 0;
+      const failures: string[] = [];
+
+      for (const batch of batches) {
+        const res = await fetch('/api/admin/submissions', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ ids: batch, action }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || 'That bulk review failed. Please try again.');
+        }
+        approved += data.approved || 0;
+        rejected += data.rejected || 0;
+        for (const result of (data.results || []) as {
+          id: string;
+          ok: boolean;
+          status?: 'approved' | 'rejected';
+          resourceId?: string;
+          error?: string;
+        }[]) {
+          if (!result.ok) {
+            failures.push(result.error || 'One upload could not be reviewed.');
+            continue;
+          }
+          setItems((current) =>
+            current.map((row) =>
+              row.id === result.id
+                ? {
+                    ...row,
+                    status: result.status || row.status,
+                    created_resource_id: result.resourceId || row.created_resource_id,
+                  }
+                : row
+            )
+          );
+        }
+      }
+
+      const done = approved + rejected;
+      const parts = [
+        approved > 0 ? `${approved} approved` : null,
+        rejected > 0 ? `${rejected} rejected` : null,
+      ].filter(Boolean);
+
+      setNotice(
+        done > 0
+          ? `${parts.join(' · ')}${failures.length > 0 ? ` · ${failures.length} left alone` : ''}.`
+          : 'Nothing was changed.'
+      );
+      if (failures.length > 0) setError(failures[0]);
+      setSelected(new Set());
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setBulkBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Tabs */}
@@ -151,6 +260,15 @@ export function SubmissionsManagerClient({
         </p>
       ) : null}
 
+      {notice ? (
+        <p
+          role="status"
+          className="rounded-xl border border-burgundy-border bg-burgundy-tint px-4 py-2.5 text-[13px] font-medium text-charcoal"
+        >
+          {notice}
+        </p>
+      ) : null}
+
       {visible.length === 0 ? (
         <div className="rounded-[24px] border border-dashed border-line bg-canvas px-6 py-12 text-center">
           <FileText className="mx-auto h-8 w-8 text-muted/50" />
@@ -168,6 +286,23 @@ export function SubmissionsManagerClient({
           </p>
         </div>
       ) : (
+        <>
+        {selectableIds.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
+            <label className="inline-flex cursor-pointer items-center gap-2 font-medium text-charcoal">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleAll}
+                className="h-4 w-4 cursor-pointer rounded border-line accent-burgundy"
+              />
+              Select all waiting here
+            </label>
+            <span>
+              {selectableIds.length} waiting on this view · {selected.size} selected
+            </span>
+          </div>
+        ) : null}
         <ul className="space-y-3">
           {visible.map((item) => (
             <li
@@ -175,6 +310,18 @@ export function SubmissionsManagerClient({
               className="rounded-[22px] border border-line bg-canvas p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  {item.status === 'pending' ? (
+                    <input
+                      type="checkbox"
+                      checked={selected.has(item.id)}
+                      onChange={() => toggle(item.id)}
+                      aria-label={`Select upload ${item.title}`}
+                      className="mt-1 h-4 w-4 shrink-0 cursor-pointer rounded border-line accent-burgundy"
+                    />
+                  ) : (
+                    <span aria-hidden="true" className="mt-1 h-4 w-4 shrink-0" />
+                  )}
                 <div className="min-w-0">
                   <p className="text-[15px] font-bold leading-snug text-charcoal">
                     {item.title}
@@ -200,6 +347,7 @@ export function SubmissionsManagerClient({
                     </span>
                     {item.student?.username ? ` (@${item.student.username})` : ''}
                   </p>
+                </div>
                 </div>
                 <Badge
                   variant={
@@ -287,7 +435,40 @@ export function SubmissionsManagerClient({
             </li>
           ))}
         </ul>
+        </>
       )}
+
+      {selected.size > 0 ? (
+        <div className="sticky bottom-3 z-20 flex flex-wrap items-center gap-2.5 rounded-2xl border border-burgundy-border bg-canvas/95 px-4 py-3 shadow-[0_18px_40px_-24px_rgba(36,7,7,0.5)] backdrop-blur-md">
+          <span className="text-[13px] font-semibold text-charcoal">
+            {selected.size} selected
+          </span>
+          <Button size="sm" onClick={() => moderateBulk('approve')} disabled={bulkBusy}>
+            {bulkBusy ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <CheckCheck className="h-3.5 w-3.5" />
+            )}
+            <span>Approve {selected.size}</span>
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => moderateBulk('reject')}
+            disabled={bulkBusy}
+          >
+            <X className="h-3.5 w-3.5" />
+            <span>Reject {selected.size}</span>
+          </Button>
+          <button
+            type="button"
+            onClick={() => setSelected(new Set())}
+            className="cursor-pointer text-xs font-medium text-muted hover:text-charcoal"
+          >
+            Clear
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

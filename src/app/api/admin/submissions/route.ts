@@ -20,6 +20,17 @@ const moderateSchema = z.object({
   admin_note: z.string().trim().max(500).optional().nullable(),
 });
 
+/**
+ * The queue's selection bar approves a pile at once. Ten per call: each
+ * approval re-validates the Drive link and publishes a resource, so the
+ * batches stay short enough to finish inside one request.
+ */
+const bulkSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(25),
+  action: z.enum(['approve', 'reject']),
+  admin_note: z.string().trim().max(500).optional().nullable(),
+});
+
 /** The moderation queue (defaults to pending, oldest first). */
 export async function GET(request: NextRequest) {
   const auth = await requireApiStaff();
@@ -51,22 +62,26 @@ export async function GET(request: NextRequest) {
  * Approve → the submission becomes a published resource, credited to
  * the student (uploaded_by), with taxonomy derived from the subject —
  * exactly like an admin upload. Reject → status only.
+ *
+ * Extracted so one code path serves both the single row buttons and the
+ * bulk bar; nothing here is allowed to half-apply.
  */
-export async function PATCH(request: NextRequest) {
-  const auth = await requireApiStaff();
-  if (!auth.ok) return auth.response;
+interface ModerateResult {
+  id: string;
+  ok: boolean;
+  status?: 'approved' | 'rejected';
+  resourceId?: string;
+  error?: string;
+  httpStatus?: number;
+}
 
-  const body = await request.json().catch(() => null);
-  const parsed = moderateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message || 'Invalid moderation request.' },
-      { status: 400 }
-    );
-  }
-  const { id, action, admin_note } = parsed.data;
-  const adminClient = createSupabaseAdminClient();
-
+async function moderateOne(
+  adminClient: ReturnType<typeof createSupabaseAdminClient>,
+  adminId: string,
+  id: string,
+  action: 'approve' | 'reject',
+  adminNote: string | null
+): Promise<ModerateResult> {
   const { data: submission } = await adminClient
     .from('material_submissions')
     .select('*, subject:subjects(id, subject_code, name)')
@@ -74,13 +89,10 @@ export async function PATCH(request: NextRequest) {
     .maybeSingle();
 
   if (!submission) {
-    return NextResponse.json({ error: 'That upload was not found.' }, { status: 404 });
+    return { id, ok: false, error: 'That upload was not found.', httpStatus: 404 };
   }
   if (submission.status !== 'pending') {
-    return NextResponse.json(
-      { error: 'That upload has already been reviewed.' },
-      { status: 409 }
-    );
+    return { id, ok: false, error: 'That upload has already been reviewed.', httpStatus: 409 };
   }
 
   const reviewedAt = new Date().toISOString();
@@ -90,25 +102,27 @@ export async function PATCH(request: NextRequest) {
       .from('material_submissions')
       .update({
         status: 'rejected',
-        admin_note: admin_note || null,
-        reviewed_by: auth.profile.id,
+        admin_note: adminNote || null,
+        reviewed_by: adminId,
         reviewed_at: reviewedAt,
       })
       .eq('id', id);
     if (error) {
-      return NextResponse.json(
-        { error: friendlyDbError(error, 'Could not reject that upload.', 'admin') },
-        { status: 400 }
-      );
+      return {
+        id,
+        ok: false,
+        error: friendlyDbError(error, 'Could not reject that upload.', 'admin'),
+        httpStatus: 400,
+      };
     }
     await logAdminActivity({
-      adminId: auth.profile.id,
+      adminId,
       actionType: 'SUBMISSION_REJECTED',
       entityType: 'material_submission',
       entityId: id,
       summary: `Rejected student upload "${submission.title}"`,
     });
-    return NextResponse.json({ ok: true, status: 'rejected' });
+    return { id, ok: true, status: 'rejected' };
   }
 
   // ---- Approve -------------------------------------------------------
@@ -117,27 +131,24 @@ export async function PATCH(request: NextRequest) {
     submission.google_drive_share_url as string
   );
   if (!linkCheck.valid || !linkCheck.fileId || !linkCheck.normalizedShareUrl) {
-    return NextResponse.json(
-      {
-        error:
-          'The Drive link on this upload no longer validates. Reject it and ask the student to share the link again.',
-      },
-      { status: 400 }
-    );
+    return {
+      id,
+      ok: false,
+      error:
+        'The Drive link on this upload no longer validates. Reject it and ask the student to share the link again.',
+      httpStatus: 400,
+    };
   }
 
-  // Taxonomy comes from the subject row, never from the submission —
-  // the same rule the admin upload follows.
+  // Taxonomy comes from the subject row, never from the submission — the same
+  // rule the admin upload follows.
   const { data: subject } = await adminClient
     .from('subjects')
     .select('id, programme_id, semester_id, regulation_id, university_id')
     .eq('id', submission.subject_id)
     .maybeSingle();
   if (!subject) {
-    return NextResponse.json(
-      { error: 'The subject for this upload no longer exists.' },
-      { status: 400 }
-    );
+    return { id, ok: false, error: 'The subject for this upload no longer exists.', httpStatus: 400 };
   }
 
   let categoryId = submission.category_id as string | null;
@@ -150,10 +161,7 @@ export async function PATCH(request: NextRequest) {
     categoryId = fallback?.id || null;
   }
   if (!categoryId) {
-    return NextResponse.json(
-      { error: 'No resource category available for this upload.' },
-      { status: 400 }
-    );
+    return { id, ok: false, error: 'No resource category available for this upload.', httpStatus: 400 };
   }
 
   const audienceSpecializationId = await resolveCourseAudienceSpecialization(
@@ -185,39 +193,39 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (insertError || !resource) {
-    return NextResponse.json(
-      {
-        error: friendlyDbError(
-          insertError,
-          'Approving failed while publishing the material. Please try again.',
-          'admin'
-        ),
-      },
-      { status: 400 }
-    );
+    return {
+      id,
+      ok: false,
+      error: friendlyDbError(
+        insertError,
+        'Approving failed while publishing the material. Please try again.',
+        'admin'
+      ),
+      httpStatus: 400,
+    };
   }
 
   const { error: updateError } = await adminClient
     .from('material_submissions')
     .update({
       status: 'approved',
-      admin_note: admin_note || null,
+      admin_note: adminNote || null,
       created_resource_id: resource.id,
-      reviewed_by: auth.profile.id,
+      reviewed_by: adminId,
       reviewed_at: reviewedAt,
     })
     .eq('id', id);
 
   if (updateError) {
-    // The resource is published; don't lose track of it — surface the
-    // problem instead of pretending the approval failed.
-    return NextResponse.json(
-      {
-        error:
-          'The material was published, but marking the upload as approved failed. Check Study Materials, then refresh this queue.',
-      },
-      { status: 500 }
-    );
+    // The resource is published; don't lose track of it — surface the problem
+    // instead of pretending the approval failed.
+    return {
+      id,
+      ok: false,
+      error:
+        'The material was published, but marking the upload as approved failed. Check Study Materials, then refresh this queue.',
+      httpStatus: 500,
+    };
   }
 
   // Tell the contributor — in-app notification + web push, best-effort.
@@ -240,12 +248,83 @@ export async function PATCH(request: NextRequest) {
   }
 
   await logAdminActivity({
-    adminId: auth.profile.id,
+    adminId,
     actionType: 'SUBMISSION_APPROVED',
     entityType: 'material_submission',
     entityId: id,
     summary: `Approved student upload "${submission.title}" (published as resource ${resource.id})`,
   });
 
-  return NextResponse.json({ ok: true, status: 'approved', resourceId: resource.id });
+  return { id, ok: true, status: 'approved', resourceId: resource.id };
+}
+
+export async function PATCH(request: NextRequest) {
+  const auth = await requireApiStaff();
+  if (!auth.ok) return auth.response;
+
+  const body = await request.json().catch(() => null);
+  const adminClient = createSupabaseAdminClient();
+
+  // ---- Bulk ----------------------------------------------------------
+  if (body && typeof body === 'object' && 'ids' in (body as Record<string, unknown>)) {
+    const parsed = bulkSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Invalid moderation request.' },
+        { status: 400 }
+      );
+    }
+
+    const results: ModerateResult[] = [];
+    for (const id of parsed.data.ids) {
+      results.push(
+        await moderateOne(
+          adminClient,
+          auth.profile.id,
+          id,
+          parsed.data.action,
+          parsed.data.admin_note ?? null
+        )
+      );
+    }
+
+    const approved = results.filter((r) => r.ok && r.status === 'approved').length;
+    const rejected = results.filter((r) => r.ok && r.status === 'rejected').length;
+    const failures = results.filter((r) => !r.ok);
+
+    return NextResponse.json({
+      ok: true,
+      approved,
+      rejected,
+      failed: failures.length,
+      results,
+    });
+  }
+
+  // ---- Single --------------------------------------------------------
+  const parsed = moderateSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message || 'Invalid moderation request.' },
+      { status: 400 }
+    );
+  }
+
+  const result = await moderateOne(
+    adminClient,
+    auth.profile.id,
+    parsed.data.id,
+    parsed.data.action,
+    parsed.data.admin_note ?? null
+  );
+
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: result.httpStatus || 400 });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    status: result.status,
+    resourceId: result.resourceId,
+  });
 }
