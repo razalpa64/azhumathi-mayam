@@ -183,10 +183,11 @@ const loadTaxonomy = unstable_cache(
     if (!taxonomy) throw new Error('[register] taxonomy unavailable');
     return taxonomy;
   },
-  // v4: drops any entry v3 may already hold from before a taxonomy migration
-  // (e.g. a degree added straight in SQL) — a bump is the only way to evict a
-  // cached copy that no admin write has invalidated.
-  ['register-taxonomy-v4'],
+  // v5: drops any entry v4 may already hold from before a taxonomy migration
+  // (e.g. a degree or a set of branches added straight in SQL) — a bump is the
+  // only way to evict a cached copy that no admin write has invalidated, and
+  // 0027 (BBA: Finance / Marketing / HRM) is exactly such a migration.
+  ['register-taxonomy-v5'],
   { revalidate: 300, tags: [TAXONOMY_CACHE_TAG] }
 );
 
