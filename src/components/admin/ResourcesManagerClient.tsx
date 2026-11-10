@@ -31,6 +31,8 @@ import type {
 import { formatDate } from '@/lib/utils';
 
 interface ResourcesManagerClientProps {
+  /** Pre-filled search when the page is opened from the ⌘K palette. */
+  initialQuery?: string;
   programmes: Programme[];
   specializations: Specialization[];
   semesters: Semester[];
@@ -51,6 +53,7 @@ const FILE_TYPES: ResourceFileType[] = [
 ];
 
 export function ResourcesManagerClient({
+  initialQuery = '',
   programmes,
   specializations,
   semesters,
@@ -63,7 +66,7 @@ export function ResourcesManagerClient({
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState(initialQuery);
   const [statusFilter, setStatusFilter] = useState('');
   const [programmeFilter, setProgrammeFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');

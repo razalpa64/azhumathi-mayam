@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Inbox, Loader2, Trash2 } from 'lucide-react';
+import { Inbox, Loader2, Search, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -42,6 +42,9 @@ export function RequestsManagerClient({
 }) {
   const [items, setItems] = useState(initialItems);
   const [filter, setFilter] = useState('');
+  // Up to 200 requests arrive at once and the only control was a status
+  // bucket — finding one student's request meant reading the whole list.
+  const [text, setText] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, { status: string; note: string }>>({});
 
@@ -51,7 +54,23 @@ export function RequestsManagerClient({
     return c;
   }, [items]);
 
-  const visible = filter ? items.filter((i) => i.status === filter) : items;
+  const needle = text.trim().toLowerCase();
+  const visible = items.filter((item) => {
+    if (filter && item.status !== filter) return false;
+    if (!needle) return true;
+    return [
+      item.title,
+      item.subject_text,
+      item.details,
+      item.admin_note,
+      item.student?.full_name,
+      item.student?.username,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(needle);
+  });
 
   function draftFor(item: ResourceRequest) {
     return drafts[item.id] || { status: item.status, note: item.admin_note || '' };
@@ -120,16 +139,33 @@ export function RequestsManagerClient({
             ) : null}
           </button>
         ))}
+
+        <label className="relative ml-auto w-full sm:w-64">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Search requests or a student…"
+            aria-label="Search requests"
+            className="h-8.5 w-full rounded-full border border-line-strong bg-canvas pl-9 pr-3 text-xs text-charcoal outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/15"
+          />
+        </label>
       </div>
 
       {visible.length === 0 ? (
         <EmptyState
           icon={Inbox}
-          title={filter ? 'Nothing in this bucket' : 'No requests yet'}
+          title={needle ? 'No request matches that search' : filter ? 'Nothing in this bucket' : 'No requests yet'}
           description={
-            filter
-              ? 'Requests you move here will show up in this list.'
-              : 'When students ask for notes or papers, they land here.'
+            needle
+              ? 'Try the student’s name or the subject instead.'
+              : filter
+                ? 'Requests you move here will show up in this list.'
+                : 'When students ask for notes or papers, they land here.'
           }
         />
       ) : (

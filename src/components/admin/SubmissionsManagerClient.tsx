@@ -6,6 +6,7 @@ import {
   ExternalLink,
   FileText,
   Loader2,
+  Search,
   X,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -28,13 +29,32 @@ export function SubmissionsManagerClient({
 }) {
   const [items, setItems] = useState<MaterialSubmission[]>(initialItems);
   const [tab, setTab] = useState<TabValue>('pending');
+  const [text, setText] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
+  const needle = text.trim().toLowerCase();
   const visible = useMemo(
-    () => (tab === 'all' ? items : items.filter((i) => i.status === tab)),
-    [items, tab]
+    () =>
+      items.filter((item) => {
+        if (tab !== 'all' && item.status !== tab) return false;
+        if (!needle) return true;
+        return [
+          item.title,
+          item.description,
+          item.student?.full_name,
+          item.student?.username,
+          item.subject?.subject_code,
+          item.subject?.name,
+          item.category?.name,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(needle);
+      }),
+    [items, tab, needle]
   );
   const pendingCount = useMemo(
     () => items.filter((i) => i.status === 'pending').length,
@@ -108,6 +128,21 @@ export function SubmissionsManagerClient({
             ) : null}
           </button>
         ))}
+
+        <label className="relative ml-auto w-full sm:w-64">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Search uploads or a student…"
+            aria-label="Search student uploads"
+            className="h-9 w-full rounded-full border border-line bg-canvas pl-9 pr-3 text-xs text-charcoal outline-none focus:border-burgundy focus:ring-2 focus:ring-burgundy/15"
+          />
+        </label>
       </div>
 
       {error ? (
@@ -120,13 +155,16 @@ export function SubmissionsManagerClient({
         <div className="rounded-[24px] border border-dashed border-line bg-canvas px-6 py-12 text-center">
           <FileText className="mx-auto h-8 w-8 text-muted/50" />
           <p className="mt-3 text-sm font-semibold text-charcoal">
-            {tab === 'pending'
-              ? 'All caught up — no uploads waiting.'
-              : 'Nothing here yet.'}
+            {needle
+              ? 'No upload matches that search.'
+              : tab === 'pending'
+                ? 'All caught up — no uploads waiting.'
+                : 'Nothing here yet.'}
           </p>
           <p className="mx-auto mt-1 max-w-sm text-[13px] leading-relaxed text-muted">
-            When students share notes from their Contribute page, they appear
-            here for a one-click review.
+            {needle
+              ? 'Try the student’s name, the subject code or part of the title.'
+              : 'When students share notes from their Contribute page, they appear here for a one-click review.'}
           </p>
         </div>
       ) : (

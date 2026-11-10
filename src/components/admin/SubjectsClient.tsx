@@ -15,6 +15,7 @@ import type {
 } from '@/types/database';
 
 interface SubjectsClientProps {
+  initialQuery?: string;
   universities: University[];
   programmes: Programme[];
   specializations: Specialization[];
@@ -24,6 +25,7 @@ interface SubjectsClientProps {
 }
 
 export function SubjectsClient({
+  initialQuery = '',
   universities,
   programmes,
   specializations,
@@ -43,7 +45,7 @@ export function SubjectsClient({
   const [semesterId, setSemesterId] = useState('');
   const [pubStatus, setPubStatus] = useState<'published' | 'draft'>('published');
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [filterProgrammeId, setFilterProgrammeId] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

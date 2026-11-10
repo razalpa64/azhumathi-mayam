@@ -21,6 +21,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Scale,
+  Search,
   Settings,
   Sparkles,
   UploadCloud,
@@ -29,6 +30,7 @@ import {
   X,
 } from 'lucide-react';
 import { BrandLogo } from '@/components/brand/BrandLogo';
+import { AdminCommandPalette } from '@/components/admin/AdminCommandPalette';
 import type { Profile } from '@/types/database';
 import { cn, getInitials } from '@/lib/utils';
 
@@ -154,6 +156,10 @@ export function AdminShell({
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  // ⌘K palette — the console had no way to search across students, subjects
+  // and materials without first guessing which page they live on.
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [shortcutLabel, setShortcutLabel] = useState('');
   // Desktop icon rail: gives wide tables (Students, Materials) their
   // room back. Remembered per browser; the drawer never collapses.
   const [collapsed, setCollapsed] = useState(false);
@@ -165,6 +171,27 @@ export function AdminShell({
       // Private mode etc. — collapsing just won't persist.
     }
   }, []);
+
+  useEffect(() => {
+    const platform = `${navigator.platform || ''} ${navigator.userAgent || ''}`;
+    setShortcutLabel(/mac|iphone|ipad|ipod/i.test(platform) ? '⌘K' : 'Ctrl K');
+  }, []);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen((previous) => !previous);
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  // Navigating anywhere closes the palette.
+  useEffect(() => {
+    setSearchOpen(false);
+  }, [pathname]);
 
   function toggleCollapsed() {
     setCollapsed((prev) => {
@@ -198,6 +225,20 @@ export function AdminShell({
     ...section,
     items: section.items.filter((item) => !item.mainOnly || isMainAdmin),
   })).filter((section) => section.items.length > 0);
+
+  // Which screen is open — drives the title in the desktop bar. Account is not
+  // in the sidebar (it lives behind the avatar), so it is titled here.
+  const titledItems = [
+    ...sections.flatMap((section) =>
+      section.items.map((item) => ({ item, group: section.label as string | null }))
+    ),
+    { item: { href: '/admin/account', label: 'My Account', exact: true }, group: 'System' },
+  ];
+  const current = titledItems
+    .filter(({ item }) =>
+      item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`)
+    )
+    .sort((a, b) => b.item.href.length - a.item.href.length)[0];
 
   function renderNavLink(item: NavItem, rail: boolean) {
     const Icon = item.icon;
@@ -497,6 +538,59 @@ export function AdminShell({
           </Link>
         </header>
 
+        {/* Desktop bar: the console had no header at all on a laptop, so the
+            page title, the search and Upload started from whatever the page
+            happened to render. Phones keep their own header above. */}
+        <header className="sticky top-0 z-30 hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-line bg-canvas/95 px-9 backdrop-blur-md lg:flex">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted">
+              {current?.group || 'Admin console'}
+            </p>
+            <h1 className="truncate text-[15px] font-bold leading-tight text-charcoal">
+              {current?.item.label || 'Admin console'}
+            </h1>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border border-line bg-canvas px-3 text-[13px] font-medium text-muted transition-colors hover:border-burgundy-border hover:text-charcoal focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/40"
+            >
+              <Search className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="hidden xl:inline">Search</span>
+              <kbd className="hidden rounded border border-line bg-neutral-soft px-1.5 py-0.5 font-sans text-[10px] font-semibold text-muted xl:inline-flex">
+                {shortcutLabel || '⌘K'}
+              </kbd>
+            </button>
+
+            {pendingRequests > 0 ? (
+              <Link
+                href="/admin/requests"
+                className="hidden items-center gap-1.5 rounded-full bg-[#FDF2F3] px-3 py-1.5 text-[12px] font-semibold text-[#B4232A] ring-1 ring-[#F4C9CC] transition-colors hover:bg-[#FBE6E8] xl:inline-flex"
+              >
+                {pendingRequests} request{pendingRequests === 1 ? '' : 's'} waiting
+              </Link>
+            ) : null}
+            {pendingSubmissions > 0 ? (
+              <Link
+                href="/admin/submissions"
+                className="hidden items-center gap-1.5 rounded-full bg-[#FDF2F3] px-3 py-1.5 text-[12px] font-semibold text-[#B4232A] ring-1 ring-[#F4C9CC] transition-colors hover:bg-[#FBE6E8] xl:inline-flex"
+              >
+                {pendingSubmissions} upload{pendingSubmissions === 1 ? '' : 's'} to review
+              </Link>
+            ) : null}
+
+            <Link
+              href="/admin/upload"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-burgundy px-3.5 text-[13px] font-semibold text-canvas shadow-[0_8px_16px_-8px_rgba(121,0,0,0.7)] transition-colors hover:bg-burgundy-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-burgundy/50"
+            >
+              <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Upload</span>
+            </Link>
+          </div>
+        </header>
+
         <main
           ref={mainRef}
           className="relative isolate mx-auto min-h-0 w-full max-w-7xl flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-canvas p-4 pb-10 sm:p-7 sm:pb-10 lg:overflow-visible lg:p-9 2xl:max-w-[1560px]"
@@ -551,7 +645,11 @@ export function AdminShell({
       </nav>
       </div>
 
-
+      <AdminCommandPalette
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        sections={sections}
+      />
     </div>
   );
 }
