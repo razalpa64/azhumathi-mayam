@@ -131,9 +131,11 @@ export function AdminShell({
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
+    const viewport = window.visualViewport;
     let last = 0;
+    let timer = 0;
+
     const apply = () => {
-      const viewport = window.visualViewport;
       // Same guard as the student shell: a zoomed viewport is not a smaller
       // phone, and pinning to it collapses the console.
       if (viewport && Math.abs(viewport.scale - 1) > 0.01) return;
@@ -143,17 +145,24 @@ export function AdminShell({
         el.style.setProperty('--app-h', `${height}px`);
       }
     };
+
+    // Debounced, and no per-frame scroll listener — see the comment in
+    // StudentShell: Safari's toolbar animates during a scroll and re-pinning
+    // on every frame of it made the page jump under the finger.
+    const schedule = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(apply, 140);
+    };
+
     apply();
-    window.addEventListener('resize', apply);
-    window.addEventListener('orientationchange', apply);
-    const viewport = window.visualViewport;
-    viewport?.addEventListener('resize', apply);
-    viewport?.addEventListener('scroll', apply);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('orientationchange', schedule);
+    viewport?.addEventListener('resize', schedule);
     return () => {
-      window.removeEventListener('resize', apply);
-      window.removeEventListener('orientationchange', apply);
-      viewport?.removeEventListener('resize', apply);
-      viewport?.removeEventListener('scroll', apply);
+      window.clearTimeout(timer);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('orientationchange', schedule);
+      viewport?.removeEventListener('resize', schedule);
     };
   }, []);
 
