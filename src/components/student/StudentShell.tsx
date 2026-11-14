@@ -436,9 +436,19 @@ export function StudentShell({
           </nav>
         </div>
 
-        {/* Mobile menu sheet — the full list of sections, one place */}
+        {/* Mobile menu sheet — the full list of sections, one place.
+
+            It is capped and scrolls on its own. The shell is exactly one
+            phone-screen tall and clips its overflow, so an uncapped sheet on
+            a short screen (an iPhone SE, or any phone with Safari's toolbars
+            showing) grew past the bottom bar and took the last sections off
+            the screen with nothing left to scroll. With a cap the header and
+            the bottom bar hold still and only the sheet moves — the "locked"
+            layout — and on a screen tall enough to fit the whole thing there
+            is no scrollbar, so it looks exactly as before. `overscroll-contain`
+            keeps a drag at the end of the list from pulling the page behind. */}
         {mobileOpen ? (
-          <div className="space-y-4 border-t border-line bg-canvas px-4 pb-5 pt-4 lg:hidden">
+          <div className="max-h-[60dvh] space-y-4 overflow-y-auto overscroll-contain border-t border-line bg-canvas px-4 pb-5 pt-4 lg:hidden">
             <div className="flex items-center justify-between gap-3 rounded-2xl bg-burgundy-tint px-4 py-3">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-charcoal">{profile.full_name}</p>
