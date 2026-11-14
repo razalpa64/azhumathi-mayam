@@ -179,6 +179,12 @@ export function StudentShell({
     let last = 0;
     const apply = () => {
       const viewport = window.visualViewport;
+      // A pinch zoom (or iOS's automatic zoom on a focused field) shrinks the
+      // visual viewport without the phone getting any smaller. Pinning the
+      // shell to that height squashed the header, the tab strip and the bottom
+      // bar into the top of a zoomed page. While zoomed, leave the layout
+      // alone; the resize that fires on the way back out restores it.
+      if (viewport && Math.abs(viewport.scale - 1) > 0.01) return;
       const height = Math.round(viewport?.height ?? window.innerHeight);
       // 4px of hysteresis: the visual viewport jitters by a pixel or two
       // while the browser chrome animates, and re-pinning the shell on

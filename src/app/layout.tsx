@@ -56,7 +56,13 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: SITE_NAME_MALAYALAM,
-    statusBarStyle: 'black-translucent',
+    // 'default', not 'black-translucent': a translucent status bar makes iOS
+    // draw the page from y=0, so the installed app's burgundy header sat under
+    // the clock and battery — and safe-area-inset-top reads 0 here, because the
+    // viewport is deliberately not edge-to-edge (see `viewport` below), so
+    // nothing could pad it back down. 'default' reserves the status bar and
+    // starts the page below it, which is how Android already behaves.
+    statusBarStyle: 'default',
   },
   icons: {
     icon: [

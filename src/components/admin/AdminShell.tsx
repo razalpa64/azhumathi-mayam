@@ -134,6 +134,9 @@ export function AdminShell({
     let last = 0;
     const apply = () => {
       const viewport = window.visualViewport;
+      // Same guard as the student shell: a zoomed viewport is not a smaller
+      // phone, and pinning to it collapses the console.
+      if (viewport && Math.abs(viewport.scale - 1) > 0.01) return;
       const height = Math.round(viewport?.height ?? window.innerHeight);
       if (height > 0 && Math.abs(height - last) >= 1) {
         last = height;
