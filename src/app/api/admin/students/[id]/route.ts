@@ -53,6 +53,21 @@ export async function GET(
       .limit(8),
   ]);
 
+  const readErrors = [
+    ['downloads', downloadsRes.error],
+    ['bookmarks', bookmarksRes.error],
+    ['recently viewed', recentRes.error],
+  ].filter(([, error]) => Boolean(error)) as [string, { code?: string; message: string }][];
+
+  if (readErrors.length > 0) {
+    // A failed count must never be reported as "0 downloads" without a trace.
+    console.error(
+      `[admin/students] read failed for ${id}: ${readErrors
+        .map(([name, error]) => `${name} (${error.code || 'no code'}) ${error.message}`)
+        .join(' | ')}`
+    );
+  }
+
   if (!profileRes.data) {
     return NextResponse.json({ error: 'Student not found.' }, { status: 404 });
   }
