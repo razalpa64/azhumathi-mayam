@@ -27,9 +27,7 @@ export default async function AdminAnalyticsPage() {
       .select('id, title, programme_id, category_id, download_count, publication_status, file_type'),
     adminClient
       .from('downloads')
-      .select(
-        'id, created_at, resource:resources(id, title), user:profiles(username, full_name)'
-      )
+      .select('id, created_at, resource_id, user_id')
       .order('created_at', { ascending: false })
       .limit(25),
     adminClient.from('bookmarks').select('id', { count: 'exact', head: true }),
@@ -44,6 +42,44 @@ export default async function AdminAnalyticsPage() {
   const students = studentsRes.data || [];
   const resources = resourcesRes.data || [];
   const programmes = programmesRes.data || [];
+
+  // The event list is read flat and joined here rather than through a nested
+  // PostgREST embed: an embed that cannot resolve its relationship returns
+  // `data: null`, which the page then reported as "No student downloads
+  // recorded yet" — a wrong answer with no way to tell it apart from an empty
+  // ledger.
+  const downloadEvents = (downloadsLogRes.data || []) as {
+    id: string;
+    created_at: string;
+    resource_id: string;
+    user_id: string;
+  }[];
+
+  const eventResourceIds = [...new Set(downloadEvents.map((event) => event.resource_id))];
+  const eventUserIds = [...new Set(downloadEvents.map((event) => event.user_id))];
+
+  const eventResources = eventResourceIds.length
+    ? ((await adminClient.from('resources').select('id, title').in('id', eventResourceIds)).data ?? [])
+    : [];
+  const eventUsers = eventUserIds.length
+    ? ((await adminClient.from('profiles').select('id, username, full_name').in('id', eventUserIds)).data ?? [])
+    : [];
+
+  const titleByResourceId = new Map(eventResources.map((row) => [row.id, row.title]));
+  const studentByProfileId = new Map(
+    eventUsers.map((row) => [row.id, { username: row.username, full_name: row.full_name }])
+  );
+
+  // Nothing on this page is allowed to render a zero it did not read: a failed
+  // query is named, not silently counted as "none yet".
+  const failedReads = [
+    ['students', studentsRes.error],
+    ['materials', resourcesRes.error],
+    ['download events', downloadsLogRes.error],
+    ['bookmarks', bookmarksCountRes.error],
+    ['programmes', programmesRes.error],
+    ['activity logs', auditLogsRes.error],
+  ].filter(([, error]) => Boolean(error)) as [string, { message: string }][];
 
   const totalDownloads = resources.reduce((sum, r) => sum + Number(r.download_count || 0), 0);
   const publishedCount = resources.filter((r) => r.publication_status === 'published').length;
@@ -71,6 +107,20 @@ export default async function AdminAnalyticsPage() {
         <p className="mt-1 text-sm text-muted">
           Verified telemetry computed directly from PostgreSQL tables with zero synthetic figures.
         </p>
+        {failedReads.length > 0 ? (
+          <div className="mt-4 rounded-lg border border-burgundy/30 bg-burgundy/5 p-3 text-xs text-charcoal">
+            <p className="font-semibold text-burgundy">
+              Some figures below are missing, not zero.
+            </p>
+            <ul className="mt-1 space-y-0.5 font-mono text-[11px] text-muted">
+              {failedReads.map(([name, error]) => (
+                <li key={name}>
+                  {name}: {error.message}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
 
       {/* Summary Strip */}
@@ -145,23 +195,27 @@ export default async function AdminAnalyticsPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <section className="lg:col-span-5 rounded-xl border border-line bg-canvas p-5 space-y-3 h-fit">
           <h2 className="text-sm font-semibold text-charcoal">Recent Student Download Events</h2>
-          {!downloadsLogRes.data || downloadsLogRes.data.length === 0 ? (
+          {downloadsLogRes.error ? (
+            <p className="py-6 text-center text-xs text-burgundy">
+              The download log could not be read: {downloadsLogRes.error.message}
+            </p>
+          ) : downloadEvents.length === 0 ? (
             <p className="py-6 text-center text-xs text-muted">
               No student downloads recorded yet.
             </p>
           ) : (
             <div className="divide-y divide-line">
-              {downloadsLogRes.data.map((dl) => {
-                const res = dl.resource as unknown as { id: string; title: string } | null;
-                const usr = dl.user as unknown as { username: string; full_name: string } | null;
+              {downloadEvents.map((dl) => {
+                const title = titleByResourceId.get(dl.resource_id) || null;
+                const usr = studentByProfileId.get(dl.user_id) || null;
                 return (
                   <div key={dl.id} className="py-2.5 space-y-0.5 text-xs">
-                    {res ? (
+                    {title ? (
                       <Link
-                        href={`/resources/${res.id}`}
+                        href={`/resources/${dl.resource_id}`}
                         className="font-semibold text-charcoal hover:text-burgundy block truncate"
                       >
-                        {res.title}
+                        {title}
                       </Link>
                     ) : (
                       <span className="font-semibold text-charcoal">Deleted Resource</span>

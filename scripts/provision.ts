@@ -237,6 +237,13 @@ async function main() {
     );
     await pg.query(lawGroupsSql);
 
+    console.log('3z. Applying 0030_download_telemetry_repair.sql (download recorder + counter re-count)...');
+    const downloadRepairSql = fs.readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/0030_download_telemetry_repair.sql'),
+      'utf8'
+    );
+    await pg.query(downloadRepairSql);
+
     console.log('4. Reloading PostgREST schema cache...');
     await pg.query(`NOTIFY pgrst, 'reload schema';`);
   } finally {
