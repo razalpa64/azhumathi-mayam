@@ -156,6 +156,20 @@ select:-webkit-autofill {
     }
 
     /*
+      Keep the page itself still. iOS Safari rubber-bands the whole document
+      when you drag past the end of a scrollable area, which drags the app's
+      header and bottom bar out of place — an open menu, a drawer or a
+      full-screen viewer would visibly detach from the screen edges. Chrome on
+      Android does not move the layout that way, which is why it only shows up
+      on an iPhone. Scoped to iOS below for the same reason as everything else
+      in this block: Android keeps its own overscroll and pull-to-refresh.
+    */
+    html,
+    body {
+      overscroll-behavior: none;
+    }
+
+    /*
       iOS gives date and time controls a fixed intrinsic width of their own,
       which ignores the width of a narrow field and pushes it past its column.
       Everywhere else they behave like any other input.
