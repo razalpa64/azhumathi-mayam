@@ -26,6 +26,7 @@ import { audienceSubjectIds, type SubjectGroupRow } from '@/lib/subject-siblings
 import { getActiveAdvertisementsByPlacement } from '@/lib/ads';
 import { GlobalSearchBar } from '@/components/student/GlobalSearchBar';
 import { ExamCountdownCard } from '@/components/student/ExamCountdownCard';
+import { InstallAppCard } from '@/components/pwa/InstallAppButton';
 import { StreakCard } from '@/components/student/StreakCard';
 import { computeStreak } from '@/lib/streak';
 import { NoticeBoard } from '@/components/student/NoticeBoard';
@@ -510,6 +511,11 @@ export default async function StudentDashboardPage() {
       <div className="anim-rise lg:hidden" style={{ animationDelay: '60ms' }}>
         <GlobalSearchBar />
       </div>
+
+      {/* The app can be installed on both kinds of phone — on Android through a
+          prompt, on iPhone through the browser's Share menu. Says so once, on
+          the screen students open first. */}
+      <InstallAppCard className="lg:hidden" />
 
       {/* Exam countdown (only when the student has a study plan) */}
       <ExamCountdownCard />

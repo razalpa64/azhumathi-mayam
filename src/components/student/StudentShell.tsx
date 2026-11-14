@@ -176,9 +176,11 @@ export function StudentShell({
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
+    const viewport = window.visualViewport;
     let last = 0;
+    let timer = 0;
+
     const apply = () => {
-      const viewport = window.visualViewport;
       // A pinch zoom (or iOS's automatic zoom on a focused field) shrinks the
       // visual viewport without the phone getting any smaller. Pinning the
       // shell to that height squashed the header, the tab strip and the bottom
@@ -195,17 +197,31 @@ export function StudentShell({
         el.style.setProperty('--app-h', `${height}px`);
       }
     };
+
+    // Let the phone settle first, then re-pin.
+    //
+    // Safari animates its toolbars away and back *during* a scroll, and every
+    // frame of that animation reports a different visual-viewport height.
+    // Re-pinning on each one resized the shell mid-scroll, which reflowed the
+    // content under the finger — the "sticky, jumpy scrolling" feeling. The
+    // same was true for the per-frame `visualViewport` scroll listener, which
+    // did a layout read on every frame of every scroll for nothing. Neither is
+    // needed: the final height arrives with the last resize event, so the
+    // write happens once, when the toolbar has finished moving.
+    const schedule = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(apply, 140);
+    };
+
     apply();
-    window.addEventListener('resize', apply);
-    window.addEventListener('orientationchange', apply);
-    const viewport = window.visualViewport;
-    viewport?.addEventListener('resize', apply);
-    viewport?.addEventListener('scroll', apply);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('orientationchange', schedule);
+    viewport?.addEventListener('resize', schedule);
     return () => {
-      window.removeEventListener('resize', apply);
-      window.removeEventListener('orientationchange', apply);
-      viewport?.removeEventListener('resize', apply);
-      viewport?.removeEventListener('scroll', apply);
+      window.clearTimeout(timer);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('orientationchange', schedule);
+      viewport?.removeEventListener('resize', schedule);
     };
   }, []);
 
