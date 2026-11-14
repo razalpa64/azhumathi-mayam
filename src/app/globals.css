@@ -129,6 +129,45 @@ select:-webkit-autofill {
   transition: background-color 9999s ease-out 0s;
 }
 
+/*
+  iPhone and iPad: stop Safari zooming the whole page when a field is tapped.
+
+  iOS Safari zooms in when it focuses an input, select or textarea whose
+  font-size is below 16px, and it does not zoom back out. Every field in the
+  app is 12-14px, so the first tap on a picker left the page enlarged for the
+  rest of the visit — everything looked oversized, misaligned and half cut
+  off, which is exactly what "the UI is broken on iPhone" looked like. Android
+  Chrome never does this, so it is fixed here rather than by enlarging the
+  type everywhere.
+
+  Both conditions are deliberate: -webkit-touch-callout is a Safari-only
+  property (so Chrome on Android never matches), and a coarse pointer keeps
+  Safari on a Mac out. Desktop and Android are untouched.
+
+  `!important` is needed to beat the Tailwind text-size utility on each field;
+  nothing else about the field's look changes.
+*/
+@supports (-webkit-touch-callout: none) {
+  @media (hover: none) and (pointer: coarse) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+
+    /*
+      iOS gives date and time controls a fixed intrinsic width of their own,
+      which ignores the width of a narrow field and pushes it past its column.
+      Everywhere else they behave like any other input.
+    */
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"] {
+      min-width: 0;
+    }
+  }
+}
+
 /* Nothing may exceed its container, whatever gets pasted in */
 img,
 svg,
